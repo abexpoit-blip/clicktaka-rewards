@@ -38,6 +38,23 @@ app.get('/api/notices', async (req, res) => {
   res.json({ notices: rows });
 });
 
+// Public payment settings (numbers + min limits) — used by deposit/withdraw forms
+app.get('/api/payment-settings', async (_req, res) => {
+  const rows = await q(
+    'SELECT bkash_number, nagad_number, min_deposit, min_withdraw, referral_percent FROM payment_settings WHERE id=1 LIMIT 1'
+  );
+  const s = rows[0] || { bkash_number: '', nagad_number: '', min_deposit: 500, min_withdraw: 500, referral_percent: 10 };
+  res.json({
+    settings: {
+      bkash_number: s.bkash_number,
+      nagad_number: s.nagad_number,
+      min_deposit: Number(s.min_deposit),
+      min_withdraw: Number(s.min_withdraw),
+      referral_percent: Number(s.referral_percent),
+    },
+  });
+});
+
 app.use((err, req, res, _next) => {
   console.error(err);
   res.status(500).json({ error: 'Internal error' });

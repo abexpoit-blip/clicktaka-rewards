@@ -148,13 +148,15 @@ CREATE TABLE IF NOT EXISTS notices (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- PAYMENT SETTINGS (admin sets bKash/Nagad numbers)
+-- PAYMENT SETTINGS (singleton row — admin sets bKash/Nagad numbers + limits)
 CREATE TABLE IF NOT EXISTS payment_settings (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  method ENUM('bkash','nagad','rocket','upay','bank') NOT NULL,
-  number VARCHAR(50) NOT NULL,
-  instructions TEXT,
-  active TINYINT(1) DEFAULT 1
+  id INT PRIMARY KEY DEFAULT 1,
+  bkash_number VARCHAR(50) NOT NULL DEFAULT '',
+  nagad_number VARCHAR(50) NOT NULL DEFAULT '',
+  min_deposit DECIMAL(10,2) NOT NULL DEFAULT 500,
+  min_withdraw DECIMAL(10,2) NOT NULL DEFAULT 500,
+  referral_percent DECIMAL(5,2) NOT NULL DEFAULT 10,
+  CHECK (id = 1)
 ) ENGINE=InnoDB;
 
 -- ADMIN LOGS
@@ -177,9 +179,7 @@ INSERT INTO packages (name, price, daily_task_limit, daily_earning, validity_day
 ('Gold',     5000,   30, 600,  365),
 ('Diamond',  10000,  50, 1300, 365);
 
-INSERT INTO payment_settings (method, number, instructions) VALUES
-('bkash', '01XXXXXXXXX', 'Send Money করে txn ID দিন'),
-('nagad', '01XXXXXXXXX', 'Send Money করে txn ID দিন');
+INSERT IGNORE INTO payment_settings (id) VALUES (1);
 
 INSERT INTO notices (title, body) VALUES
 ('স্বাগতম ClickTaka-তে!', 'Task complete করে দৈনিক income করুন।');

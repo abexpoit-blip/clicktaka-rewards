@@ -76,14 +76,14 @@ function AdminDashboard() {
       {(s.deposits_pending.count > 0 || s.withdrawals_pending.count > 0) && (
         <div className="grid sm:grid-cols-2 gap-3">
           <ActionCard
-            href="/kt-admin/users"
+            href="/kt-admin/payments"
             tone="emerald"
             icon={ArrowDownCircle}
             title={`${s.deposits_pending.count} Pending Deposits`}
             sub={`৳${s.deposits_pending.amount.toLocaleString()} approve waiting`}
           />
           <ActionCard
-            href="/kt-admin/users"
+            href="/kt-admin/payments"
             tone="rose"
             icon={ArrowUpCircle}
             title={`${s.withdrawals_pending.count} Pending Withdrawals`}
