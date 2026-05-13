@@ -74,17 +74,17 @@ function UserLayout() {
             </button>
           </div>
         </div>
-        <nav className="max-w-6xl mx-auto px-2 pb-2 flex gap-1 overflow-x-auto scrollbar-none">
+        <nav className="max-w-6xl mx-auto px-2 pb-2.5 flex gap-1.5 overflow-x-auto scrollbar-none">
           {NAV.map(({ to, label, icon: Icon }) => {
             const active = path === to;
             return (
               <Link key={to} to={to}
-                className={`group relative inline-flex items-center gap-1.5 px-3 py-2 text-xs font-medium whitespace-nowrap rounded-xl transition-all ${
+                className={`group relative inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold whitespace-nowrap rounded-xl transition-all ${
                   active
                     ? "bg-gradient-brand text-white shadow-brand"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/40"
+                    : "text-muted-foreground hover:text-foreground bg-card/40 border border-border/50 hover:border-primary/40 hover:bg-accent/40"
                 }`}>
-                <Icon className={`h-3.5 w-3.5 ${active ? "" : "text-primary/70"}`} strokeWidth={2.2} />
+                <Icon className={`h-3.5 w-3.5 ${active ? "" : "text-primary/80"}`} strokeWidth={2.3} />
                 {label}
               </Link>
             );
