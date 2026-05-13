@@ -44,6 +44,21 @@ npm run build
 echo "==> Installing backend dependencies"
 npm install --prefix server --no-audit --no-fund
 
+echo "==> Applying database migrations (using server/.env credentials)"
+if [[ -f "server/.env" && -f "database/migrations/2026_05_payments.sql" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source server/.env
+  set +a
+  MYSQL_PWD="${DB_PASS:-${DB_PASSWORD:-}}" mysql \
+    -h "${DB_HOST:-localhost}" \
+    -P "${DB_PORT:-3306}" \
+    -u "${DB_USER:-clicktaka}" \
+    "${DB_NAME:-clicktaka}" < database/migrations/2026_05_payments.sql
+else
+  echo "  skipped: server/.env or migration file missing"
+fi
+
 echo "==> Restarting PM2 processes (delete+start to apply env changes)"
 pm2 delete clicktaka-api clicktaka-web 2>/dev/null || true
 
