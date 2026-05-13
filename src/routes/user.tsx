@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import { Toaster } from "@/components/ui/sonner";
 import {
   LayoutDashboard, Target, Disc3, Package, Wallet, Send, Users, History, UserCircle2,
-  LogOut, Sparkles, ChevronRight,
+  LogOut, Banknote, ChevronRight,
 } from "lucide-react";
 
 type User = { id: number; phone: string; name: string | null; balance: number; refer_code: string };
@@ -56,7 +56,7 @@ function UserLayout() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <Link to="/user/dashboard" className="flex items-center gap-2 group">
             <span className="relative grid place-items-center h-9 w-9 rounded-xl bg-gradient-brand shadow-brand">
-              <Sparkles className="h-4 w-4 text-white" strokeWidth={2.5} />
+              <Banknote className="h-4 w-4 text-white" strokeWidth={2.5} />
               <span className="absolute inset-0 rounded-xl animate-pulse-glow" />
             </span>
             <span className="font-display text-xl font-bold text-gradient-brand tracking-tight">ClickTaka</span>
