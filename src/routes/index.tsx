@@ -309,3 +309,12 @@ function Feature({ icon: Icon, title, desc, tone }: { icon: React.ComponentType<
     </div>
   );
 }
+
+function PayLogo({ name, bg }: { name: string; bg: string }) {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-card px-3.5 py-2 shadow-sm">
+      <span className={`grid place-items-center h-7 w-7 rounded-lg text-white text-[11px] font-bold ${bg}`}>{name[0]}</span>
+      <span className="font-semibold text-sm text-foreground">{name}</span>
+    </div>
+  );
+}
