@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { DashboardSkeleton, ErrorState, EmptyState } from "@/components/ui-states";
+import { LiveTicker } from "@/components/live-ticker";
+import { Leaderboard } from "@/components/leaderboard";
 
 export const Route = createFileRoute("/_user/dashboard")({ component: Dashboard });
 
@@ -19,18 +22,24 @@ function Dashboard() {
   const [d, setD] = useState<DashData | null>(null);
   const [pkgs, setPkgs] = useState<Pkg[]>([]);
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api<DashData>("/user/dashboard").then(setD).catch((e) => setErr(e.message));
-    api<{ packages: Pkg[] }>("/user/me").then((r) => setPkgs(r.packages || [])).catch(() => {});
-  }, []);
+  function load() {
+    setLoading(true); setErr("");
+    Promise.all([
+      api<DashData>("/user/dashboard").then(setD),
+      api<{ packages: Pkg[] }>("/user/me").then((r) => setPkgs(r.packages || [])).catch(() => setPkgs([])),
+    ]).catch((e) => setErr(e.message)).finally(() => setLoading(false));
+  }
+  useEffect(load, []);
 
-  if (err) return <div className="text-red-600">{err}</div>;
-  if (!d) return <div>লোডিং...</div>;
+  if (err) return <ErrorState message={err} onRetry={load} />;
+  if (loading || !d) return <DashboardSkeleton />;
 
   const u = d.user;
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
+      <LiveTicker />
       {/* Balance hero */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-2xl p-6 shadow-lg">
         <p className="text-sm opacity-80">স্বাগতম</p>
@@ -69,7 +78,7 @@ function Dashboard() {
       <section>
         <h2 className="text-lg font-semibold mb-3">আপনার Active প্যাকেজ</h2>
         {pkgs.length === 0 ? (
-          <Card><p className="text-center text-gray-500 py-4">কোন active package নেই। <Link to="/user/packages" className="text-purple-600 font-medium">প্যাকেজ কিনুন →</Link></p></Card>
+          <EmptyState icon="📦" title="কোনো active package নেই" description="প্যাকেজ কিনে আজই income শুরু করুন।" action={{ label: "প্যাকেজ কিনুন", to: "/user/packages" }} />
         ) : (
           <div className="grid sm:grid-cols-2 gap-4">
             {pkgs.map((p) => (
@@ -105,6 +114,8 @@ function Dashboard() {
           )}
         </Card>
       </section>
+
+      <Leaderboard />
 
       {/* Transactions */}
       <section>

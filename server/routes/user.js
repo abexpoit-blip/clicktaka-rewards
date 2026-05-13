@@ -4,6 +4,19 @@ import { authUser } from '../middleware.js';
 
 const r = Router();
 
+// Top earners (this week) — public-ish leaderboard with masked phones
+r.get('/leaderboard', authUser, async (_req, res) => {
+  const rows = await q(
+    `SELECT u.id AS user_id, u.phone, u.name, COALESCE(SUM(tc.reward),0) AS total
+     FROM task_completions tc
+     JOIN users u ON u.id = tc.user_id
+     WHERE tc.completed_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+     GROUP BY u.id, u.phone, u.name
+     ORDER BY total DESC LIMIT 10`
+  );
+  res.json({ leaderboard: rows.map((r) => ({ ...r, total: Number(r.total) })) });
+});
+
 r.get('/me', authUser, async (req, res) => {
   const pkgs = await q(
     `SELECT up.id, up.expires_at, up.tasks_done_today, p.name, p.daily_task_limit, p.daily_earning
