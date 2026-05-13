@@ -26,6 +26,7 @@ import { Route as UserDepositRouteImport } from './routes/user/deposit'
 import { Route as UserDashboardRouteImport } from './routes/user/dashboard'
 import { Route as KtAdminUsersRouteImport } from './routes/kt-admin.users'
 import { Route as KtAdminTasksRouteImport } from './routes/kt-admin.tasks'
+import { Route as KtAdminLoginRouteImport } from './routes/kt-admin.login'
 import { Route as KtAdminEarningsRouteImport } from './routes/kt-admin.earnings'
 import { Route as KtAdminDashboardRouteImport } from './routes/kt-admin.dashboard'
 import { Route as ApiSplatRouteImport } from './routes/api/$'
@@ -115,6 +116,11 @@ const KtAdminTasksRoute = KtAdminTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => KtAdminRoute,
 } as any)
+const KtAdminLoginRoute = KtAdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => KtAdminRoute,
+} as any)
 const KtAdminEarningsRoute = KtAdminEarningsRouteImport.update({
   id: '/earnings',
   path: '/earnings',
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/api/$': typeof ApiSplatRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
+  '/kt-admin/login': typeof KtAdminLoginRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
   '/user/dashboard': typeof UserDashboardRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/api/$': typeof ApiSplatRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
+  '/kt-admin/login': typeof KtAdminLoginRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
   '/user/dashboard': typeof UserDashboardRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/api/$': typeof ApiSplatRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
+  '/kt-admin/login': typeof KtAdminLoginRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
   '/user/dashboard': typeof UserDashboardRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
+    | '/kt-admin/login'
     | '/kt-admin/tasks'
     | '/kt-admin/users'
     | '/user/dashboard'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
+    | '/kt-admin/login'
     | '/kt-admin/tasks'
     | '/kt-admin/users'
     | '/user/dashboard'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/api/$'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
+    | '/kt-admin/login'
     | '/kt-admin/tasks'
     | '/kt-admin/users'
     | '/user/dashboard'
@@ -398,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KtAdminTasksRouteImport
       parentRoute: typeof KtAdminRoute
     }
+    '/kt-admin/login': {
+      id: '/kt-admin/login'
+      path: '/login'
+      fullPath: '/kt-admin/login'
+      preLoaderRoute: typeof KtAdminLoginRouteImport
+      parentRoute: typeof KtAdminRoute
+    }
     '/kt-admin/earnings': {
       id: '/kt-admin/earnings'
       path: '/earnings'
@@ -425,6 +444,7 @@ declare module '@tanstack/react-router' {
 interface KtAdminRouteChildren {
   KtAdminDashboardRoute: typeof KtAdminDashboardRoute
   KtAdminEarningsRoute: typeof KtAdminEarningsRoute
+  KtAdminLoginRoute: typeof KtAdminLoginRoute
   KtAdminTasksRoute: typeof KtAdminTasksRoute
   KtAdminUsersRoute: typeof KtAdminUsersRoute
 }
@@ -432,6 +452,7 @@ interface KtAdminRouteChildren {
 const KtAdminRouteChildren: KtAdminRouteChildren = {
   KtAdminDashboardRoute: KtAdminDashboardRoute,
   KtAdminEarningsRoute: KtAdminEarningsRoute,
+  KtAdminLoginRoute: KtAdminLoginRoute,
   KtAdminTasksRoute: KtAdminTasksRoute,
   KtAdminUsersRoute: KtAdminUsersRoute,
 }
@@ -477,3 +498,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
