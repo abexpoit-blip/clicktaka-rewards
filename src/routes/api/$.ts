@@ -12,6 +12,8 @@ const HOP_BY_HOP_HEADERS = new Set([
   "host",
 ]);
 
+const LOCAL_API_ORIGINS = new Set(["http://localhost:3001", "http://127.0.0.1:3001"]);
+
 export const Route = createFileRoute("/api/$")({
   server: {
     handlers: {
@@ -27,6 +29,11 @@ export const Route = createFileRoute("/api/$")({
 
 function getBackendOrigin() {
   return (process.env.API_ORIGIN || process.env.VITE_API_URL || "https://clicktaka24.com").replace(/\/$/, "");
+}
+
+function fallbackOrigin(request: Request) {
+  const incomingUrl = new URL(request.url);
+  return `${incomingUrl.protocol}//${incomingUrl.host}`;
 }
 
 function copyRequestHeaders(request: Request) {
@@ -53,9 +60,14 @@ function copyResponseHeaders(response: Response) {
 
 async function proxyApiRequest({ request, params }: { request: Request; params: { _splat?: string } }) {
   const incomingUrl = new URL(request.url);
-  const backendUrl = new URL(`/api/${params._splat ?? ""}${incomingUrl.search}`, getBackendOrigin());
+  const backendOrigin = getBackendOrigin();
+  const backendUrl = new URL(`/api/${params._splat ?? ""}${incomingUrl.search}`, backendOrigin);
   const method = request.method.toUpperCase();
   const hasBody = !["GET", "HEAD"].includes(method);
+
+  if (LOCAL_API_ORIGINS.has(backendOrigin) && incomingUrl.origin !== backendOrigin) {
+    return Response.redirect(new URL(`/api/${params._splat ?? ""}${incomingUrl.search}`, fallbackOrigin(request)), 307);
+  }
 
   try {
     const response = await fetch(backendUrl, {
