@@ -181,7 +181,7 @@ function Landing() {
           </div>
           <div className="border-t border-border/60 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
             <span>© {new Date().getFullYear()} <span className="font-semibold text-gradient-brand">ClickTaka</span> — Bangladesh's #1 task earning platform.</span>
-            <span>Crafted by <a href="#" className="font-semibold text-primary hover:underline">OpenXcell Agency</a></span>
+            <span>Crafted by <a href="https://www.openxcell.com/" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">OpenXcell Agency</a></span>
           </div>
         </div>
       </footer>

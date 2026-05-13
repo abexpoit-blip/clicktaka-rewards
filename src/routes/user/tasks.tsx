@@ -5,7 +5,17 @@ import { toast } from "sonner";
 import {
   Target, Trophy, Zap, Lock, CheckCircle2, Play, Clock, X,
   TrendingUp, Crown, Flame, Coins, Package as PackageIcon, ExternalLink,
+  Video, AppWindow, Share2, Gamepad2, Sparkles, ArrowRight,
 } from "lucide-react";
+
+const TYPE_META: Record<string, { icon: any; grad: string; label: string }> = {
+  ad:     { icon: ExternalLink, grad: "from-violet-500 to-fuchsia-500",  label: "Sponsored Ad" },
+  video:  { icon: Video,        grad: "from-rose-500 to-orange-500",     label: "Video Watch" },
+  app:    { icon: AppWindow,    grad: "from-sky-500 to-cyan-500",        label: "App Install" },
+  social: { icon: Share2,       grad: "from-emerald-500 to-teal-500",    label: "Social Action" },
+  game:   { icon: Gamepad2,     grad: "from-amber-500 to-orange-600",    label: "Mini Game" },
+};
+function typeMeta(t: string) { return TYPE_META[t] || { icon: Target, grad: "from-slate-500 to-slate-700", label: t }; }
 
 export const Route = createFileRoute("/user/tasks")({ component: TasksPage });
 
@@ -201,46 +211,84 @@ function TasksPage() {
             <p className="text-muted-foreground">এই মুহূর্তে কোনো task নেই। কিছুক্ষণ পর check করুন।</p>
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 gap-3">
-            {d.tasks.map((t, i) => {
-              const isDone = done.has(t.id);
-              const disabled = isDone || limitReached || active !== null;
-              const accents = ["from-violet-500 to-fuchsia-500", "from-blue-500 to-cyan-500", "from-emerald-500 to-teal-500", "from-orange-500 to-pink-500", "from-rose-500 to-red-500"];
-              const accent = accents[i % accents.length];
-              return (
-                <div key={t.id} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card p-4 shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all">
-                  <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${accent}`} />
-                  <div className="flex items-center gap-3">
-                    <div className={`grid place-items-center h-12 w-12 rounded-xl bg-gradient-to-br ${accent} text-white shrink-0 shadow`}>
-                      {t.type === "ad" ? <ExternalLink className="h-5 w-5" /> : <Target className="h-5 w-5" />}
+          <>
+            {/* Today Potential bar */}
+            <div className="mb-4 rounded-2xl border border-border/70 bg-gradient-brand-soft p-4 flex items-center gap-4 flex-wrap">
+              <div className="grid place-items-center h-11 w-11 rounded-2xl bg-gradient-brand text-white shadow-brand shrink-0">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div className="flex-1 min-w-[180px]">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold">Today's Potential</p>
+                <p className="font-display text-xl sm:text-2xl font-bold tabular-nums">
+                  ৳{d.tasks.reduce((s, t) => s + Number(t.reward || 0), 0).toLocaleString()}
+                  <span className="text-xs font-normal text-muted-foreground ml-2">এই মুহূর্তে claim-able</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Available</p>
+                <p className="font-display text-2xl font-bold tabular-nums text-primary">{d.tasks.length}</p>
+              </div>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {d.tasks.map((t) => {
+                const isDone = done.has(t.id);
+                const disabled = isDone || limitReached || active !== null;
+                const m = typeMeta(t.type);
+                const Icon = m.icon;
+                return (
+                  <article key={t.id} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all">
+                    <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.grad}`} />
+                    {isDone && (
+                      <span className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-success/15 text-success px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                        <CheckCircle2 className="h-3 w-3" /> Completed
+                      </span>
+                    )}
+                    <div className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className={`grid place-items-center h-12 w-12 rounded-2xl bg-gradient-to-br ${m.grad} text-white shrink-0 shadow-lg`}>
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{m.label}</p>
+                          <h3 className="font-display font-bold text-base mt-0.5 line-clamp-2">{t.title}</h3>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <div className="rounded-xl bg-success/10 text-success py-2 text-center">
+                          <p className="text-[10px] uppercase tracking-wider opacity-80">Reward</p>
+                          <p className="font-display font-bold tabular-nums text-base">+৳{Number(t.reward).toFixed(2)}</p>
+                        </div>
+                        <div className="rounded-xl bg-info/10 text-info py-2 text-center">
+                          <p className="text-[10px] uppercase tracking-wider opacity-80">Duration</p>
+                          <p className="font-display font-bold tabular-nums text-base">~15s</p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => startTask(t)}
+                        disabled={disabled}
+                        className={`mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold transition ${
+                          isDone
+                            ? "bg-success/10 text-success cursor-default"
+                            : limitReached
+                            ? "bg-muted text-muted-foreground cursor-not-allowed"
+                            : disabled
+                            ? "bg-muted text-muted-foreground cursor-not-allowed"
+                            : `bg-gradient-to-r ${m.grad} text-white shadow-brand hover:scale-[1.02]`
+                        }`}
+                      >
+                        {isDone ? <><CheckCircle2 className="h-4 w-4" /> Done</>
+                          : limitReached ? <>Daily Limit শেষ</>
+                          : <><Play className="h-4 w-4 fill-white" /> Start &amp; Earn <ArrowRight className="h-3.5 w-3.5" /></>}
+                      </button>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-sm truncate">{t.title}</p>
-                      <p className="text-[11px] text-muted-foreground capitalize flex items-center gap-1.5 mt-0.5">
-                        <span className="rounded-md bg-muted px-1.5 py-0.5 font-medium">{t.type}</span>
-                        <span className="inline-flex items-center gap-0.5 text-success font-bold">
-                          <Coins className="h-3 w-3" /> +৳{t.reward}
-                        </span>
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => startTask(t)}
-                      disabled={disabled}
-                      className={`inline-flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition ${
-                        isDone
-                          ? "bg-success/10 text-success"
-                          : disabled
-                          ? "bg-muted text-muted-foreground cursor-not-allowed"
-                          : "bg-gradient-brand text-white shadow-brand hover:scale-105"
-                      }`}
-                    >
-                      {isDone ? <><CheckCircle2 className="h-3.5 w-3.5" /> Done</> : limitReached ? "Limit" : <><Play className="h-3.5 w-3.5 fill-white" /> Start</>}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                  </article>
+                );
+              })}
+            </div>
+          </>
         )}
       </section>
     </div>

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import {
   Crown, Sparkles, CheckCircle2, Calendar, Coins, Target, Gift,
   ShieldCheck, Zap, TrendingUp, ArrowRight, Star, Wallet, Flame,
+  X, CreditCard, Smartphone, Lock, Loader2,
 } from "lucide-react";
 
 export const Route = createFileRoute("/user/packages")({ component: PackagesPage });
@@ -28,6 +29,9 @@ function PackagesPage() {
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState<number | null>(null);
   const [balance, setBalance] = useState<number>(0);
+  const [modalPkg, setModalPkg] = useState<Package | null>(null);
+  const [step, setStep] = useState<"select" | "confirm">("select");
+  const [method, setMethod] = useState<string>("balance");
 
   function load() {
     api<{ packages: Package[] }>("/packages")
@@ -39,16 +43,32 @@ function PackagesPage() {
   }
   useEffect(load, []);
 
-  async function buy(p: Package) {
-    if (balance < p.price) {
-      toast.error(`Balance কম! আপনার আছে ৳${balance.toLocaleString()}, দরকার ৳${p.price.toLocaleString()}। আগে Deposit করুন।`);
+  function openUpgrade(p: Package) {
+    setModalPkg(p);
+    setStep("select");
+    setMethod("balance");
+  }
+  function closeModal() {
+    if (buying !== null) return;
+    setModalPkg(null);
+  }
+
+  async function confirmBuy() {
+    if (!modalPkg) return;
+    const p = modalPkg;
+    if (method === "balance" && balance < p.price) {
+      toast.error(`Balance কম! আপনার আছে ৳${balance.toLocaleString()}, দরকার ৳${p.price.toLocaleString()}।`);
       return;
     }
-    if (!confirm(`${p.name} প্যাকেজ কিনতে চান? (৳${p.price})`)) return;
+    if (method !== "balance") {
+      toast.info("এই payment method এখন setup হচ্ছে — আপাতত Balance থেকে activate করুন।");
+      return;
+    }
     setBuying(p.id);
     try {
       await api(`/user/packages/${p.id}/buy`, { method: "POST" });
       toast.success(`${p.name} package activate হয়েছে! 🎉`);
+      setModalPkg(null);
       load();
     } catch (e: any) {
       toast.error(e.message);
@@ -159,15 +179,10 @@ function PackagesPage() {
 
                   {/* CTA */}
                   <button
-                    onClick={() => buy(p)}
-                    disabled={buying === p.id}
-                    className={`mt-6 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-bold text-sm transition shadow-brand disabled:opacity-60 ${
-                      can
-                        ? `bg-gradient-to-r ${t.grad} text-white hover:scale-[1.02]`
-                        : "bg-muted text-muted-foreground cursor-not-allowed"
-                    }`}
+                    onClick={() => openUpgrade(p)}
+                    className={`mt-6 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-bold text-sm transition shadow-brand bg-gradient-to-r ${t.grad} text-white hover:scale-[1.02]`}
                   >
-                    {buying === p.id ? "Activating..." : can ? <>Activate Now <ArrowRight className="h-4 w-4" /></> : "Balance অপ্রতুল"}
+                    <Crown className="h-4 w-4" /> Upgrade Now <ArrowRight className="h-4 w-4" />
                   </button>
                   {!can && (
                     <Link to="/user/deposit" className="block mt-2 text-center text-xs font-semibold text-primary hover:underline">
@@ -201,6 +216,159 @@ function PackagesPage() {
           </div>
         </div>
       </section>
+
+      {/* Premium Upgrade Modal */}
+      {modalPkg && (
+        <UpgradeModal
+          pkg={modalPkg}
+          balance={balance}
+          step={step}
+          setStep={setStep}
+          method={method}
+          setMethod={setMethod}
+          buying={buying === modalPkg.id}
+          onClose={closeModal}
+          onConfirm={confirmBuy}
+        />
+      )}
+    </div>
+  );
+}
+
+function UpgradeModal({
+  pkg, balance, step, setStep, method, setMethod, buying, onClose, onConfirm,
+}: {
+  pkg: Package; balance: number;
+  step: "select" | "confirm"; setStep: (s: "select" | "confirm") => void;
+  method: string; setMethod: (m: string) => void;
+  buying: boolean; onClose: () => void; onConfirm: () => void;
+}) {
+  const roi = pkg.price > 0 ? Math.round((Number(pkg.daily_earning) * pkg.validity_days / Number(pkg.price)) * 100) : 0;
+  const balanceShort = method === "balance" && balance < pkg.price;
+  const methods = [
+    { id: "balance", label: "My Balance", sub: `৳${balance.toLocaleString()} available`, icon: Wallet, grad: "from-violet-500 to-fuchsia-500", instant: true },
+    { id: "bkash",   label: "bKash",      sub: "Instant payment",                      icon: Smartphone, grad: "from-pink-500 to-rose-600",      instant: true },
+    { id: "nagad",   label: "Nagad",      sub: "Mobile banking",                       icon: Smartphone, grad: "from-orange-500 to-red-500",      instant: true },
+    { id: "card",    label: "Card",       sub: "Visa / Mastercard",                    icon: CreditCard, grad: "from-sky-500 to-indigo-600",      instant: false },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center p-4 animate-fade-in">
+      <div aria-hidden className="absolute inset-0 bg-foreground/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-lg rounded-3xl bg-card border border-border/70 shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="relative bg-gradient-brand text-white px-6 py-5">
+          <div aria-hidden className="absolute -top-12 -right-10 h-40 w-40 rounded-full bg-white/15 blur-3xl" />
+          <button onClick={onClose} disabled={buying}
+            className="absolute top-3 right-3 grid place-items-center h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 transition disabled:opacity-40">
+            <X className="h-4 w-4" />
+          </button>
+          <div className="relative">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur px-3 py-1 text-[10px] uppercase tracking-wider font-bold">
+              <Crown className="h-3 w-3" /> Premium Upgrade
+            </div>
+            <h3 className="font-display text-2xl font-bold mt-2">{pkg.name}</h3>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="font-display text-3xl font-bold tabular-nums">৳{Number(pkg.price).toLocaleString()}</span>
+              <span className="text-xs text-white/80">one-time • {pkg.validity_days} days valid</span>
+            </div>
+            {/* Step indicator */}
+            <div className="mt-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider">
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${step === "select" ? "bg-white text-primary" : "bg-white/20"}`}>
+                <span className={`grid place-items-center h-4 w-4 rounded-full text-[9px] ${step === "select" ? "bg-primary text-white" : "bg-white/30"}`}>1</span> Method
+              </span>
+              <span className="h-px flex-1 bg-white/30" />
+              <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${step === "confirm" ? "bg-white text-primary" : "bg-white/20"}`}>
+                <span className={`grid place-items-center h-4 w-4 rounded-full text-[9px] ${step === "confirm" ? "bg-primary text-white" : "bg-white/30"}`}>2</span> Confirm
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Body */}
+        <div className="p-6 space-y-4">
+          {step === "select" ? (
+            <>
+              <p className="text-sm font-bold">Payment method বেছে নিন</p>
+              <div className="space-y-2">
+                {methods.map((m) => {
+                  const Icon = m.icon;
+                  const sel = method === m.id;
+                  return (
+                    <button key={m.id} onClick={() => setMethod(m.id)}
+                      className={`w-full flex items-center gap-3 rounded-2xl border p-3 text-left transition ${sel ? "border-primary bg-gradient-brand-soft" : "border-border bg-card hover:border-primary/40"}`}>
+                      <div className={`grid place-items-center h-10 w-10 rounded-xl bg-gradient-to-br ${m.grad} text-white shrink-0 shadow`}>
+                        <Icon className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-sm">{m.label}</p>
+                        <p className="text-[11px] text-muted-foreground">{m.sub}</p>
+                      </div>
+                      {m.instant && <span className="text-[10px] font-bold text-success uppercase tracking-wider">Instant</span>}
+                      <span className={`grid place-items-center h-5 w-5 rounded-full border-2 ${sel ? "border-primary bg-primary text-white" : "border-border"}`}>
+                        {sel && <CheckCircle2 className="h-3 w-3" />}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {balanceShort && (
+                <p className="text-xs text-destructive bg-destructive/10 rounded-xl p-2.5">
+                  ⚠ Balance অপ্রতুল। দরকার ৳{(pkg.price - balance).toLocaleString()} আরো — Deposit করুন বা অন্য method বেছে নিন।
+                </p>
+              )}
+              <button onClick={() => setStep("confirm")}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-brand text-white px-5 py-3 font-bold shadow-brand hover:scale-[1.02] transition">
+                Continue <ArrowRight className="h-4 w-4" />
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-sm font-bold">আপনার order review করুন</p>
+              <div className="rounded-2xl border border-border bg-gradient-brand-soft p-4 space-y-2">
+                <Row label="Package" value={pkg.name} />
+                <Row label="Daily earning" value={`৳${Number(pkg.daily_earning).toLocaleString()}`} accent />
+                <Row label="Daily tasks" value={String(pkg.daily_task_limit)} />
+                <Row label="Validity" value={`${pkg.validity_days} days`} />
+                <Row label="Total ROI" value={`${roi}%`} accent />
+                <div className="border-t border-border/60 pt-2 flex justify-between items-center">
+                  <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Pay via</span>
+                  <span className="font-bold text-sm capitalize">{method}</span>
+                </div>
+                <div className="flex justify-between items-baseline">
+                  <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Total</span>
+                  <span className="font-display text-2xl font-bold tabular-nums">৳{Number(pkg.price).toLocaleString()}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 rounded-xl bg-success/10 text-success p-2.5 text-xs">
+                <Lock className="h-3.5 w-3.5 shrink-0" />
+                <span>সম্পূর্ণ secured transaction। Activate হলেই আজই income শুরু হবে।</span>
+              </div>
+
+              <div className="flex gap-2">
+                <button onClick={() => setStep("select")} disabled={buying}
+                  className="px-4 py-3 rounded-2xl border border-border bg-card text-sm font-bold hover:bg-accent/40 transition disabled:opacity-50">
+                  Back
+                </button>
+                <button onClick={onConfirm} disabled={buying || balanceShort}
+                  className="flex-1 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-brand text-white px-5 py-3 font-bold shadow-brand hover:scale-[1.02] transition disabled:opacity-60 disabled:hover:scale-100">
+                  {buying ? <><Loader2 className="h-4 w-4 animate-spin" /> Activating...</> : <><Sparkles className="h-4 w-4" /> Confirm &amp; Pay</>}
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div className="flex justify-between items-center text-sm">
+      <span className="text-muted-foreground">{label}</span>
+      <span className={`font-bold tabular-nums ${accent ? "text-success" : ""}`}>{value}</span>
     </div>
   );
 }
