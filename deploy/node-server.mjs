@@ -60,6 +60,12 @@ const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url || "/", `http://${req.headers.host || "localhost"}`);
 
+    if (url.pathname === "/login.php") {
+      res.writeHead(302, { location: "/login" });
+      res.end();
+      return;
+    }
+
     // Try to serve a real static file from dist/client first (assets, favicon, etc.)
     const file = await tryStatic(url.pathname);
     if (file) {
