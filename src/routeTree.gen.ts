@@ -18,6 +18,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UserWithdrawRouteImport } from './routes/user/withdraw'
 import { Route as UserTasksRouteImport } from './routes/user/tasks'
 import { Route as UserSpinRouteImport } from './routes/user/spin'
+import { Route as UserReferRouteImport } from './routes/user/refer'
+import { Route as UserProfileRouteImport } from './routes/user/profile'
 import { Route as UserPackagesRouteImport } from './routes/user/packages'
 import { Route as UserHistoryRouteImport } from './routes/user/history'
 import { Route as UserDepositRouteImport } from './routes/user/deposit'
@@ -70,6 +72,16 @@ const UserTasksRoute = UserTasksRouteImport.update({
 const UserSpinRoute = UserSpinRouteImport.update({
   id: '/spin',
   path: '/spin',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserReferRoute = UserReferRouteImport.update({
+  id: '/refer',
+  path: '/refer',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserProfileRoute = UserProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => UserRoute,
 } as any)
 const UserPackagesRoute = UserPackagesRouteImport.update({
@@ -128,6 +140,8 @@ export interface FileRoutesByFullPath {
   '/user/deposit': typeof UserDepositRoute
   '/user/history': typeof UserHistoryRoute
   '/user/packages': typeof UserPackagesRoute
+  '/user/profile': typeof UserProfileRoute
+  '/user/refer': typeof UserReferRoute
   '/user/spin': typeof UserSpinRoute
   '/user/tasks': typeof UserTasksRoute
   '/user/withdraw': typeof UserWithdrawRoute
@@ -147,6 +161,8 @@ export interface FileRoutesByTo {
   '/user/deposit': typeof UserDepositRoute
   '/user/history': typeof UserHistoryRoute
   '/user/packages': typeof UserPackagesRoute
+  '/user/profile': typeof UserProfileRoute
+  '/user/refer': typeof UserReferRoute
   '/user/spin': typeof UserSpinRoute
   '/user/tasks': typeof UserTasksRoute
   '/user/withdraw': typeof UserWithdrawRoute
@@ -167,6 +183,8 @@ export interface FileRoutesById {
   '/user/deposit': typeof UserDepositRoute
   '/user/history': typeof UserHistoryRoute
   '/user/packages': typeof UserPackagesRoute
+  '/user/profile': typeof UserProfileRoute
+  '/user/refer': typeof UserReferRoute
   '/user/spin': typeof UserSpinRoute
   '/user/tasks': typeof UserTasksRoute
   '/user/withdraw': typeof UserWithdrawRoute
@@ -188,6 +206,8 @@ export interface FileRouteTypes {
     | '/user/deposit'
     | '/user/history'
     | '/user/packages'
+    | '/user/profile'
+    | '/user/refer'
     | '/user/spin'
     | '/user/tasks'
     | '/user/withdraw'
@@ -207,6 +227,8 @@ export interface FileRouteTypes {
     | '/user/deposit'
     | '/user/history'
     | '/user/packages'
+    | '/user/profile'
+    | '/user/refer'
     | '/user/spin'
     | '/user/tasks'
     | '/user/withdraw'
@@ -226,6 +248,8 @@ export interface FileRouteTypes {
     | '/user/deposit'
     | '/user/history'
     | '/user/packages'
+    | '/user/profile'
+    | '/user/refer'
     | '/user/spin'
     | '/user/tasks'
     | '/user/withdraw'
@@ -303,6 +327,20 @@ declare module '@tanstack/react-router' {
       path: '/spin'
       fullPath: '/user/spin'
       preLoaderRoute: typeof UserSpinRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/refer': {
+      id: '/user/refer'
+      path: '/refer'
+      fullPath: '/user/refer'
+      preLoaderRoute: typeof UserReferRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/profile': {
+      id: '/user/profile'
+      path: '/profile'
+      fullPath: '/user/profile'
+      preLoaderRoute: typeof UserProfileRouteImport
       parentRoute: typeof UserRoute
     }
     '/user/packages': {
@@ -386,6 +424,8 @@ interface UserRouteChildren {
   UserDepositRoute: typeof UserDepositRoute
   UserHistoryRoute: typeof UserHistoryRoute
   UserPackagesRoute: typeof UserPackagesRoute
+  UserProfileRoute: typeof UserProfileRoute
+  UserReferRoute: typeof UserReferRoute
   UserSpinRoute: typeof UserSpinRoute
   UserTasksRoute: typeof UserTasksRoute
   UserWithdrawRoute: typeof UserWithdrawRoute
@@ -396,6 +436,8 @@ const UserRouteChildren: UserRouteChildren = {
   UserDepositRoute: UserDepositRoute,
   UserHistoryRoute: UserHistoryRoute,
   UserPackagesRoute: UserPackagesRoute,
+  UserProfileRoute: UserProfileRoute,
+  UserReferRoute: UserReferRoute,
   UserSpinRoute: UserSpinRoute,
   UserTasksRoute: UserTasksRoute,
   UserWithdrawRoute: UserWithdrawRoute,
