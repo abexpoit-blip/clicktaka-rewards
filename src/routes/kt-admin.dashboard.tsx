@@ -45,7 +45,11 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Overview</h1>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h1 className="text-2xl font-bold">Overview</h1>
+      </div>
+
+      <DeployPanel />
 
       {/* Stat grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
