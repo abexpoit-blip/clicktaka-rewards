@@ -97,9 +97,12 @@ function AdminTasks() {
                         {t.active ? 'active' : 'paused'}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-right">
-                      <button onClick={() => toggle(t.id)} className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600">
+                    <td className="px-3 py-2 text-right whitespace-nowrap">
+                      <button onClick={() => toggle(t.id)} className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 mr-1">
                         {t.active ? 'Pause' : 'Activate'}
+                      </button>
+                      <button onClick={() => del(t.id)} className="text-xs px-2 py-1 rounded bg-red-600/30 text-red-300 hover:bg-red-600/50">
+                        Delete
                       </button>
                     </td>
                   </tr>
