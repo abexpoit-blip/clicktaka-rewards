@@ -45,7 +45,11 @@ function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Overview</h1>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h1 className="text-2xl font-bold">Overview</h1>
+      </div>
+
+      <DeployPanel />
 
       {/* Stat grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -113,6 +117,64 @@ function StatCard({ label, value, sub, color }: { label: string; value: number |
       <p className="text-xs uppercase tracking-wide opacity-80">{label}</p>
       <p className="text-2xl font-bold mt-1 text-white">{value}</p>
       {sub && <p className="text-xs mt-1 opacity-70">{sub}</p>}
+    </div>
+  );
+}
+
+type DeployInfo = {
+  commit: string | null; full_commit: string | null; branch: string | null;
+  message: string | null; author: string | null; commit_time: string | null;
+  deployed_at: string | null; server_time: string | null; uptime_sec: number;
+};
+
+function DeployPanel() {
+  const [d, setD] = useState<DeployInfo | null>(null);
+  const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
+  function load() {
+    setLoading(true); setErr("");
+    api<DeployInfo>("/admin/deploy-info").then(setD).catch((e) => setErr(e.message)).finally(() => setLoading(false));
+  }
+  useEffect(load, []);
+  const fmt = (s: string | null) => s ? new Date(s).toLocaleString() : "—";
+  const uptime = (sec: number) => {
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60);
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+  };
+  return (
+    <section className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-semibold text-slate-200 flex items-center gap-2">
+          <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+          Deploy / Git Info
+        </h2>
+        <button onClick={load} className="text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200">↻ Refresh</button>
+      </div>
+      {loading ? (
+        <Skeleton className="h-20 w-full" />
+      ) : err ? (
+        <p className="text-xs text-rose-400">{err}</p>
+      ) : d ? (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <Field label="Commit" value={d.commit || "—"} mono />
+          <Field label="Branch" value={d.branch || "—"} mono />
+          <Field label="Author" value={d.author || "—"} />
+          <Field label="Commit Time" value={fmt(d.commit_time)} />
+          <Field label="Deployed At" value={fmt(d.deployed_at)} />
+          <Field label="Server Time" value={fmt(d.server_time)} />
+          <Field label="Uptime" value={uptime(d.uptime_sec)} />
+          <Field label="Message" value={d.message || "—"} className="md:col-span-1 truncate" />
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function Field({ label, value, mono, className }: { label: string; value: string; mono?: boolean; className?: string }) {
+  return (
+    <div className={`bg-slate-900/60 border border-slate-700 rounded-lg p-2 ${className || ""}`}>
+      <p className="text-[10px] uppercase tracking-wide text-slate-400">{label}</p>
+      <p className={`mt-0.5 text-slate-100 truncate ${mono ? "font-mono" : ""}`} title={value}>{value}</p>
     </div>
   );
 }
