@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { Toaster } from "@/components/ui/sonner";
 
 type User = { id: number; phone: string; name: string | null; balance: number; refer_code: string };
 
@@ -29,6 +30,7 @@ function UserLayout() {
   const nav = [
     { to: "/user/dashboard", label: "🏠 Dashboard" },
     { to: "/user/tasks", label: "🎯 Tasks" },
+    { to: "/user/spin", label: "🎡 Spin" },
     { to: "/user/packages", label: "📦 Packages" },
     { to: "/user/deposit", label: "💰 Deposit" },
     { to: "/user/withdraw", label: "💸 Withdraw" },
@@ -64,6 +66,7 @@ function UserLayout() {
       <main className="max-w-6xl mx-auto px-4 py-6">
         <Outlet />
       </main>
+      <Toaster position="top-center" richColors />
     </div>
   );
 }

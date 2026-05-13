@@ -128,6 +128,17 @@ CREATE TABLE IF NOT EXISTS transactions (
   INDEX idx_user (user_id, created_at)
 ) ENGINE=InnoDB;
 
+-- DAILY SPINS (Spin Wheel — 1/day)
+CREATE TABLE IF NOT EXISTS daily_spins (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  spin_date DATE NOT NULL,
+  reward DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_user_date (user_id, spin_date),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- NOTICES
 CREATE TABLE IF NOT EXISTS notices (
   id INT AUTO_INCREMENT PRIMARY KEY,
