@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 
 type Pkg = { id: number; name: string; price: number; daily_task_limit: number; daily_earning: number };
+type ActivePkg = { id: number; name: string; daily_task_limit: number; daily_earning: number; expires_at?: string };
+type Me = { user: { id: number; phone: string }; packages: ActivePkg[] };
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,12 +25,24 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [packages, setPackages] = useState<Pkg[]>([]);
+  const [me, setMe] = useState<Me | null>(null);
+  const [authed, setAuthed] = useState<boolean>(false);
 
   useEffect(() => {
     api<{ packages: Pkg[] }>("/packages")
       .then((d) => setPackages(d.packages))
       .catch(() => {});
+    api<Me>("/user/me")
+      .then((d) => { setMe(d); setAuthed(true); })
+      .catch(() => setAuthed(false));
   }, []);
+
+  const activePkgPrice = (() => {
+    if (!me?.packages?.length || !packages.length) return 0;
+    const names = new Set(me.packages.map((p) => p.name));
+    const matched = packages.filter((p) => names.has(p.name));
+    return matched.reduce((m, p) => Math.max(m, Number(p.price)), 0);
+  })();
 
   return (
     <div className="min-h-screen grid-noise">
@@ -79,10 +93,10 @@ function Landing() {
 
           {/* Hero stats */}
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
-            <HeroStat icon={Users} label="Active User" value="১,৮০,০০০+" />
-            <HeroStat icon={Wallet} label="Total Paid" value="৳২.৪ কোটি+" />
+            <HeroStat icon={Users} label="Active User" value="৫৩,২৬৯+" />
+            <HeroStat icon={Wallet} label="Total Paid" value="৳৭,৩২,০০০+" />
             <HeroStat icon={Zap} label="Avg Withdraw" value="১০ মিনিট" />
-            <HeroStat icon={ShieldCheck} label="Trust Score" value="৪.৯ / ৫" />
+            <HeroStat icon={ShieldCheck} label="Trust Score" value="৪.৫ / ৫.০" />
           </div>
         </div>
       </section>
@@ -116,38 +130,80 @@ function Landing() {
           )}
           {packages.map((p, i) => {
             const featured = i === Math.min(2, packages.length - 1);
+            const price = Number(p.price);
+            const isActive = activePkgPrice > 0 && price === activePkgPrice;
+            const isUpgrade = activePkgPrice > 0 && price > activePkgPrice;
+            const isLower = activePkgPrice > 0 && price < activePkgPrice;
             return (
               <div key={p.id} className={`relative rounded-2xl p-5 transition-all hover:-translate-y-1 ${
                 featured
                   ? "bg-gradient-brand text-white shadow-brand ring-brand"
                   : "bg-card border border-border/70 shadow-card hover:shadow-brand"
-              }`}>
-                {featured && (
+              } ${isLower ? "opacity-60" : ""}`}>
+                {isActive && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-emerald-500 text-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow">
+                    <CheckCircle2 className="h-3 w-3" /> Already Active
+                  </span>
+                )}
+                {!isActive && featured && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-white text-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow">
                     <Crown className="h-3 w-3" /> Popular
                   </span>
                 )}
                 <h3 className={`font-display text-lg font-bold ${featured ? "" : "text-primary"}`}>{p.name}</h3>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className={`font-display text-3xl font-bold ${featured ? "" : "text-foreground"}`}>৳{Number(p.price).toLocaleString()}</span>
+                  <span className={`font-display text-3xl font-bold ${featured ? "" : "text-foreground"}`}>৳{price.toLocaleString()}</span>
                 </div>
                 <ul className={`mt-4 space-y-2 text-sm ${featured ? "text-white/90" : "text-muted-foreground"}`}>
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> দৈনিক <b>{p.daily_task_limit}</b> টি task</li>
-                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> দৈনিক <b>৳{Number(p.daily_earning)}</b></li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> দৈনিক <b>৳{Number(p.daily_earning)}</b> ইনকাম</li>
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> ৩৬৫ দিন valid</li>
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> Refer commission ১০%</li>
                 </ul>
-                <Link to="/register" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold transition ${
-                  featured
-                    ? "bg-white text-primary hover:bg-white/90"
-                    : "bg-gradient-brand text-white hover:opacity-95"
-                }`}>
-                  কিনুন →
-                </Link>
+                {authed ? (
+                  isActive ? (
+                    <Link to="/user/dashboard" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold bg-emerald-500 text-white hover:bg-emerald-600 transition`}>
+                      ✓ Dashboard
+                    </Link>
+                  ) : isUpgrade ? (
+                    <Link to="/user/packages" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold transition ${
+                      featured ? "bg-white text-primary hover:bg-white/90" : "bg-gradient-brand text-white hover:opacity-95"
+                    }`}>
+                      ⬆ Upgrade — বেশি আয় করুন
+                    </Link>
+                  ) : isLower ? (
+                    <button disabled className="block w-full mt-5 text-center py-2.5 rounded-xl font-semibold bg-muted text-muted-foreground cursor-not-allowed">
+                      Lower than active
+                    </button>
+                  ) : (
+                    <Link to="/user/packages" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold transition ${
+                      featured ? "bg-white text-primary hover:bg-white/90" : "bg-gradient-brand text-white hover:opacity-95"
+                    }`}>
+                      কিনুন →
+                    </Link>
+                  )
+                ) : (
+                  <Link to="/register" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold transition ${
+                    featured ? "bg-white text-primary hover:bg-white/90" : "bg-gradient-brand text-white hover:opacity-95"
+                  }`}>
+                    Login করে দেখুন →
+                  </Link>
+                )}
               </div>
             );
           })}
         </div>
+
+        {authed && activePkgPrice > 0 && (
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            🎉 আপনার active package চলছে — <b className="text-primary">বড় package নিলে আরো বেশি দৈনিক ইনকাম</b> করতে পারবেন!
+          </p>
+        )}
+        {!authed && (
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            🔒 প্যাকেজ কিনতে হলে আগে <Link to="/login" className="text-primary font-semibold hover:underline">Login</Link> অথবা <Link to="/register" className="text-primary font-semibold hover:underline">Register</Link> করুন
+          </p>
+        )}
       </section>
 
       {/* Live withdrawals */}
@@ -206,9 +262,21 @@ function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-border/60 bg-card/40 py-8">
-        <div className="max-w-6xl mx-auto px-4 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} <span className="font-semibold text-gradient-brand">ClickTaka</span> — Bangladesh's #1 task earning platform.
+      <footer className="border-t border-border/60 bg-card/40 py-10">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-6">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Accepted Payment Methods</p>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2.5">
+              <PayLogo name="bKash" bg="bg-pink-600" />
+              <PayLogo name="Nagad" bg="bg-orange-500" />
+              <PayLogo name="Rocket" bg="bg-purple-700" />
+              <PayLogo name="Upay" bg="bg-emerald-600" />
+            </div>
+          </div>
+          <div className="border-t border-border/60 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span>© {new Date().getFullYear()} <span className="font-semibold text-gradient-brand">ClickTaka</span> — Bangladesh's #1 task earning platform.</span>
+            <span>Crafted by <a href="#" className="font-semibold text-primary hover:underline">OpenXcell Agency</a></span>
+          </div>
         </div>
       </footer>
     </div>
@@ -238,6 +306,15 @@ function Feature({ icon: Icon, title, desc, tone }: { icon: React.ComponentType<
       </span>
       <h3 className="font-display font-semibold text-lg mt-3">{title}</h3>
       <p className="text-sm text-muted-foreground mt-1">{desc}</p>
+    </div>
+  );
+}
+
+function PayLogo({ name, bg }: { name: string; bg: string }) {
+  return (
+    <div className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-card px-3.5 py-2 shadow-sm">
+      <span className={`grid place-items-center h-7 w-7 rounded-lg text-white text-[11px] font-bold ${bg}`}>{name[0]}</span>
+      <span className="font-semibold text-sm text-foreground">{name}</span>
     </div>
   );
 }
