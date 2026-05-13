@@ -78,6 +78,48 @@ r.post('/login', async (req, res) => {
   }
 });
 
+r.post('/admin-login', async (req, res) => {
+  try {
+    const schema = z.object({
+      username: z.string().min(1).max(64),
+      password: z.string().min(1).max(200),
+    });
+    const data = schema.parse(req.body);
+
+    const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
+    const ADMIN_PASS = process.env.ADMIN_PASSWORD || '';
+    if (!ADMIN_PASS) return res.status(500).json({ error: 'Admin not configured' });
+
+    if (data.username !== ADMIN_USER || data.password !== ADMIN_PASS) {
+      return res.status(401).json({ error: 'Username বা password ভুল' });
+    }
+
+    // find an admin user row to attach the session to
+    let rows = await q('SELECT id FROM users WHERE is_admin=1 ORDER BY id ASC LIMIT 1');
+    let uid;
+    if (rows.length) {
+      uid = rows[0].id;
+    } else {
+      // bootstrap an admin user row (phone is just a placeholder)
+      const hash = await hashPassword(ADMIN_PASS);
+      const referCode = genReferCode();
+      const ins = await q(
+        'INSERT INTO users (phone, password_hash, name, refer_code, is_admin) VALUES (?,?,?,?,1)',
+        ['admin', hash, 'Admin', referCode]
+      );
+      uid = ins.insertId;
+    }
+
+    const token = signToken({ uid, admin: true });
+    setAuthCookie(res, token);
+    res.json({ ok: true, is_admin: true });
+  } catch (e) {
+    if (e?.errors) return res.status(400).json({ error: e.errors[0].message });
+    console.error('admin-login error:', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 r.post('/logout', (req, res) => {
   clearAuthCookie(res);
   res.json({ ok: true });
