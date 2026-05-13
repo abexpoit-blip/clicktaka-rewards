@@ -12,7 +12,6 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as UserRouteImport } from './routes/user'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as KtAdminLoginRouteImport } from './routes/kt-admin-login'
 import { Route as KtAdminRouteImport } from './routes/kt-admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UserWithdrawRouteImport } from './routes/user/withdraw'
@@ -44,11 +43,6 @@ const RegisterRoute = RegisterRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KtAdminLoginRoute = KtAdminLoginRouteImport.update({
-  id: '/kt-admin-login',
-  path: '/kt-admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KtAdminRoute = KtAdminRouteImport.update({
@@ -140,7 +134,6 @@ const ApiSplatRoute = ApiSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/kt-admin': typeof KtAdminRouteWithChildren
-  '/kt-admin-login': typeof KtAdminLoginRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/user': typeof UserRouteWithChildren
@@ -163,7 +156,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/kt-admin': typeof KtAdminRouteWithChildren
-  '/kt-admin-login': typeof KtAdminLoginRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/user': typeof UserRouteWithChildren
@@ -187,7 +179,6 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/kt-admin': typeof KtAdminRouteWithChildren
-  '/kt-admin-login': typeof KtAdminLoginRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/user': typeof UserRouteWithChildren
@@ -212,7 +203,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/kt-admin'
-    | '/kt-admin-login'
     | '/login'
     | '/register'
     | '/user'
@@ -235,7 +225,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/kt-admin'
-    | '/kt-admin-login'
     | '/login'
     | '/register'
     | '/user'
@@ -258,7 +247,6 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/kt-admin'
-    | '/kt-admin-login'
     | '/login'
     | '/register'
     | '/user'
@@ -282,7 +270,6 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   KtAdminRoute: typeof KtAdminRouteWithChildren
-  KtAdminLoginRoute: typeof KtAdminLoginRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   UserRoute: typeof UserRouteWithChildren
@@ -310,13 +297,6 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/kt-admin-login': {
-      id: '/kt-admin-login'
-      path: '/kt-admin-login'
-      fullPath: '/kt-admin-login'
-      preLoaderRoute: typeof KtAdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/kt-admin': {
@@ -489,7 +469,6 @@ const UserRouteWithChildren = UserRoute._addFileChildren(UserRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   KtAdminRoute: KtAdminRouteWithChildren,
-  KtAdminLoginRoute: KtAdminLoginRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   UserRoute: UserRouteWithChildren,

@@ -15,15 +15,15 @@ function AdminLayout() {
   useEffect(() => {
     api<Me>("/user/me")
       .then((d) => {
-        if (!d.user.is_admin) { navigate({ to: "/kt-admin-login" }); return; }
+        if (!d.user.is_admin) { navigate({ to: "/kt-admin/login" }); return; }
         setOk(true); setLoading(false);
       })
-      .catch(() => navigate({ to: "/kt-admin-login" }));
+      .catch(() => navigate({ to: "/kt-admin/login" }));
   }, [navigate]);
 
   async function logout() {
     await api("/auth/logout", { method: "POST" }).catch(() => {});
-    navigate({ to: "/kt-admin-login" });
+    navigate({ to: "/kt-admin/login" });
   }
 
   if (loading) return <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center">লোডিং...</div>;
