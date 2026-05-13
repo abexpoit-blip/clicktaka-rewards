@@ -130,6 +130,8 @@ PORT=3001
 NODE_ENV=production
 FRONTEND_URL=https://clicktaka24.com
 COOKIE_DOMAIN=.clicktaka24.com
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=Clicktaka247
 ```
 
 JWT secret generate:
