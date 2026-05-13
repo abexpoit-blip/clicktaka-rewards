@@ -4,6 +4,7 @@ import { q } from '../db.js';
 import { authAdmin } from '../middleware.js';
 import fs from 'node:fs';
 import path from 'node:path';
+import zlib from 'node:zlib';
 
 const r = Router();
 
@@ -32,7 +33,13 @@ function readGitInfo() {
     }
     const objectPath = path.join(gitDir, 'objects', head.slice(0, 2), head.slice(2));
     if (!fs.existsSync(objectPath)) return { ...empty, full_commit: head, branch };
-    return { ...empty, full_commit: head, branch };
+    const raw = zlib.inflateSync(fs.readFileSync(objectPath)).toString('utf8');
+    const body = raw.slice(raw.indexOf('\0') + 1);
+    const [headers, ...messageParts] = body.split('\n\n');
+    const authorLine = headers.split('\n').find((line) => line.startsWith('author '));
+    const authorMatch = authorLine?.match(/^author\s+(.+?)\s+<.*>\s+(\d+)\s+([+-]\d{4})$/);
+    const commitTime = authorMatch ? new Date(Number(authorMatch[2]) * 1000).toISOString() : null;
+    return { ...empty, full_commit: head, branch, message: messageParts.join('\n\n').split('\n')[0] || null, author: authorMatch?.[1] || null, commit_time: commitTime };
   } catch {
     return empty;
   }
