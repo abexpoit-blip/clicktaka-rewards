@@ -130,38 +130,80 @@ function Landing() {
           )}
           {packages.map((p, i) => {
             const featured = i === Math.min(2, packages.length - 1);
+            const price = Number(p.price);
+            const isActive = activePkgPrice > 0 && price === activePkgPrice;
+            const isUpgrade = activePkgPrice > 0 && price > activePkgPrice;
+            const isLower = activePkgPrice > 0 && price < activePkgPrice;
             return (
               <div key={p.id} className={`relative rounded-2xl p-5 transition-all hover:-translate-y-1 ${
                 featured
                   ? "bg-gradient-brand text-white shadow-brand ring-brand"
                   : "bg-card border border-border/70 shadow-card hover:shadow-brand"
-              }`}>
-                {featured && (
+              } ${isLower ? "opacity-60" : ""}`}>
+                {isActive && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-emerald-500 text-white px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow">
+                    <CheckCircle2 className="h-3 w-3" /> Already Active
+                  </span>
+                )}
+                {!isActive && featured && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 rounded-full bg-white text-primary px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider shadow">
                     <Crown className="h-3 w-3" /> Popular
                   </span>
                 )}
                 <h3 className={`font-display text-lg font-bold ${featured ? "" : "text-primary"}`}>{p.name}</h3>
                 <div className="mt-3 flex items-baseline gap-1">
-                  <span className={`font-display text-3xl font-bold ${featured ? "" : "text-foreground"}`}>৳{Number(p.price).toLocaleString()}</span>
+                  <span className={`font-display text-3xl font-bold ${featured ? "" : "text-foreground"}`}>৳{price.toLocaleString()}</span>
                 </div>
                 <ul className={`mt-4 space-y-2 text-sm ${featured ? "text-white/90" : "text-muted-foreground"}`}>
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> দৈনিক <b>{p.daily_task_limit}</b> টি task</li>
-                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> দৈনিক <b>৳{Number(p.daily_earning)}</b></li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> দৈনিক <b>৳{Number(p.daily_earning)}</b> ইনকাম</li>
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> ৩৬৫ দিন valid</li>
                   <li className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 shrink-0" /> Refer commission ১০%</li>
                 </ul>
-                <Link to="/register" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold transition ${
-                  featured
-                    ? "bg-white text-primary hover:bg-white/90"
-                    : "bg-gradient-brand text-white hover:opacity-95"
-                }`}>
-                  কিনুন →
-                </Link>
+                {authed ? (
+                  isActive ? (
+                    <Link to="/user/dashboard" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold bg-emerald-500 text-white hover:bg-emerald-600 transition`}>
+                      ✓ Dashboard
+                    </Link>
+                  ) : isUpgrade ? (
+                    <Link to="/user/packages" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold transition ${
+                      featured ? "bg-white text-primary hover:bg-white/90" : "bg-gradient-brand text-white hover:opacity-95"
+                    }`}>
+                      ⬆ Upgrade — বেশি আয় করুন
+                    </Link>
+                  ) : isLower ? (
+                    <button disabled className="block w-full mt-5 text-center py-2.5 rounded-xl font-semibold bg-muted text-muted-foreground cursor-not-allowed">
+                      Lower than active
+                    </button>
+                  ) : (
+                    <Link to="/user/packages" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold transition ${
+                      featured ? "bg-white text-primary hover:bg-white/90" : "bg-gradient-brand text-white hover:opacity-95"
+                    }`}>
+                      কিনুন →
+                    </Link>
+                  )
+                ) : (
+                  <Link to="/register" className={`block mt-5 text-center py-2.5 rounded-xl font-semibold transition ${
+                    featured ? "bg-white text-primary hover:bg-white/90" : "bg-gradient-brand text-white hover:opacity-95"
+                  }`}>
+                    Login করে দেখুন →
+                  </Link>
+                )}
               </div>
             );
           })}
         </div>
+
+        {authed && activePkgPrice > 0 && (
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            🎉 আপনার active package চলছে — <b className="text-primary">বড় package নিলে আরো বেশি দৈনিক ইনকাম</b> করতে পারবেন!
+          </p>
+        )}
+        {!authed && (
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            🔒 প্যাকেজ কিনতে হলে আগে <Link to="/login" className="text-primary font-semibold hover:underline">Login</Link> অথবা <Link to="/register" className="text-primary font-semibold hover:underline">Register</Link> করুন
+          </p>
+        )}
       </section>
 
       {/* Live withdrawals */}
