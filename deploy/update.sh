@@ -74,5 +74,8 @@ echo
 echo "==> Web check"
 curl -sS -o /dev/null -w "  web :3002 -> HTTP %{http_code}\n" http://127.0.0.1:3002/ || true
 
+echo "==> Port bindings"
+ss -ltnp 2>/dev/null | grep -E ':3001|:3002|:4000' || echo "  (no listeners on 3001/3002/4000)"
+
 echo "==> Recent logs"
-pm2 logs clicktaka-api clicktaka-web --lines 30 --nostream
+pm2 logs clicktaka-api clicktaka-web --lines 40 --nostream
