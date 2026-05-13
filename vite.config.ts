@@ -12,4 +12,12 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    preview: {
+      host: "127.0.0.1",
+      port: 3002,
+      strictPort: true,
+      allowedHosts: ["clicktaka24.com", "www.clicktaka24.com", "localhost", "127.0.0.1"],
+    },
+  },
 });
