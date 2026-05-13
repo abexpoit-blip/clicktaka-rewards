@@ -15,9 +15,12 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as KtAdminLoginRouteImport } from './routes/kt-admin-login'
 import { Route as KtAdminRouteImport } from './routes/kt-admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UserWithdrawRouteImport } from './routes/user/withdraw'
 import { Route as UserTasksRouteImport } from './routes/user/tasks'
 import { Route as UserSpinRouteImport } from './routes/user/spin'
+import { Route as UserPackagesRouteImport } from './routes/user/packages'
 import { Route as UserHistoryRouteImport } from './routes/user/history'
+import { Route as UserDepositRouteImport } from './routes/user/deposit'
 import { Route as UserDashboardRouteImport } from './routes/user/dashboard'
 import { Route as KtAdminUsersRouteImport } from './routes/kt-admin.users'
 import { Route as KtAdminTasksRouteImport } from './routes/kt-admin.tasks'
@@ -54,6 +57,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserWithdrawRoute = UserWithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
+  getParentRoute: () => UserRoute,
+} as any)
 const UserTasksRoute = UserTasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
@@ -64,9 +72,19 @@ const UserSpinRoute = UserSpinRouteImport.update({
   path: '/spin',
   getParentRoute: () => UserRoute,
 } as any)
+const UserPackagesRoute = UserPackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => UserRoute,
+} as any)
 const UserHistoryRoute = UserHistoryRouteImport.update({
   id: '/history',
   path: '/history',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserDepositRoute = UserDepositRouteImport.update({
+  id: '/deposit',
+  path: '/deposit',
   getParentRoute: () => UserRoute,
 } as any)
 const UserDashboardRoute = UserDashboardRouteImport.update({
@@ -107,9 +125,12 @@ export interface FileRoutesByFullPath {
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
   '/user/dashboard': typeof UserDashboardRoute
+  '/user/deposit': typeof UserDepositRoute
   '/user/history': typeof UserHistoryRoute
+  '/user/packages': typeof UserPackagesRoute
   '/user/spin': typeof UserSpinRoute
   '/user/tasks': typeof UserTasksRoute
+  '/user/withdraw': typeof UserWithdrawRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,9 +144,12 @@ export interface FileRoutesByTo {
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
   '/user/dashboard': typeof UserDashboardRoute
+  '/user/deposit': typeof UserDepositRoute
   '/user/history': typeof UserHistoryRoute
+  '/user/packages': typeof UserPackagesRoute
   '/user/spin': typeof UserSpinRoute
   '/user/tasks': typeof UserTasksRoute
+  '/user/withdraw': typeof UserWithdrawRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -140,9 +164,12 @@ export interface FileRoutesById {
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
   '/user/dashboard': typeof UserDashboardRoute
+  '/user/deposit': typeof UserDepositRoute
   '/user/history': typeof UserHistoryRoute
+  '/user/packages': typeof UserPackagesRoute
   '/user/spin': typeof UserSpinRoute
   '/user/tasks': typeof UserTasksRoute
+  '/user/withdraw': typeof UserWithdrawRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -158,9 +185,12 @@ export interface FileRouteTypes {
     | '/kt-admin/tasks'
     | '/kt-admin/users'
     | '/user/dashboard'
+    | '/user/deposit'
     | '/user/history'
+    | '/user/packages'
     | '/user/spin'
     | '/user/tasks'
+    | '/user/withdraw'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -174,9 +204,12 @@ export interface FileRouteTypes {
     | '/kt-admin/tasks'
     | '/kt-admin/users'
     | '/user/dashboard'
+    | '/user/deposit'
     | '/user/history'
+    | '/user/packages'
     | '/user/spin'
     | '/user/tasks'
+    | '/user/withdraw'
   id:
     | '__root__'
     | '/'
@@ -190,9 +223,12 @@ export interface FileRouteTypes {
     | '/kt-admin/tasks'
     | '/kt-admin/users'
     | '/user/dashboard'
+    | '/user/deposit'
     | '/user/history'
+    | '/user/packages'
     | '/user/spin'
     | '/user/tasks'
+    | '/user/withdraw'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -248,6 +284,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/user/withdraw': {
+      id: '/user/withdraw'
+      path: '/withdraw'
+      fullPath: '/user/withdraw'
+      preLoaderRoute: typeof UserWithdrawRouteImport
+      parentRoute: typeof UserRoute
+    }
     '/user/tasks': {
       id: '/user/tasks'
       path: '/tasks'
@@ -262,11 +305,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserSpinRouteImport
       parentRoute: typeof UserRoute
     }
+    '/user/packages': {
+      id: '/user/packages'
+      path: '/packages'
+      fullPath: '/user/packages'
+      preLoaderRoute: typeof UserPackagesRouteImport
+      parentRoute: typeof UserRoute
+    }
     '/user/history': {
       id: '/user/history'
       path: '/history'
       fullPath: '/user/history'
       preLoaderRoute: typeof UserHistoryRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/deposit': {
+      id: '/user/deposit'
+      path: '/deposit'
+      fullPath: '/user/deposit'
+      preLoaderRoute: typeof UserDepositRouteImport
       parentRoute: typeof UserRoute
     }
     '/user/dashboard': {
@@ -326,16 +383,22 @@ const KtAdminRouteWithChildren =
 
 interface UserRouteChildren {
   UserDashboardRoute: typeof UserDashboardRoute
+  UserDepositRoute: typeof UserDepositRoute
   UserHistoryRoute: typeof UserHistoryRoute
+  UserPackagesRoute: typeof UserPackagesRoute
   UserSpinRoute: typeof UserSpinRoute
   UserTasksRoute: typeof UserTasksRoute
+  UserWithdrawRoute: typeof UserWithdrawRoute
 }
 
 const UserRouteChildren: UserRouteChildren = {
   UserDashboardRoute: UserDashboardRoute,
+  UserDepositRoute: UserDepositRoute,
   UserHistoryRoute: UserHistoryRoute,
+  UserPackagesRoute: UserPackagesRoute,
   UserSpinRoute: UserSpinRoute,
   UserTasksRoute: UserTasksRoute,
+  UserWithdrawRoute: UserWithdrawRoute,
 }
 
 const UserRouteWithChildren = UserRoute._addFileChildren(UserRouteChildren)
@@ -351,3 +414,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
