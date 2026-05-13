@@ -5,9 +5,9 @@ import { DashboardSkeleton, ErrorState, EmptyState } from "@/components/ui-state
 import { LiveTicker } from "@/components/live-ticker";
 import { Leaderboard } from "@/components/leaderboard";
 import {
-  Wallet, TrendingUp, Coins, Copy, Check, Target, Package, Activity,
-  ArrowUpRight, ArrowDownRight, Calendar, Sparkles, Gift, Zap, Crown, Flame,
-  Trophy, Rocket, Shield, Star, Award, BadgeCheck,
+  Wallet, TrendingUp, Coins, Target, Package, Activity,
+  ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown, Flame,
+  Trophy, Rocket, Shield, Star, Play, ArrowRight, Calendar, Award, BadgeCheck,
 } from "lucide-react";
 
 export const Route = createFileRoute("/user/dashboard")({ component: Dashboard });
@@ -15,6 +15,8 @@ export const Route = createFileRoute("/user/dashboard")({ component: Dashboard }
 type Pkg = { id: number; name: string; expires_at: string; tasks_done_today: number; daily_task_limit: number; daily_earning: number };
 type Completion = { id: number; reward: number; completed_at: string; title: string; type: string };
 type Tx = { id: number; type: string; amount: number; balance_after: number | null; note: string | null; created_at: string };
+type Task = { id: number; title: string; type: string; url: string | null; reward: number };
+type TaskData = { tasks: Task[]; today_completed: number; daily_limit: number };
 type DashData = {
   user: { id: number; phone: string; name: string | null; balance: number; refer_code: string };
   available_tasks: number;
@@ -26,15 +28,16 @@ type DashData = {
 function Dashboard() {
   const [d, setD] = useState<DashData | null>(null);
   const [pkgs, setPkgs] = useState<Pkg[]>([]);
+  const [tdata, setTdata] = useState<TaskData | null>(null);
   const [err, setErr] = useState("");
   const [loading, setLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
 
   function load() {
     setLoading(true); setErr("");
     Promise.all([
       api<DashData>("/user/dashboard").then(setD),
       api<{ packages: Pkg[] }>("/user/me").then((r) => setPkgs(r.packages || [])).catch(() => setPkgs([])),
+      api<TaskData>("/user/tasks").then(setTdata).catch(() => setTdata(null)),
     ]).catch((e) => setErr(e.message)).finally(() => setLoading(false));
   }
   useEffect(load, []);
@@ -42,17 +45,19 @@ function Dashboard() {
   if (err) return <ErrorState message={err} onRetry={load} />;
   if (loading || !d) return <DashboardSkeleton />;
 
-  const u = d.user;
-  function copyRefer() {
-    navigator.clipboard.writeText(u.refer_code);
-    setCopied(true); setTimeout(() => setCopied(false), 1500);
-  }
+  const noPackage = pkgs.length === 0;
+  const todayDone = tdata?.today_completed ?? 0;
+  const dailyLimit = tdata?.daily_limit ?? 0;
+  const availableTasks = tdata?.tasks ?? [];
+  const taskCount = availableTasks.length || d.available_tasks;
+  const pct = dailyLimit > 0 ? Math.min(100, Math.round((todayDone / dailyLimit) * 100)) : 0;
+  const potential = availableTasks.reduce((s, t) => s + Number(t.reward || 0), 0);
 
   return (
     <div className="space-y-8 animate-fade-in">
       <LiveTicker />
 
-      {/* Hero — premium gradient with animated orbs */}
+      {/* Today's Mission — task-focused hero (replaces old profile hero) */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-brand text-white shadow-brand">
         <div aria-hidden className="absolute -top-24 -right-16 h-72 w-72 rounded-full bg-white/15 blur-3xl animate-float" />
         <div aria-hidden className="absolute -bottom-24 -left-10 h-72 w-72 rounded-full bg-primary-glow/40 blur-3xl" />
@@ -63,24 +68,51 @@ function Dashboard() {
         <div className="relative p-6 sm:p-8">
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur px-3 py-1 text-[11px] uppercase tracking-wider font-semibold">
-                <Sparkles className="h-3 w-3" /> Premium Member
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur px-3 py-1 text-[11px] uppercase tracking-wider font-bold">
+                <Flame className="h-3 w-3" /> Today's Mission
               </div>
-              <p className="mt-3 text-sm text-white/80">স্বাগতম 👋</p>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight mt-1">{u.name || u.phone}</h1>
+              <h1 className="font-display text-3xl sm:text-4xl font-bold mt-3 tracking-tight">
+                আজকের <span className="shimmer-text">Earning</span> শুরু করুন
+              </h1>
+              <p className="mt-1 text-white/85 text-sm">প্রতিটা task complete = সরাসরি Balance-এ টাকা যোগ ✨</p>
             </div>
-            <button onClick={copyRefer}
-              className="inline-flex items-center gap-2 rounded-2xl bg-white/15 hover:bg-white/25 backdrop-blur px-4 py-2.5 text-sm font-medium transition border border-white/20">
-              <Gift className="h-4 w-4" />
-              <span className="font-mono tracking-wider">{u.refer_code}</span>
-              {copied ? <Check className="h-4 w-4 text-emerald-300" /> : <Copy className="h-3.5 w-3.5 opacity-80" />}
-            </button>
+            <div className="text-right">
+              <p className="text-[11px] uppercase tracking-wider text-white/70">Available Now</p>
+              <p className="font-display text-5xl font-bold tabular-nums">{taskCount}</p>
+            </div>
           </div>
 
-          <div className="mt-7 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-            <HeroStat icon={Wallet} label="Balance" value={`৳${Number(u.balance).toLocaleString()}`} accent />
-            <HeroStat icon={TrendingUp} label="আজকের ইনকাম" value={`৳${d.earnings.today.toLocaleString()}`} />
-            <HeroStat icon={Coins} label="মোট ইনকাম" value={`৳${d.earnings.total.toLocaleString()}`} />
+          {/* Progress bar */}
+          <div className="mt-6">
+            <div className="flex items-center justify-between text-xs mb-2">
+              <span className="inline-flex items-center gap-1.5 font-semibold"><Target className="h-3.5 w-3.5" /> Daily Progress</span>
+              <span className="tabular-nums font-bold">{todayDone} / {dailyLimit || "—"}</span>
+            </div>
+            <div className="h-3 bg-white/15 rounded-full overflow-hidden backdrop-blur">
+              <div className="h-full bg-gradient-to-r from-amber-300 via-yellow-200 to-emerald-300 rounded-full transition-all shadow-lg" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+
+          {/* Today's potential + CTA */}
+          <div className="mt-5 grid sm:grid-cols-[1fr_auto] gap-3 items-center">
+            <div className="rounded-2xl bg-white/12 backdrop-blur border border-white/15 px-4 py-3 flex items-center gap-3">
+              <div className="grid place-items-center h-10 w-10 rounded-xl bg-white/20 shrink-0">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-wider text-white/70 font-bold">Today's Potential</p>
+                <p className="font-display text-xl font-bold tabular-nums">৳{potential.toLocaleString()} <span className="text-[11px] font-normal text-white/75">claim-able</span></p>
+              </div>
+            </div>
+            {noPackage ? (
+              <Link to="/user/packages" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-primary px-5 py-3 text-sm font-bold hover:scale-[1.03] transition shadow-2xl whitespace-nowrap">
+                <Crown className="h-4 w-4" /> Package নিন
+              </Link>
+            ) : (
+              <Link to="/user/tasks" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white text-primary px-5 py-3 text-sm font-bold hover:scale-[1.03] transition shadow-2xl whitespace-nowrap">
+                <Play className="h-4 w-4 fill-primary" /> Start Earning <ArrowRight className="h-4 w-4" />
+              </Link>
+            )}
           </div>
         </div>
       </section>
