@@ -88,6 +88,7 @@ r.post('/admin-login', async (req, res) => {
 
     const ADMIN_USER = process.env.ADMIN_USERNAME || 'admin';
     const ADMIN_PASS = process.env.ADMIN_PASSWORD || '';
+    const ADMIN_PHONE = process.env.ADMIN_PHONE || '01700000000';
     if (!ADMIN_PASS) return res.status(500).json({ error: 'Admin not configured' });
 
     if (data.username !== ADMIN_USER || data.password !== ADMIN_PASS) {
@@ -105,7 +106,7 @@ r.post('/admin-login', async (req, res) => {
       const referCode = genReferCode();
       const ins = await q(
         'INSERT INTO users (phone, password_hash, name, refer_code, is_admin) VALUES (?,?,?,?,1)',
-        ['admin', hash, 'Admin', referCode]
+        [ADMIN_PHONE, hash, 'Admin', referCode]
       );
       uid = ins.insertId;
     }
