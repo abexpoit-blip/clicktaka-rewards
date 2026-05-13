@@ -100,6 +100,9 @@ r.delete('/tasks/:id', authAdmin, async (req, res) => {
   if (c[0].c > 0) return res.status(409).json({ error: 'Completions আছে — শুধু pause করুন' });
   await q('DELETE FROM tasks WHERE id=?', [id]);
   res.json({ ok: true });
+});
+
+// Recent earnings (task completions across all users)
 r.get('/earnings', authAdmin, async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 50, 200);
   const rows = await q(
