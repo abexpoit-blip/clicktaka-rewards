@@ -51,7 +51,7 @@ function Landing() {
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2 group">
             <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-brand shadow-brand">
-              <Sparkles className="h-4 w-4 text-white" strokeWidth={2.5} />
+              <Banknote className="h-4 w-4 text-white" strokeWidth={2.5} />
             </span>
             <span className="font-display text-xl font-bold text-gradient-brand">ClickTaka</span>
           </Link>
