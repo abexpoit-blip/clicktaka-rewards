@@ -49,15 +49,19 @@ export function LiveTicker() {
   // duplicate for seamless infinite marquee
   const loop = useMemo(() => [...items, ...items], [items]);
 
-  // Stats banner numbers (subtly increase over time for FOMO)
+  // Stats banner numbers (subtly increase over time for FOMO).
+  // Use a stable initial value to avoid SSR/client hydration mismatch,
+  // then start ticking after mount.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
   const stats = useMemo(() => {
-    const base = Date.now();
-    const minutes = Math.floor(base / 60000) % 1000;
+    if (!mounted) return { today: 1247, paid: 8.4 };
+    const minutes = Math.floor(Date.now() / 60000) % 1000;
     return {
       today: 1247 + (minutes % 80),
       paid: 8.4, // lakh
     };
-  }, [pulseKey]);
+  }, [pulseKey, mounted]);
 
   return (
     <div className="relative overflow-hidden rounded-2xl p-[1.5px] bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-400 shadow-[0_10px_40px_-12px_rgba(16,185,129,0.45)]">
