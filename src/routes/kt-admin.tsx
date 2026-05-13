@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { LayoutDashboard, Users, Target, Coins, LogOut, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Users, Target, Coins, LogOut, ShieldCheck, Wallet } from "lucide-react";
 
 export const Route = createFileRoute("/kt-admin")({ component: AdminLayout });
 
@@ -12,6 +12,7 @@ const NAV = [
   { to: "/kt-admin/users",     label: "Users",    icon: Users },
   { to: "/kt-admin/tasks",     label: "Tasks/Ads",icon: Target },
   { to: "/kt-admin/earnings",  label: "Earnings", icon: Coins },
+  { to: "/kt-admin/payments",  label: "Payments", icon: Wallet },
 ] as const;
 
 function AdminLayout() {

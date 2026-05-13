@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { readActive, viewedSeconds, REQUIRED_SECONDS, type ActiveTask } from "@/lib/active-task";
-import { CheckCircle2 } from "lucide-react";
+import { readActive, viewedSeconds, clearActive, REQUIRED_SECONDS, type ActiveTask } from "@/lib/active-task";
+import { CheckCircle2, RotateCcw } from "lucide-react";
 import { DashboardSkeleton, ErrorState, EmptyState } from "@/components/ui-states";
 import { LiveTicker } from "@/components/live-ticker";
 import { Leaderboard } from "@/components/leaderboard";
@@ -363,6 +363,27 @@ function QuickTaskCard({ task, done }: { task: Task; done: boolean }) {
               <span>{ready ? "✓ Verified — Claim করুন" : `Verifying ad view… ${viewed}/${REQUIRED_SECONDS}s`}</span>
               <span className="font-bold">{pct}%</span>
             </p>
+            <button
+              type="button"
+              onClick={() => { clearActive(); }}
+              className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-destructive transition"
+            >
+              <RotateCcw className="h-3 w-3" /> Reset & Start over
+            </button>
+          </div>
+        )}
+
+        {/* Locked by another task — quick way out */}
+        {otherActive && !done && (
+          <div className="mt-2.5 flex items-center justify-between gap-2 rounded-lg bg-muted/50 px-2.5 py-1.5">
+            <span className="text-[10px] text-muted-foreground">⚠ অন্য task active — তাই lock</span>
+            <button
+              type="button"
+              onClick={() => clearActive()}
+              className="inline-flex items-center gap-1 text-[10px] font-bold text-primary hover:underline"
+            >
+              <RotateCcw className="h-3 w-3" /> Reset
+            </button>
           </div>
         )}
       </div>

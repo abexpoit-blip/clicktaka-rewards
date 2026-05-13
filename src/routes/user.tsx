@@ -1,6 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { BALANCE_EVENT } from "@/lib/active-task";
 import { Toaster } from "@/components/ui/sonner";
 import {
   LayoutDashboard, Target, Disc3, Package, Wallet, Send, Users, History, UserCircle2,
@@ -34,6 +35,17 @@ function UserLayout() {
       .then((d) => { setUser(d.user); setLoading(false); })
       .catch(() => navigate({ to: "/login" }));
   }, [navigate]);
+
+  // Optimistic balance updates from Claim / Withdraw / Deposit success
+  useEffect(() => {
+    function onDelta(e: Event) {
+      const detail = (e as CustomEvent).detail as { delta: number } | undefined;
+      if (!detail) return;
+      setUser((u) => (u ? { ...u, balance: Number(u.balance) + Number(detail.delta) } : u));
+    }
+    window.addEventListener(BALANCE_EVENT, onDelta);
+    return () => window.removeEventListener(BALANCE_EVENT, onDelta);
+  }, []);
 
   async function logout() {
     await api("/auth/logout", { method: "POST" }).catch(() => {});

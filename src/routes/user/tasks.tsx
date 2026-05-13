@@ -1,9 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { bumpBalance } from "@/lib/active-task";
 import { toast } from "sonner";
 import {
-  Target, Trophy, Zap, Lock, CheckCircle2, Play, Clock, X,
+  Target, Trophy, Zap, Lock, CheckCircle2, Play, Clock, X, RotateCcw,
   TrendingUp, Crown, Flame, Coins, Package as PackageIcon, ExternalLink,
   Video, AppWindow, Share2, Gamepad2, Sparkles, ArrowRight,
 } from "lucide-react";
@@ -33,6 +34,7 @@ function TasksPage() {
   const [d, setD] = useState<Data | null>(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
+  const [justClaimed, setJustClaimed] = useState<{ id: number; reward: number } | null>(null);
   const REQUIRED_SECONDS = 30;
   const [active, setActive] = useState<{ task: Task; viewed: number; awayOnce: boolean; awayMs: number; needsAway: boolean } | null>(() => {
     // Resume from localStorage if user navigated here from dashboard / refreshed
@@ -114,9 +116,15 @@ function TasksPage() {
     setBusy(task.id);
     try {
       const r = await api<{ ok: boolean; reward: number }>(`/user/tasks/${task.id}/complete`, { method: "POST" });
-      toast.success(`+৳${r.reward} যোগ হয়েছে 🎉`);
+      // Optimistic balance bump for instant header update — no refresh needed
+      bumpBalance(Number(r.reward));
+      // Inline success state on the card before refetch
+      setJustClaimed({ id: task.id, reward: Number(r.reward) });
       setActive(null);
+      toast.success(`+৳${r.reward} যোগ হয়েছে 🎉`);
+      // Refetch in background; clear success badge after a moment
       load();
+      setTimeout(() => setJustClaimed((s) => (s?.id === task.id ? null : s)), 2500);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -267,11 +275,20 @@ function TasksPage() {
             <div className="relative mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
               <div className="h-full bg-white rounded-full transition-all" style={{ width: `${pctDone}%` }} />
             </div>
-            <p className="relative mt-2 text-[11px] text-white/85 leading-relaxed">
-              {needsAway
-                ? "🛡️ Ad tab-এ যান ও কমপক্ষে 30s দেখুন। ClickTaka tab-এ ফিরে আসলে timer pause হয়ে যাবে।"
-                : "⏱ কমপক্ষে 30 সেকেন্ড অপেক্ষা করুন।"}
-            </p>
+            <div className="relative mt-2 flex items-center justify-between gap-2 text-[11px] text-white/85 leading-relaxed">
+              <p className="flex-1">
+                {needsAway
+                  ? "🛡️ Ad tab-এ যান ও কমপক্ষে 30s দেখুন। ফিরে আসলে timer pause হবে।"
+                  : "⏱ কমপক্ষে 30 সেকেন্ড অপেক্ষা করুন।"}
+              </p>
+              <button
+                type="button"
+                onClick={() => { setActive(null); toast.message("Active task reset হয়েছে — আবার Start করুন"); }}
+                className="inline-flex items-center gap-1 rounded-full bg-white/20 hover:bg-white/30 px-2.5 py-1 font-bold uppercase tracking-wider transition shrink-0"
+              >
+                <RotateCcw className="h-3 w-3" /> Reset
+              </button>
+            </div>
           </div>
         </div>
         );
@@ -312,15 +329,17 @@ function TasksPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {d.tasks.map((t) => {
                 const isDone = done.has(t.id);
-                const disabled = isDone || limitReached || active !== null;
+                const justOk = justClaimed?.id === t.id;
+                const otherActive = active !== null && active.task.id !== t.id;
+                const disabled = isDone || limitReached || otherActive;
                 const m = typeMeta(t.type);
                 const Icon = m.icon;
                 return (
-                  <article key={t.id} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all">
+                  <article key={t.id} className={`group relative overflow-hidden rounded-2xl border bg-card shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all ${justOk ? "border-success ring-2 ring-success/30 animate-pulse" : "border-border/70"}`}>
                     <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.grad}`} />
-                    {isDone && (
+                    {(isDone || justOk) && (
                       <span className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-success/15 text-success px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                        <CheckCircle2 className="h-3 w-3" /> Completed
+                        <CheckCircle2 className="h-3 w-3" /> {justOk ? `+৳${justClaimed!.reward}` : "Completed"}
                       </span>
                     )}
                     <div className="p-4">
