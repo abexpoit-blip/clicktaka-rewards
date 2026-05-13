@@ -285,6 +285,91 @@ function HeroStat({ icon: Icon, label, value, accent }: { icon: React.ComponentT
   );
 }
 
+function QuickTaskCard({ task, done }: { task: Task; done: boolean }) {
+  const m = TASK_TYPE[task.type] || TASK_TYPE.ad;
+  const Icon = m.icon;
+  const [active, setActive] = useState<ActiveTask | null>(() => readActive());
+  const [, force] = useState(0);
+
+  // Live tick + cross-tab sync
+  useEffect(() => {
+    const onChange = () => setActive(readActive());
+    window.addEventListener("ct:active-task", onChange);
+    window.addEventListener("storage", onChange);
+    const t = setInterval(() => force((x) => x + 1), 1000);
+    return () => {
+      window.removeEventListener("ct:active-task", onChange);
+      window.removeEventListener("storage", onChange);
+      clearInterval(t);
+    };
+  }, []);
+
+  const isMine = active?.id === task.id;
+  const viewed = isMine ? viewedSeconds(active!) : 0;
+  const remaining = Math.max(0, REQUIRED_SECONDS - viewed);
+  const pct = Math.round((viewed / REQUIRED_SECONDS) * 100);
+  const ready = isMine && remaining === 0;
+  const otherActive = !!active && !isMine;
+
+  let label: React.ReactNode = <>Start <ArrowRight className="h-3 w-3" /></>;
+  if (done) label = <><CheckCircle2 className="h-3.5 w-3.5" /> Done</>;
+  else if (ready) label = <><CheckCircle2 className="h-3.5 w-3.5" /> Claim</>;
+  else if (isMine) label = <>Continue <ArrowRight className="h-3 w-3" /></>;
+  else if (otherActive) label = <>Locked</>;
+
+  const btnDisabled = done || otherActive;
+
+  return (
+    <article className={`group relative overflow-hidden rounded-2xl border ${isMine ? "border-primary/50 ring-2 ring-primary/15" : "border-border/70"} bg-card shadow-card hover:shadow-brand transition-all`}>
+      <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.grad}`} />
+      <div className="p-3.5">
+        <div className="flex items-center gap-3">
+          <div className={`grid place-items-center h-11 w-11 rounded-xl bg-gradient-to-br ${m.grad} text-white shadow-md shrink-0 relative`}>
+            <Icon className="h-5 w-5" />
+            {done && <span className="absolute inset-0 grid place-items-center bg-success/90 rounded-xl"><CheckCircle2 className="h-5 w-5 text-white" /></span>}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{m.label}</p>
+            <h3 className="font-semibold text-sm truncate">{task.title}</h3>
+            <p className="text-[11px] tabular-nums">
+              <span className="text-success font-bold">+৳{Number(task.reward).toFixed(2)}</span>
+              <span className="text-muted-foreground"> · {isMine && !ready ? `${remaining}s বাকি` : "~30s"}</span>
+            </p>
+          </div>
+          {btnDisabled ? (
+            <span className={`inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold whitespace-nowrap shrink-0 ${done ? "bg-success/15 text-success" : "bg-muted text-muted-foreground cursor-not-allowed"}`}>
+              {label}
+            </span>
+          ) : (
+            <Link to="/user/tasks"
+              className={`inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold whitespace-nowrap shrink-0 text-white shadow-md hover:scale-[1.05] transition ${
+                ready ? "bg-gradient-to-r from-emerald-500 to-teal-500" : `bg-gradient-to-r ${m.grad}`
+              }`}>
+              {label}
+            </Link>
+          )}
+        </div>
+
+        {/* Progress bar — only visible while this task is being watched */}
+        {isMine && (
+          <div className="mt-3">
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${ready ? "bg-success" : `bg-gradient-to-r ${m.grad}`}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground tabular-nums flex items-center justify-between">
+              <span>{ready ? "✓ Verified — Claim করুন" : `Verifying ad view… ${viewed}/${REQUIRED_SECONDS}s`}</span>
+              <span className="font-bold">{pct}%</span>
+            </p>
+          </div>
+        )}
+      </div>
+    </article>
+  );
+}
+
 function QuickCard({ icon: Icon, tone, label, value, sub, linkLabel, to }: {
   icon: React.ComponentType<{className?: string}>;
   tone: "primary" | "info" | "success";
