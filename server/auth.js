@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import './env.js';
 
 const SECRET = process.env.JWT_SECRET || 'dev-secret-change-me';
 

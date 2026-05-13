@@ -17,11 +17,9 @@ CREATE TABLE IF NOT EXISTS payment_settings_new (
   CHECK (id = 1)
 ) ENGINE=InnoDB;
 
--- Migrate any old data if both tables exist (best-effort)
-INSERT IGNORE INTO payment_settings_new (id, bkash_number, nagad_number)
-  SELECT 1,
-    COALESCE((SELECT number FROM payment_settings WHERE method='bkash' LIMIT 1), ''),
-    COALESCE((SELECT number FROM payment_settings WHERE method='nagad' LIMIT 1), '');
+-- Keep this migration idempotent across both old and already-new installs.
+-- Payment numbers can be re-entered from the admin payment settings screen.
+INSERT IGNORE INTO payment_settings_new (id) VALUES (1);
 
 -- Swap tables
 DROP TABLE IF EXISTS payment_settings;
@@ -38,3 +36,14 @@ ALTER TABLE deposits
 -- 3) Make sure withdrawals.account stores user phone (we expose as payment_number in API)
 ALTER TABLE withdrawals
   MODIFY status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending';
+
+-- 4) Ensure daily spin table exists for /api/user/spin/status and /api/user/spin
+CREATE TABLE IF NOT EXISTS daily_spins (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  spin_date DATE NOT NULL,
+  reward DECIMAL(10,2) NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_user_date (user_id, spin_date),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

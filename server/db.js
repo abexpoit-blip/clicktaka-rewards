@@ -1,5 +1,12 @@
 import mysql from 'mysql2/promise';
-import 'dotenv/config';
+import './env.js';
+
+const requiredDbEnv = ['DB_USER', 'DB_NAME'];
+const missingDbEnv = requiredDbEnv.filter((key) => !process.env[key]);
+
+if (missingDbEnv.length) {
+  throw new Error(`Missing database config in server/.env: ${missingDbEnv.join(', ')}`);
+}
 
 export const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
