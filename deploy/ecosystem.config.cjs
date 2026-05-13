@@ -12,10 +12,10 @@ module.exports = {
     {
       name: 'clicktaka-web',
       cwd: '/var/www/clicktaka-rewards',
-      script: 'node_modules/.bin/vite',
-      args: 'preview --host 127.0.0.1 --port 3002',
-      env: { NODE_ENV: 'production' },
-      max_memory_restart: '300M',
+      script: 'deploy/node-server.mjs',
+      interpreter: 'node',
+      env: { NODE_ENV: 'production', HOST: '127.0.0.1', PORT: '3002' },
+      max_memory_restart: '400M',
     },
   ],
 };
