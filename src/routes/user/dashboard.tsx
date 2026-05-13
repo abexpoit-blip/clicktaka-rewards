@@ -92,6 +92,9 @@ function Dashboard() {
         <QuickCard icon={Activity} tone="success" label="Recent Activity" value={d.recent_completions.length} sub="শেষ task complete" linkLabel="History" to="/user/history" />
       </div>
 
+      {/* Achievement strip — premium gamification */}
+      <AchievementStrip totalEarned={d.earnings.total} completions={d.recent_completions.length} hasPkg={pkgs.length > 0} />
+
       {/* Upgrade CTA — eye-catching, drives package purchase */}
       {pkgs.length === 0 ? (
         <UpgradeBanner />
