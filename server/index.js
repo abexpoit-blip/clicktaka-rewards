@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
 
 const app = express();
+app.set('trust proxy', 1); // behind nginx
 
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
