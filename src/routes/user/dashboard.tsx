@@ -91,6 +91,13 @@ function Dashboard() {
         <QuickCard icon={Activity} tone="success" label="Recent Activity" value={d.recent_completions.length} sub="শেষ task complete" linkLabel="History" to="/user/history" />
       </div>
 
+      {/* Upgrade CTA — eye-catching, drives package purchase */}
+      {pkgs.length === 0 ? (
+        <UpgradeBanner />
+      ) : (
+        <EarnMoreBanner pkgs={pkgs} />
+      )}
+
       {/* Active packages */}
       <section>
         <SectionTitle icon={Package} title="আপনার Active প্যাকেজ" />
