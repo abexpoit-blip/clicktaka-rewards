@@ -5,8 +5,8 @@ import { LiveTicker } from "@/components/live-ticker";
 import { Reviews } from "@/components/reviews";
 import { BrandsMarquee } from "@/components/brands-marquee";
 import {
-  Sparkles, Rocket, ShieldCheck, Zap, Users, Wallet, Target, Crown,
-  CheckCircle2, ArrowRight, TrendingUp, Smartphone,
+  Banknote, Rocket, ShieldCheck, Zap, Users, Wallet, Target, Crown,
+  CheckCircle2, ArrowRight, TrendingUp, Smartphone, Sparkles,
 } from "lucide-react";
 
 type Pkg = { id: number; name: string; price: number; daily_task_limit: number; daily_earning: number };
