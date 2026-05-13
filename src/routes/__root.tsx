@@ -11,6 +11,11 @@ import {
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
+  if (typeof window !== "undefined" && window.location.pathname === "/login.php") {
+    window.location.replace("/login");
+    return null;
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
