@@ -7,6 +7,37 @@ import path from 'node:path';
 
 const r = Router();
 
+function findRepoRoot(start = process.cwd()) {
+  let dir = start;
+  for (let i = 0; i < 8; i += 1) {
+    if (fs.existsSync(path.join(dir, '.git'))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return process.cwd();
+}
+
+function readGitInfo() {
+  const repo = findRepoRoot();
+  const gitDir = path.join(repo, '.git');
+  const empty = { full_commit: null, branch: null, message: null, author: null, commit_time: null };
+  try {
+    let head = fs.readFileSync(path.join(gitDir, 'HEAD'), 'utf8').trim();
+    let branch = null;
+    if (head.startsWith('ref: ')) {
+      const ref = head.slice(5);
+      branch = ref.replace(/^refs\/heads\//, '');
+      head = fs.readFileSync(path.join(gitDir, ref), 'utf8').trim();
+    }
+    const objectPath = path.join(gitDir, 'objects', head.slice(0, 2), head.slice(2));
+    if (!fs.existsSync(objectPath)) return { ...empty, full_commit: head, branch };
+    return { ...empty, full_commit: head, branch };
+  } catch {
+    return empty;
+  }
+}
+
 // Overview stats
 r.get('/stats', authAdmin, async (req, res) => {
   const [users, activeUsers, blocked, totalEarnings, pendingDep, pendingWd, totalTasks, activeTasks, totalCompletions, todayCompletions] = await Promise.all([
