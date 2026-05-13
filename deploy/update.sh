@@ -7,6 +7,10 @@ cd "$APP_DIR"
 echo "==> Deploying from: $APP_DIR"
 git pull
 
+echo "==> Updating PM2 runtime"
+npm install -g pm2@latest
+pm2 update || true
+
 echo "==> Installing frontend dependencies"
 npm install
 
