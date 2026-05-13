@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import { Toaster } from "@/components/ui/sonner";
 import {
   LayoutDashboard, Target, Disc3, Package, Wallet, Send, Users, History, UserCircle2,
-  LogOut, Sparkles, ChevronRight,
+  LogOut, Banknote, ChevronRight,
 } from "lucide-react";
 
 type User = { id: number; phone: string; name: string | null; balance: number; refer_code: string };
