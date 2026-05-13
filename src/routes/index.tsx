@@ -262,9 +262,21 @@ function Landing() {
         </div>
       </section>
 
-      <footer className="border-t border-border/60 bg-card/40 py-8">
-        <div className="max-w-6xl mx-auto px-4 text-center text-sm text-muted-foreground">
-          © {new Date().getFullYear()} <span className="font-semibold text-gradient-brand">ClickTaka</span> — Bangladesh's #1 task earning platform.
+      <footer className="border-t border-border/60 bg-card/40 py-10">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-6">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Accepted Payment Methods</p>
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-2.5">
+              <PayLogo name="bKash" bg="bg-pink-600" />
+              <PayLogo name="Nagad" bg="bg-orange-500" />
+              <PayLogo name="Rocket" bg="bg-purple-700" />
+              <PayLogo name="Upay" bg="bg-emerald-600" />
+            </div>
+          </div>
+          <div className="border-t border-border/60 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
+            <span>© {new Date().getFullYear()} <span className="font-semibold text-gradient-brand">ClickTaka</span> — Bangladesh's #1 task earning platform.</span>
+            <span>Crafted by <a href="#" className="font-semibold text-primary hover:underline">OpenXcell Agency</a></span>
+          </div>
         </div>
       </footer>
     </div>
