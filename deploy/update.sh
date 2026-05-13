@@ -44,6 +44,86 @@ npm run build
 echo "==> Installing backend dependencies"
 npm install --prefix server --no-audit --no-fund
 
+echo "==> Ensuring backend environment"
+mkdir -p server
+touch server/.env
+
+get_env_value() {
+  local key="$1"
+  grep -E "^[[:space:]]*${key}=" server/.env | tail -n 1 | cut -d= -f2- | sed -e 's/^\"//' -e 's/\"$//' -e "s/^'//" -e "s/'$//"
+}
+
+set_env_value() {
+  local key="$1"
+  local value="$2"
+  if grep -qE "^[[:space:]]*${key}=" server/.env; then
+    python3 - "$key" "$value" <<'PY'
+from pathlib import Path
+import sys
+key, value = sys.argv[1], sys.argv[2]
+path = Path('server/.env')
+lines = path.read_text().splitlines()
+written = False
+for i, line in enumerate(lines):
+    if line.strip().startswith(f'{key}='):
+        lines[i] = f'{key}={value}'
+        written = True
+if not written:
+    lines.append(f'{key}={value}')
+path.write_text('\n'.join(lines) + '\n')
+PY
+  else
+    printf '%s=%s\n' "$key" "$value" >> server/.env
+  fi
+}
+
+ensure_env_value() {
+  local key="$1"
+  local default_value="$2"
+  local current
+  current="$(get_env_value "$key" || true)"
+  if [[ -z "$current" ]]; then
+    set_env_value "$key" "$default_value"
+  fi
+}
+
+ensure_env_value DB_HOST "localhost"
+ensure_env_value DB_PORT "3306"
+ensure_env_value DB_USER "clicktaka"
+ensure_env_value DB_NAME "clicktaka"
+ensure_env_value PORT "3001"
+ensure_env_value NODE_ENV "production"
+ensure_env_value FRONTEND_URL "https://clicktaka24.com"
+ensure_env_value COOKIE_DOMAIN ".clicktaka24.com"
+
+DB_PASS_CURRENT="$(get_env_value DB_PASS || true)"
+DB_PASSWORD_CURRENT="$(get_env_value DB_PASSWORD || true)"
+if [[ -z "$DB_PASS_CURRENT" ]]; then
+  if [[ -n "${MYSQL_PASSWORD:-}" ]]; then
+    set_env_value DB_PASS "$MYSQL_PASSWORD"
+  elif [[ -n "${MYSQL_PWD:-}" ]]; then
+    set_env_value DB_PASS "$MYSQL_PWD"
+  elif [[ -n "$DB_PASSWORD_CURRENT" ]]; then
+    set_env_value DB_PASS "$DB_PASSWORD_CURRENT"
+  elif [[ -t 0 ]]; then
+    read -rsp "Enter MySQL password for clicktaka user: " DB_PASS_INPUT
+    echo
+    set_env_value DB_PASS "$DB_PASS_INPUT"
+  else
+    echo "ERROR: DB_PASS is missing in server/.env. Run: MYSQL_PASSWORD='your_mysql_password' bash deploy/update.sh" >&2
+    exit 1
+  fi
+fi
+
+JWT_CURRENT="$(get_env_value JWT_SECRET || true)"
+if [[ -z "$JWT_CURRENT" || "$JWT_CURRENT" == "dev-secret-change-me" || "$JWT_CURRENT" == "change_this_to_a_long_random_secret_64_chars_minimum" ]]; then
+  if command -v openssl >/dev/null 2>&1; then
+    set_env_value JWT_SECRET "$(openssl rand -hex 32)"
+  else
+    set_env_value JWT_SECRET "$(node -e "console.log(require('crypto').randomBytes(32).toString('hex'))")"
+  fi
+fi
+
 echo "==> Applying database migrations (using server/.env credentials)"
 if [[ -f "server/.env" && -f "database/migrations/2026_05_payments.sql" ]]; then
   set -a
@@ -60,6 +140,7 @@ else
 fi
 
 echo "==> Restarting PM2 processes (delete+start to apply env changes)"
+pm2 flush clicktaka-api clicktaka-web >/dev/null 2>&1 || true
 pm2 delete clicktaka-api clicktaka-web 2>/dev/null || true
 
 echo "==> Freeing ports 3001/3002/4000 if held by orphan processes"
