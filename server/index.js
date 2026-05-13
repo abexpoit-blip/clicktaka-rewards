@@ -6,6 +6,7 @@ import 'dotenv/config';
 
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 app.set('trust proxy', 1); // behind nginx
@@ -24,6 +25,7 @@ app.get('/api/health', (req, res) => res.json({ ok: true, ts: Date.now() }));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Public: packages list
 import { q } from './db.js';

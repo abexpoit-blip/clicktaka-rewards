@@ -12,8 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KtAdminLoginRouteImport } from './routes/kt-admin-login'
+import { Route as KtAdminRouteImport } from './routes/kt-admin'
 import { Route as UserRouteImport } from './routes/_user'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as KtAdminUsersRouteImport } from './routes/kt-admin.users'
+import { Route as KtAdminTasksRouteImport } from './routes/kt-admin.tasks'
+import { Route as KtAdminEarningsRouteImport } from './routes/kt-admin.earnings'
+import { Route as KtAdminDashboardRouteImport } from './routes/kt-admin.dashboard'
 import { Route as UserDashboardRouteImport } from './routes/_user/dashboard'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -31,6 +36,11 @@ const KtAdminLoginRoute = KtAdminLoginRouteImport.update({
   path: '/kt-admin-login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KtAdminRoute = KtAdminRouteImport.update({
+  id: '/kt-admin',
+  path: '/kt-admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UserRoute = UserRouteImport.update({
   id: '/_user',
   getParentRoute: () => rootRouteImport,
@@ -40,6 +50,26 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KtAdminUsersRoute = KtAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => KtAdminRoute,
+} as any)
+const KtAdminTasksRoute = KtAdminTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => KtAdminRoute,
+} as any)
+const KtAdminEarningsRoute = KtAdminEarningsRouteImport.update({
+  id: '/earnings',
+  path: '/earnings',
+  getParentRoute: () => KtAdminRoute,
+} as any)
+const KtAdminDashboardRoute = KtAdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => KtAdminRoute,
+} as any)
 const UserDashboardRoute = UserDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -48,45 +78,86 @@ const UserDashboardRoute = UserDashboardRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/kt-admin': typeof KtAdminRouteWithChildren
   '/kt-admin-login': typeof KtAdminLoginRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof UserDashboardRoute
+  '/kt-admin/dashboard': typeof KtAdminDashboardRoute
+  '/kt-admin/earnings': typeof KtAdminEarningsRoute
+  '/kt-admin/tasks': typeof KtAdminTasksRoute
+  '/kt-admin/users': typeof KtAdminUsersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/kt-admin': typeof KtAdminRouteWithChildren
   '/kt-admin-login': typeof KtAdminLoginRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof UserDashboardRoute
+  '/kt-admin/dashboard': typeof KtAdminDashboardRoute
+  '/kt-admin/earnings': typeof KtAdminEarningsRoute
+  '/kt-admin/tasks': typeof KtAdminTasksRoute
+  '/kt-admin/users': typeof KtAdminUsersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_user': typeof UserRouteWithChildren
+  '/kt-admin': typeof KtAdminRouteWithChildren
   '/kt-admin-login': typeof KtAdminLoginRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_user/dashboard': typeof UserDashboardRoute
+  '/kt-admin/dashboard': typeof KtAdminDashboardRoute
+  '/kt-admin/earnings': typeof KtAdminEarningsRoute
+  '/kt-admin/tasks': typeof KtAdminTasksRoute
+  '/kt-admin/users': typeof KtAdminUsersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/kt-admin-login' | '/login' | '/register' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/kt-admin'
+    | '/kt-admin-login'
+    | '/login'
+    | '/register'
+    | '/dashboard'
+    | '/kt-admin/dashboard'
+    | '/kt-admin/earnings'
+    | '/kt-admin/tasks'
+    | '/kt-admin/users'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/kt-admin-login' | '/login' | '/register' | '/dashboard'
+  to:
+    | '/'
+    | '/kt-admin'
+    | '/kt-admin-login'
+    | '/login'
+    | '/register'
+    | '/dashboard'
+    | '/kt-admin/dashboard'
+    | '/kt-admin/earnings'
+    | '/kt-admin/tasks'
+    | '/kt-admin/users'
   id:
     | '__root__'
     | '/'
     | '/_user'
+    | '/kt-admin'
     | '/kt-admin-login'
     | '/login'
     | '/register'
     | '/_user/dashboard'
+    | '/kt-admin/dashboard'
+    | '/kt-admin/earnings'
+    | '/kt-admin/tasks'
+    | '/kt-admin/users'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   UserRoute: typeof UserRouteWithChildren
+  KtAdminRoute: typeof KtAdminRouteWithChildren
   KtAdminLoginRoute: typeof KtAdminLoginRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -115,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KtAdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/kt-admin': {
+      id: '/kt-admin'
+      path: '/kt-admin'
+      fullPath: '/kt-admin'
+      preLoaderRoute: typeof KtAdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_user': {
       id: '/_user'
       path: ''
@@ -128,6 +206,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/kt-admin/users': {
+      id: '/kt-admin/users'
+      path: '/users'
+      fullPath: '/kt-admin/users'
+      preLoaderRoute: typeof KtAdminUsersRouteImport
+      parentRoute: typeof KtAdminRoute
+    }
+    '/kt-admin/tasks': {
+      id: '/kt-admin/tasks'
+      path: '/tasks'
+      fullPath: '/kt-admin/tasks'
+      preLoaderRoute: typeof KtAdminTasksRouteImport
+      parentRoute: typeof KtAdminRoute
+    }
+    '/kt-admin/earnings': {
+      id: '/kt-admin/earnings'
+      path: '/earnings'
+      fullPath: '/kt-admin/earnings'
+      preLoaderRoute: typeof KtAdminEarningsRouteImport
+      parentRoute: typeof KtAdminRoute
+    }
+    '/kt-admin/dashboard': {
+      id: '/kt-admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/kt-admin/dashboard'
+      preLoaderRoute: typeof KtAdminDashboardRouteImport
+      parentRoute: typeof KtAdminRoute
     }
     '/_user/dashboard': {
       id: '/_user/dashboard'
@@ -149,9 +255,27 @@ const UserRouteChildren: UserRouteChildren = {
 
 const UserRouteWithChildren = UserRoute._addFileChildren(UserRouteChildren)
 
+interface KtAdminRouteChildren {
+  KtAdminDashboardRoute: typeof KtAdminDashboardRoute
+  KtAdminEarningsRoute: typeof KtAdminEarningsRoute
+  KtAdminTasksRoute: typeof KtAdminTasksRoute
+  KtAdminUsersRoute: typeof KtAdminUsersRoute
+}
+
+const KtAdminRouteChildren: KtAdminRouteChildren = {
+  KtAdminDashboardRoute: KtAdminDashboardRoute,
+  KtAdminEarningsRoute: KtAdminEarningsRoute,
+  KtAdminTasksRoute: KtAdminTasksRoute,
+  KtAdminUsersRoute: KtAdminUsersRoute,
+}
+
+const KtAdminRouteWithChildren =
+  KtAdminRoute._addFileChildren(KtAdminRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   UserRoute: UserRouteWithChildren,
+  KtAdminRoute: KtAdminRouteWithChildren,
   KtAdminLoginRoute: KtAdminLoginRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
