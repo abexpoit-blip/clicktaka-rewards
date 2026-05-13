@@ -25,7 +25,7 @@ type Pkg = { id: number; name: string; expires_at: string; tasks_done_today: num
 type Completion = { id: number; reward: number; completed_at: string; title: string; type: string };
 type Tx = { id: number; type: string; amount: number; balance_after: number | null; note: string | null; created_at: string };
 type Task = { id: number; title: string; type: string; url: string | null; reward: number };
-type TaskData = { tasks: Task[]; today_completed: number; daily_limit: number };
+type TaskData = { tasks: Task[]; today_completed: number; daily_limit: number; completed_task_ids_today?: number[] };
 type DashData = {
   user: { id: number; phone: string; name: string | null; balance: number; refer_code: string };
   available_tasks: number;
