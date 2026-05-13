@@ -28,6 +28,7 @@ import { Route as KtAdminUsersRouteImport } from './routes/kt-admin.users'
 import { Route as KtAdminTasksRouteImport } from './routes/kt-admin.tasks'
 import { Route as KtAdminEarningsRouteImport } from './routes/kt-admin.earnings'
 import { Route as KtAdminDashboardRouteImport } from './routes/kt-admin.dashboard'
+import { Route as ApiSplatRouteImport } from './routes/api/$'
 
 const UserRoute = UserRouteImport.update({
   id: '/user',
@@ -124,6 +125,11 @@ const KtAdminDashboardRoute = KtAdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => KtAdminRoute,
 } as any)
+const ApiSplatRoute = ApiSplatRouteImport.update({
+  id: '/api/$',
+  path: '/api/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/user': typeof UserRouteWithChildren
+  '/api/$': typeof ApiSplatRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
@@ -153,6 +160,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/user': typeof UserRouteWithChildren
+  '/api/$': typeof ApiSplatRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
@@ -175,6 +183,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/user': typeof UserRouteWithChildren
+  '/api/$': typeof ApiSplatRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
@@ -198,6 +207,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/user'
+    | '/api/$'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/tasks'
@@ -219,6 +229,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/user'
+    | '/api/$'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/tasks'
@@ -240,6 +251,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/user'
+    | '/api/$'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/tasks'
@@ -262,6 +274,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
   UserRoute: typeof UserRouteWithChildren
+  ApiSplatRoute: typeof ApiSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -399,6 +412,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KtAdminDashboardRouteImport
       parentRoute: typeof KtAdminRoute
     }
+    '/api/$': {
+      id: '/api/$'
+      path: '/api/$'
+      fullPath: '/api/$'
+      preLoaderRoute: typeof ApiSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -452,6 +472,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
   UserRoute: UserRouteWithChildren,
+  ApiSplatRoute: ApiSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
