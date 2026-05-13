@@ -20,7 +20,6 @@ type Me = { user: { balance: number } };
 const METHODS = [
   { id: "bkash",  label: "Bkash",  color: "from-pink-500 to-rose-500",     emoji: "📱" },
   { id: "nagad",  label: "Nagad",  color: "from-orange-500 to-amber-500",  emoji: "🟧" },
-  { id: "rocket", label: "Rocket", color: "from-purple-500 to-fuchsia-500",emoji: "🚀" },
 ] as const;
 
 function WithdrawPage() {
@@ -65,7 +64,7 @@ function WithdrawPage() {
               <ArrowUpFromLine className="h-3 w-3" /> Cash Out
             </div>
             <h1 className="font-display text-2xl sm:text-3xl font-bold mt-3 tracking-tight">টাকা Withdraw করুন</h1>
-            <p className="mt-1 text-white/85 text-sm">Bkash / Nagad / Rocket — 1–24 ঘণ্টায় deliver</p>
+            <p className="mt-1 text-white/85 text-sm">Bkash / Nagad — 1–24 ঘণ্টায় deliver</p>
           </div>
           <div className="rounded-2xl bg-white/15 backdrop-blur border border-white/20 px-4 py-3 text-right">
             <p className="text-[10px] uppercase tracking-wider text-white/80 font-bold">Available Balance</p>
@@ -78,7 +77,7 @@ function WithdrawPage() {
       <div className="grid lg:grid-cols-[1.2fr_1fr] gap-5">
         <section className="rounded-3xl border border-border/70 bg-card p-5 sm:p-6 shadow-card">
           <h2 className="font-display text-lg font-bold flex items-center gap-2"><Smartphone className="h-4 w-4 text-primary" /> Method বাছুন</h2>
-          <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="mt-3 grid grid-cols-2 gap-2">
             {METHODS.map((mm) => {
               const active = mm.id === method;
               return (
@@ -116,8 +115,8 @@ function WithdrawPage() {
             </button>
           </form>
 
-          <div className="mt-4 rounded-xl bg-info/10 text-info-foreground border border-info/20 p-3 text-xs flex items-start gap-2">
-            <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
+          <div className="mt-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-slate-800 dark:text-slate-100 border border-blue-200 dark:border-blue-800/60 p-3 text-xs flex items-start gap-2">
+            <Info className="h-4 w-4 text-blue-600 dark:text-blue-300 shrink-0 mt-0.5" />
             <span>Submit করার সাথে সাথেই balance থেকে টাকা hold হবে। Admin verify করার পর আপনার Bkash/Nagad-এ পাঠিয়ে দেওয়া হবে।</span>
           </div>
         </section>

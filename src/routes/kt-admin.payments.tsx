@@ -40,7 +40,7 @@ function AdminPayments() {
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl sm:text-3xl font-bold bg-gradient-to-r from-fuchsia-300 via-purple-200 to-indigo-300 bg-clip-text text-transparent">Payments Center</h1>
-          <p className="text-xs text-slate-400 mt-0.5">Bkash / Nagad / Rocket — settings, deposit & withdraw queue</p>
+          <p className="text-xs text-slate-400 mt-0.5">Bkash / Nagad — settings, deposit & withdraw queue</p>
         </div>
       </header>
 
@@ -108,7 +108,7 @@ function SettingsPanel() {
         <div className="space-y-3">
           <NumField icon="📱" label="Bkash Number"  value={s.bkash_number}  onChange={(v) => setS({ ...s, bkash_number: v })} placeholder="01XXXXXXXXX" />
           <NumField icon="🟧" label="Nagad Number"  value={s.nagad_number}  onChange={(v) => setS({ ...s, nagad_number: v })} placeholder="01XXXXXXXXX" />
-          <NumField icon="🚀" label="Rocket Number" value={s.rocket_number || ""} onChange={(v) => setS({ ...s, rocket_number: v })} placeholder="01XXXXXXXXX" />
+          <p className="text-[11px] text-slate-400 mt-2">📌 এই number-গুলোই user-এর Deposit page-এ <b>Send Money</b> guideline সহ দেখানো হবে।</p>
         </div>
       </section>
 

@@ -115,7 +115,7 @@ function AdminTasks() {
           <Field className="sm:col-span-5" label="Title">
             <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required
               placeholder="Watch promo video"
-              className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition" />
+              className="w-full px-3.5 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 focus:border-fuchsia-400/50 transition" />
           </Field>
           <Field className="sm:col-span-3" label="Type">
             <div className="grid grid-cols-5 gap-1.5">
@@ -133,9 +133,9 @@ function AdminTasks() {
           </Field>
           <Field className="sm:col-span-2" label="Reward (৳)">
             <div className="relative">
-              <Coins className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-success" />
+              <Coins className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-emerald-400" />
               <input type="number" step="0.01" min="0" value={form.reward} onChange={(e) => setForm({ ...form, reward: e.target.value })} required
-                className="w-full pl-9 pr-3 py-2.5 bg-background border border-border rounded-xl text-sm font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition" />
+                className="w-full pl-9 pr-3 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm font-bold tabular-nums text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 focus:border-fuchsia-400/50 transition" />
             </div>
           </Field>
           <div className="sm:col-span-2 flex flex-col justify-end">
@@ -145,9 +145,9 @@ function AdminTasks() {
           </div>
           <Field className="sm:col-span-12" label="URL (optional)">
             <div className="relative">
-              <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="https://example.com/landing"
-                className="w-full pl-9 pr-3 py-2.5 bg-background border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition" />
+                className="w-full pl-9 pr-3 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 focus:border-fuchsia-400/50 transition" />
             </div>
             {err && <p className="text-destructive text-xs mt-1.5">{err}</p>}
           </Field>
@@ -159,7 +159,7 @@ function AdminTasks() {
         <div className="relative flex-1 min-w-[220px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Title / type / URL দিয়ে খুঁজুন..."
-            className="w-full pl-9 pr-3 py-2.5 bg-card border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition shadow-card" />
+            className="w-full pl-9 pr-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 focus:border-fuchsia-400/50 transition" />
         </div>
         <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-card p-1 shadow-card">
           <Filter className="h-4 w-4 text-muted-foreground mx-2" />
