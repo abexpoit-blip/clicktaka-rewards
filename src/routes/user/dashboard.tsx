@@ -117,6 +117,49 @@ function Dashboard() {
         </div>
       </section>
 
+      {/* Today's task preview — 3-5 quick tasks with Start/Continue */}
+      {availableTasks.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="grid place-items-center h-7 w-7 rounded-lg bg-gradient-brand text-white shadow-brand">
+                <Zap className="h-4 w-4" />
+              </span>
+              <h2 className="font-display text-lg sm:text-xl font-bold tracking-tight">আজকের Quick Tasks</h2>
+            </div>
+            <Link to="/user/tasks" className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline">
+              All <ArrowRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {availableTasks.slice(0, 5).map((t) => {
+              const m = TASK_TYPE[t.type] || TASK_TYPE.ad;
+              const Icon = m.icon;
+              const inProgress = false; // simple preview — full progress tracked on /user/tasks
+              return (
+                <article key={t.id} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all">
+                  <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.grad}`} />
+                  <div className="p-3.5 flex items-center gap-3">
+                    <div className={`grid place-items-center h-11 w-11 rounded-xl bg-gradient-to-br ${m.grad} text-white shadow-md shrink-0`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{m.label}</p>
+                      <h3 className="font-semibold text-sm truncate">{t.title}</h3>
+                      <p className="text-[11px] text-success font-bold tabular-nums">+৳{Number(t.reward).toFixed(2)} · ~30s</p>
+                    </div>
+                    <Link to="/user/tasks"
+                      className={`inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold whitespace-nowrap shrink-0 bg-gradient-to-r ${m.grad} text-white shadow-md hover:scale-[1.05] transition`}>
+                      {inProgress ? "Continue" : "Start"} <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* Quick stats — premium glass cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <QuickCard icon={Target} tone="primary" label="এখনই করতে পারবেন" value={d.available_tasks} sub="Active task / ad" linkLabel="Tasks দেখুন" to="/user/tasks" />
