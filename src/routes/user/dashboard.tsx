@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { readActive, viewedSeconds, REQUIRED_SECONDS, type ActiveTask } from "@/lib/active-task";
+import { CheckCircle2 } from "lucide-react";
 import { DashboardSkeleton, ErrorState, EmptyState } from "@/components/ui-states";
 import { LiveTicker } from "@/components/live-ticker";
 import { Leaderboard } from "@/components/leaderboard";
