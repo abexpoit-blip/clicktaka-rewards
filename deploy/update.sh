@@ -95,6 +95,17 @@ ensure_env_value PORT "3001"
 ensure_env_value NODE_ENV "production"
 ensure_env_value FRONTEND_URL "https://clicktaka24.com"
 ensure_env_value COOKIE_DOMAIN ".clicktaka24.com"
+ensure_env_value ADMIN_USERNAME "admin"
+ensure_env_value ADMIN_PHONE "01700000000"
+
+ADMIN_PASSWORD_CURRENT="$(get_env_value ADMIN_PASSWORD || true)"
+if [[ -z "$ADMIN_PASSWORD_CURRENT" ]]; then
+  if [[ -n "${ADMIN_PASSWORD:-}" ]]; then
+    set_env_value ADMIN_PASSWORD "$ADMIN_PASSWORD"
+  else
+    set_env_value ADMIN_PASSWORD "Admin@1234"
+  fi
+fi
 
 DB_PASS_CURRENT="$(get_env_value DB_PASS || true)"
 DB_PASSWORD_CURRENT="$(get_env_value DB_PASSWORD || true)"
@@ -125,6 +136,20 @@ if [[ -z "$JWT_CURRENT" || "$JWT_CURRENT" == "dev-secret-change-me" || "$JWT_CUR
 fi
 
 echo "==> Applying database migrations (using server/.env credentials)"
+if [[ -f "server/.env" && -f "database/schema.sql" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source server/.env
+  set +a
+  MYSQL_PWD="${DB_PASS:-${DB_PASSWORD:-}}" mysql \
+    -h "${DB_HOST:-localhost}" \
+    -P "${DB_PORT:-3306}" \
+    -u "${DB_USER:-clicktaka}" \
+    "${DB_NAME:-clicktaka}" < database/schema.sql
+else
+  echo "  skipped: server/.env or schema file missing"
+fi
+
 if [[ -f "server/.env" && -f "database/migrations/2026_05_payments.sql" ]]; then
   set -a
   # shellcheck disable=SC1091
@@ -138,6 +163,9 @@ if [[ -f "server/.env" && -f "database/migrations/2026_05_payments.sql" ]]; then
 else
   echo "  skipped: server/.env or migration file missing"
 fi
+
+echo "==> Ensuring admin user"
+node server/scripts/ensure-admin.mjs
 
 echo "==> Restarting PM2 processes (delete+start to apply env changes)"
 pm2 flush clicktaka-api clicktaka-web >/dev/null 2>&1 || true
