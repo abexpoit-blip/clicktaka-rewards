@@ -10,8 +10,9 @@ module.exports = {
       script: 'index.js',
       instances: 1,
       exec_mode: 'fork',
-      env: { NODE_ENV: 'production' },
+      env: { NODE_ENV: 'production', PORT: '3001' },
       max_memory_restart: '300M',
+      node_args: '--no-deprecation',
     },
     {
       name: 'clicktaka-web',
