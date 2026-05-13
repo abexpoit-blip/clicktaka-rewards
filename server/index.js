@@ -6,6 +6,7 @@ import 'dotenv/config';
 
 import authRoutes from './routes/auth.js';
 import userRoutes from './routes/user.js';
+import adminRoutes from './routes/admin.js';
 
 const app = express();
 app.set('trust proxy', 1); // behind nginx
