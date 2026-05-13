@@ -20,15 +20,20 @@ function AdminLayout() {
   const [me, setMe] = useState<Me["user"] | null>(null);
   const [loading, setLoading] = useState(true);
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const isLoginPage = path === "/kt-admin/login";
 
   useEffect(() => {
+    if (isLoginPage) { setLoading(false); return; }
     api<Me>("/user/me")
       .then((d) => {
         if (!d.user.is_admin) { navigate({ to: "/kt-admin/login" }); return; }
         setMe(d.user); setLoading(false);
       })
       .catch(() => navigate({ to: "/kt-admin/login" }));
-  }, [navigate]);
+  }, [navigate, isLoginPage]);
+
+  // Login page renders standalone without admin chrome
+  if (isLoginPage) return <Outlet />;
 
   async function logout() {
     await api("/auth/logout", { method: "POST" }).catch(() => {});
