@@ -140,8 +140,8 @@ else
 fi
 
 echo "==> Restarting PM2 processes (delete+start to apply env changes)"
-pm2 delete clicktaka-api clicktaka-web 2>/dev/null || true
 pm2 flush clicktaka-api clicktaka-web >/dev/null 2>&1 || true
+pm2 delete clicktaka-api clicktaka-web 2>/dev/null || true
 
 echo "==> Freeing ports 3001/3002/4000 if held by orphan processes"
 for P in 3001 3002 4000; do
