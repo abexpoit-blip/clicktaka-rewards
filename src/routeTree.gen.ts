@@ -25,6 +25,7 @@ import { Route as UserDepositRouteImport } from './routes/user/deposit'
 import { Route as UserDashboardRouteImport } from './routes/user/dashboard'
 import { Route as KtAdminUsersRouteImport } from './routes/kt-admin.users'
 import { Route as KtAdminTasksRouteImport } from './routes/kt-admin.tasks'
+import { Route as KtAdminPaymentsRouteImport } from './routes/kt-admin.payments'
 import { Route as KtAdminLoginRouteImport } from './routes/kt-admin.login'
 import { Route as KtAdminEarningsRouteImport } from './routes/kt-admin.earnings'
 import { Route as KtAdminDashboardRouteImport } from './routes/kt-admin.dashboard'
@@ -110,6 +111,11 @@ const KtAdminTasksRoute = KtAdminTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => KtAdminRoute,
 } as any)
+const KtAdminPaymentsRoute = KtAdminPaymentsRouteImport.update({
+  id: '/payments',
+  path: '/payments',
+  getParentRoute: () => KtAdminRoute,
+} as any)
 const KtAdminLoginRoute = KtAdminLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/login': typeof KtAdminLoginRoute
+  '/kt-admin/payments': typeof KtAdminPaymentsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
   '/user/dashboard': typeof UserDashboardRoute
@@ -163,6 +170,7 @@ export interface FileRoutesByTo {
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/login': typeof KtAdminLoginRoute
+  '/kt-admin/payments': typeof KtAdminPaymentsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
   '/user/dashboard': typeof UserDashboardRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/login': typeof KtAdminLoginRoute
+  '/kt-admin/payments': typeof KtAdminPaymentsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
   '/user/dashboard': typeof UserDashboardRoute
@@ -210,6 +219,7 @@ export interface FileRouteTypes {
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/login'
+    | '/kt-admin/payments'
     | '/kt-admin/tasks'
     | '/kt-admin/users'
     | '/user/dashboard'
@@ -232,6 +242,7 @@ export interface FileRouteTypes {
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/login'
+    | '/kt-admin/payments'
     | '/kt-admin/tasks'
     | '/kt-admin/users'
     | '/user/dashboard'
@@ -254,6 +265,7 @@ export interface FileRouteTypes {
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/login'
+    | '/kt-admin/payments'
     | '/kt-admin/tasks'
     | '/kt-admin/users'
     | '/user/dashboard'
@@ -390,6 +402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KtAdminTasksRouteImport
       parentRoute: typeof KtAdminRoute
     }
+    '/kt-admin/payments': {
+      id: '/kt-admin/payments'
+      path: '/payments'
+      fullPath: '/kt-admin/payments'
+      preLoaderRoute: typeof KtAdminPaymentsRouteImport
+      parentRoute: typeof KtAdminRoute
+    }
     '/kt-admin/login': {
       id: '/kt-admin/login'
       path: '/login'
@@ -425,6 +444,7 @@ interface KtAdminRouteChildren {
   KtAdminDashboardRoute: typeof KtAdminDashboardRoute
   KtAdminEarningsRoute: typeof KtAdminEarningsRoute
   KtAdminLoginRoute: typeof KtAdminLoginRoute
+  KtAdminPaymentsRoute: typeof KtAdminPaymentsRoute
   KtAdminTasksRoute: typeof KtAdminTasksRoute
   KtAdminUsersRoute: typeof KtAdminUsersRoute
 }
@@ -433,6 +453,7 @@ const KtAdminRouteChildren: KtAdminRouteChildren = {
   KtAdminDashboardRoute: KtAdminDashboardRoute,
   KtAdminEarningsRoute: KtAdminEarningsRoute,
   KtAdminLoginRoute: KtAdminLoginRoute,
+  KtAdminPaymentsRoute: KtAdminPaymentsRoute,
   KtAdminTasksRoute: KtAdminTasksRoute,
   KtAdminUsersRoute: KtAdminUsersRoute,
 }
