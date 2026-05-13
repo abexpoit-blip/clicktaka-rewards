@@ -55,6 +55,27 @@ systemctl status mysql --no-pager
 journalctl -u mysql -n 80 --no-pager
 ```
 
+যদি log-এ `MySQL has been frozen to prevent damage to your system` দেখায়, তাহলে সাধারণত পুরোনো/broken MySQL-MariaDB files থেকে conflict হচ্ছে। এই প্রজেক্টের VPS যদি নতুন হয় এবং কোনো গুরুত্বপূর্ণ old database না থাকে, নিচের **fresh reinstall** চালান:
+
+```bash
+systemctl stop mysql || true
+systemctl reset-failed mysql || true
+
+apt purge -y mysql-server mysql-client mysql-common mariadb-server mariadb-client mariadb-common
+apt autoremove -y
+
+mv /etc/mysql /root/mysql-config-backup-$(date +%F-%H%M%S) 2>/dev/null || true
+mv /var/lib/mysql /root/mysql-data-backup-$(date +%F-%H%M%S) 2>/dev/null || true
+rm -rf /var/run/mysqld
+
+apt update
+apt install -y mysql-server
+systemctl enable --now mysql
+systemctl status mysql --no-pager -l
+```
+
+⚠️ যদি VPS-এ আগে থেকেই কোনো দরকারি database থাকে, `/var/lib/mysql` move/delete করবেন না—আগে backup নিন।
+
 `active (running)` দেখালে database/user তৈরি করুন। Ubuntu VPS-এ root user দিয়ে সবচেয়ে সহজ command:
 
 ```bash
