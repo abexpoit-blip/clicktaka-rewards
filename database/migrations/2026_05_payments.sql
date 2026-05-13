@@ -17,11 +17,9 @@ CREATE TABLE IF NOT EXISTS payment_settings_new (
   CHECK (id = 1)
 ) ENGINE=InnoDB;
 
--- Migrate any old data if both tables exist (best-effort)
-INSERT IGNORE INTO payment_settings_new (id, bkash_number, nagad_number)
-  SELECT 1,
-    COALESCE((SELECT number FROM payment_settings WHERE method='bkash' LIMIT 1), ''),
-    COALESCE((SELECT number FROM payment_settings WHERE method='nagad' LIMIT 1), '');
+-- Keep this migration idempotent across both old and already-new installs.
+-- Payment numbers can be re-entered from the admin payment settings screen.
+INSERT IGNORE INTO payment_settings_new (id) VALUES (1);
 
 -- Swap tables
 DROP TABLE IF EXISTS payment_settings;
