@@ -81,9 +81,9 @@ function ProfilePage() {
 
       {/* Quick actions */}
       <div className="grid grid-cols-3 gap-3">
-        <QuickAction to="/user/deposit" icon={ArrowDownCircle} label="Deposit" from="from-emerald-500" to="to-teal-500" />
-        <QuickAction to="/user/withdraw" icon={ArrowUpCircle} label="Withdraw" from="from-rose-500" to="to-pink-500" />
-        <QuickAction to="/user/refer" icon={Send} label="Refer" from="from-violet-500" to="to-fuchsia-500" />
+        <QuickAction href="/user/deposit" icon={ArrowDownCircle} label="Deposit" from="from-emerald-500" toGrad="to-teal-500" />
+        <QuickAction href="/user/withdraw" icon={ArrowUpCircle} label="Withdraw" from="from-rose-500" toGrad="to-pink-500" />
+        <QuickAction href="/user/refer" icon={Send} label="Refer" from="from-violet-500" toGrad="to-fuchsia-500" />
       </div>
 
       {/* Info grid */}
@@ -165,10 +165,10 @@ function ProfilePage() {
   );
 }
 
-function QuickAction({ to, icon: Icon, label, from, to: gTo }: { to: string; icon: any; label: string; from: string; to: string }) {
+function QuickAction({ href, icon: Icon, label, from, toGrad }: { href: string; icon: any; label: string; from: string; toGrad: string }) {
   return (
-    <Link to={to} className="group rounded-2xl bg-white border border-gray-200 p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition text-center">
-      <div className={`mx-auto grid place-items-center h-11 w-11 rounded-xl bg-gradient-to-br ${from} ${gTo} text-white shadow-md group-hover:scale-110 transition`}>
+    <Link to={href} className="group rounded-2xl bg-white border border-gray-200 p-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition text-center">
+      <div className={`mx-auto grid place-items-center h-11 w-11 rounded-xl bg-gradient-to-br ${from} ${toGrad} text-white shadow-md group-hover:scale-110 transition`}>
         <Icon className="h-5 w-5" />
       </div>
       <p className="mt-2 text-xs font-semibold text-gray-700">{label}</p>
