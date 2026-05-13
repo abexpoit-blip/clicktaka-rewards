@@ -6,7 +6,7 @@ import { LiveTicker } from "@/components/live-ticker";
 import { Leaderboard } from "@/components/leaderboard";
 import {
   Wallet, TrendingUp, Coins, Copy, Check, Target, Package, Activity,
-  ArrowUpRight, ArrowDownRight, Calendar, Sparkles, Gift, Zap,
+  ArrowUpRight, ArrowDownRight, Calendar, Sparkles, Gift, Zap, Crown, Flame,
 } from "lucide-react";
 
 export const Route = createFileRoute("/user/dashboard")({ component: Dashboard });
