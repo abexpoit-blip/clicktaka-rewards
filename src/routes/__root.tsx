@@ -72,14 +72,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "ClickTaka — Earn Money Online in Bangladesh" },
+      { name: "description", content: "ক্লিক করে, অ্যাড দেখে, গেম খেলে দৈনিক ইনকাম করুন। ClickTaka — Bangladesh's #1 task earning platform." },
+      { property: "og:title", content: "ClickTaka — দৈনিক টাকা আয় করুন" },
+      { property: "og:description", content: "Task complete করে দৈনিক ৫০-১৩০০ টাকা ইনকাম করুন।" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
       {

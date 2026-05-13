@@ -9,38 +9,119 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as KtAdminLoginRouteImport } from './routes/kt-admin-login'
+import { Route as UserRouteImport } from './routes/_user'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UserDashboardRouteImport } from './routes/_user/dashboard'
 
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KtAdminLoginRoute = KtAdminLoginRouteImport.update({
+  id: '/kt-admin-login',
+  path: '/kt-admin-login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UserRoute = UserRouteImport.update({
+  id: '/_user',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UserDashboardRoute = UserDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => UserRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/kt-admin-login': typeof KtAdminLoginRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/dashboard': typeof UserDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/kt-admin-login': typeof KtAdminLoginRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/dashboard': typeof UserDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_user': typeof UserRouteWithChildren
+  '/kt-admin-login': typeof KtAdminLoginRoute
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/_user/dashboard': typeof UserDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/kt-admin-login' | '/login' | '/register' | '/dashboard'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/kt-admin-login' | '/login' | '/register' | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/_user'
+    | '/kt-admin-login'
+    | '/login'
+    | '/register'
+    | '/_user/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  UserRoute: typeof UserRouteWithChildren
+  KtAdminLoginRoute: typeof KtAdminLoginRoute
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/kt-admin-login': {
+      id: '/kt-admin-login'
+      path: '/kt-admin-login'
+      fullPath: '/kt-admin-login'
+      preLoaderRoute: typeof KtAdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_user': {
+      id: '/_user'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof UserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +129,43 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_user/dashboard': {
+      id: '/_user/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof UserDashboardRouteImport
+      parentRoute: typeof UserRoute
+    }
   }
 }
 
+interface UserRouteChildren {
+  UserDashboardRoute: typeof UserDashboardRoute
+}
+
+const UserRouteChildren: UserRouteChildren = {
+  UserDashboardRoute: UserDashboardRoute,
+}
+
+const UserRouteWithChildren = UserRoute._addFileChildren(UserRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  UserRoute: UserRouteWithChildren,
+  KtAdminLoginRoute: KtAdminLoginRoute,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
