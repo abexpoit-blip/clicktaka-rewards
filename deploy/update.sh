@@ -46,6 +46,16 @@ npm install --prefix server --no-audit --no-fund
 
 echo "==> Restarting PM2 processes (delete+start to apply env changes)"
 pm2 delete clicktaka-api clicktaka-web 2>/dev/null || true
+
+echo "==> Freeing ports 3001/3002/4000 if held by orphan processes"
+for P in 3001 3002 4000; do
+  PIDS="$(ss -ltnp 2>/dev/null | awk -v p=":$P" '$4 ~ p {print $0}' | grep -oP 'pid=\K[0-9]+' | sort -u || true)"
+  if [[ -n "${PIDS:-}" ]]; then
+    echo "  killing PIDs on :$P -> $PIDS"
+    kill -9 $PIDS 2>/dev/null || true
+  fi
+done
+
 pm2 start deploy/ecosystem.config.cjs --update-env
 pm2 save
 
