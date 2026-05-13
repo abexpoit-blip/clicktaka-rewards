@@ -18,7 +18,6 @@ type Deposit = {
 const METHODS = [
   { id: "bkash",  label: "Bkash",  color: "from-pink-500 to-rose-500",     emoji: "📱" },
   { id: "nagad",  label: "Nagad",  color: "from-orange-500 to-amber-500",  emoji: "🟧" },
-  { id: "rocket", label: "Rocket", color: "from-purple-500 to-fuchsia-500",emoji: "🚀" },
 ] as const;
 
 function DepositPage() {
@@ -36,7 +35,7 @@ function DepositPage() {
   }
   useEffect(load, []);
 
-  const target = s ? (method === "bkash" ? s.bkash_number : method === "nagad" ? s.nagad_number : s.rocket_number || "") : "";
+  const target = s ? (method === "bkash" ? s.bkash_number : s.nagad_number) : "";
 
   function copyNumber() {
     if (!target) return;
@@ -68,7 +67,7 @@ function DepositPage() {
               <ArrowDownToLine className="h-3 w-3" /> Add Money
             </div>
             <h1 className="font-display text-2xl sm:text-3xl font-bold mt-3 tracking-tight">Account-এ Deposit করুন</h1>
-            <p className="mt-1 text-white/85 text-sm">Bkash / Nagad / Rocket — instant verify</p>
+            <p className="mt-1 text-white/85 text-sm">Bkash / Nagad — instant verify</p>
           </div>
           <div className="rounded-2xl bg-white/12 backdrop-blur border border-white/15 px-4 py-3">
             <p className="text-[10px] uppercase tracking-wider text-white/70 font-bold">Min. Deposit</p>
@@ -80,7 +79,7 @@ function DepositPage() {
       <div className="grid lg:grid-cols-[1.2fr_1fr] gap-5">
         <section className="rounded-3xl border border-border/70 bg-card p-5 sm:p-6 shadow-card">
           <h2 className="font-display text-lg font-bold flex items-center gap-2"><Smartphone className="h-4 w-4 text-primary" /> Method বাছুন</h2>
-          <div className="mt-3 grid grid-cols-3 gap-2">
+          <div className="mt-3 grid grid-cols-2 gap-2">
             {METHODS.map((mm) => {
               const active = mm.id === method;
               return (
@@ -96,10 +95,11 @@ function DepositPage() {
           </div>
 
           {target ? (
-            <div className="mt-4 rounded-2xl border border-dashed border-primary/30 bg-gradient-brand-soft p-4 flex items-center justify-between gap-3 flex-wrap">
+            <div className="mt-4 rounded-2xl border-2 border-primary/40 bg-gradient-brand-soft p-4 flex items-center justify-between gap-3 flex-wrap">
               <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">এই {METHODS.find(m => m.id === method)?.label} number-এ Send Money করুন</p>
-                <p className="font-display text-2xl font-bold tabular-nums tracking-wide">{target}</p>
+                <p className="text-[11px] uppercase tracking-wider text-foreground/70 font-bold">এই {METHODS.find(m => m.id === method)?.label} number-এ Send Money করুন</p>
+                <p className="font-display text-2xl font-bold tabular-nums tracking-wide text-foreground">{target}</p>
+                <p className="text-[11px] text-foreground/70 mt-1">📌 শুধুমাত্র <b>Send Money</b> করুন (Cash Out নয়)</p>
               </div>
               <button onClick={copyNumber} className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-brand text-white px-3.5 py-2 text-xs font-bold shadow-brand hover:scale-[1.03] transition">
                 {copied ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />} {copied ? "Copied" : "Copy"}
@@ -126,9 +126,9 @@ function DepositPage() {
             </button>
           </form>
 
-          <div className="mt-4 rounded-xl bg-info/10 text-info-foreground border border-info/20 p-3 text-xs flex items-start gap-2">
-            <Info className="h-4 w-4 text-info shrink-0 mt-0.5" />
-            <span>উপরের number-এ Send Money করার পর SMS-এ আসা <b>Transaction ID</b> এখানে paste করুন। 1–10 মিনিটের মধ্যে balance যোগ হবে।</span>
+          <div className="mt-4 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-slate-800 dark:text-slate-100 border border-blue-200 dark:border-blue-800/60 p-3 text-xs flex items-start gap-2">
+            <Info className="h-4 w-4 text-blue-600 dark:text-blue-300 shrink-0 mt-0.5" />
+            <span>উপরের number-এ <b>Send Money</b> করার পর SMS-এ আসা <b>Transaction ID</b> এখানে paste করুন। 1–10 মিনিটের মধ্যে balance যোগ হবে।</span>
           </div>
         </section>
 
