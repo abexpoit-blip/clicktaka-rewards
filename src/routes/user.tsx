@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 type User = { id: number; phone: string; name: string | null; balance: number; refer_code: string };
 
-export const Route = createFileRoute("/_user")({ component: UserLayout });
+export const Route = createFileRoute("/user")({ component: UserLayout });
 
 function UserLayout() {
   const navigate = useNavigate();

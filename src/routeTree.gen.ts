@@ -9,21 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UserRouteImport } from './routes/user'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as KtAdminLoginRouteImport } from './routes/kt-admin-login'
 import { Route as KtAdminRouteImport } from './routes/kt-admin'
-import { Route as UserRouteImport } from './routes/_user'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UserWithdrawRouteImport } from './routes/user/withdraw'
+import { Route as UserTasksRouteImport } from './routes/user/tasks'
+import { Route as UserSpinRouteImport } from './routes/user/spin'
+import { Route as UserReferRouteImport } from './routes/user/refer'
+import { Route as UserProfileRouteImport } from './routes/user/profile'
+import { Route as UserPackagesRouteImport } from './routes/user/packages'
+import { Route as UserHistoryRouteImport } from './routes/user/history'
+import { Route as UserDepositRouteImport } from './routes/user/deposit'
+import { Route as UserDashboardRouteImport } from './routes/user/dashboard'
 import { Route as KtAdminUsersRouteImport } from './routes/kt-admin.users'
 import { Route as KtAdminTasksRouteImport } from './routes/kt-admin.tasks'
 import { Route as KtAdminEarningsRouteImport } from './routes/kt-admin.earnings'
 import { Route as KtAdminDashboardRouteImport } from './routes/kt-admin.dashboard'
-import { Route as UserTasksRouteImport } from './routes/_user/tasks'
-import { Route as UserSpinRouteImport } from './routes/_user/spin'
-import { Route as UserHistoryRouteImport } from './routes/_user/history'
-import { Route as UserDashboardRouteImport } from './routes/_user/dashboard'
 
+const UserRoute = UserRouteImport.update({
+  id: '/user',
+  path: '/user',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegisterRoute = RegisterRouteImport.update({
   id: '/register',
   path: '/register',
@@ -44,14 +54,55 @@ const KtAdminRoute = KtAdminRouteImport.update({
   path: '/kt-admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UserRoute = UserRouteImport.update({
-  id: '/_user',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const UserWithdrawRoute = UserWithdrawRouteImport.update({
+  id: '/withdraw',
+  path: '/withdraw',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserTasksRoute = UserTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserSpinRoute = UserSpinRouteImport.update({
+  id: '/spin',
+  path: '/spin',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserReferRoute = UserReferRouteImport.update({
+  id: '/refer',
+  path: '/refer',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserProfileRoute = UserProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserPackagesRoute = UserPackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserHistoryRoute = UserHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserDepositRoute = UserDepositRouteImport.update({
+  id: '/deposit',
+  path: '/deposit',
+  getParentRoute: () => UserRoute,
+} as any)
+const UserDashboardRoute = UserDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => UserRoute,
 } as any)
 const KtAdminUsersRoute = KtAdminUsersRouteImport.update({
   id: '/users',
@@ -73,26 +124,6 @@ const KtAdminDashboardRoute = KtAdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => KtAdminRoute,
 } as any)
-const UserTasksRoute = UserTasksRouteImport.update({
-  id: '/tasks',
-  path: '/tasks',
-  getParentRoute: () => UserRoute,
-} as any)
-const UserSpinRoute = UserSpinRouteImport.update({
-  id: '/spin',
-  path: '/spin',
-  getParentRoute: () => UserRoute,
-} as any)
-const UserHistoryRoute = UserHistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
-  getParentRoute: () => UserRoute,
-} as any)
-const UserDashboardRoute = UserDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => UserRoute,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -100,14 +131,20 @@ export interface FileRoutesByFullPath {
   '/kt-admin-login': typeof KtAdminLoginRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/dashboard': typeof UserDashboardRoute
-  '/history': typeof UserHistoryRoute
-  '/spin': typeof UserSpinRoute
-  '/tasks': typeof UserTasksRoute
+  '/user': typeof UserRouteWithChildren
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
+  '/user/dashboard': typeof UserDashboardRoute
+  '/user/deposit': typeof UserDepositRoute
+  '/user/history': typeof UserHistoryRoute
+  '/user/packages': typeof UserPackagesRoute
+  '/user/profile': typeof UserProfileRoute
+  '/user/refer': typeof UserReferRoute
+  '/user/spin': typeof UserSpinRoute
+  '/user/tasks': typeof UserTasksRoute
+  '/user/withdraw': typeof UserWithdrawRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -115,31 +152,42 @@ export interface FileRoutesByTo {
   '/kt-admin-login': typeof KtAdminLoginRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/dashboard': typeof UserDashboardRoute
-  '/history': typeof UserHistoryRoute
-  '/spin': typeof UserSpinRoute
-  '/tasks': typeof UserTasksRoute
+  '/user': typeof UserRouteWithChildren
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
+  '/user/dashboard': typeof UserDashboardRoute
+  '/user/deposit': typeof UserDepositRoute
+  '/user/history': typeof UserHistoryRoute
+  '/user/packages': typeof UserPackagesRoute
+  '/user/profile': typeof UserProfileRoute
+  '/user/refer': typeof UserReferRoute
+  '/user/spin': typeof UserSpinRoute
+  '/user/tasks': typeof UserTasksRoute
+  '/user/withdraw': typeof UserWithdrawRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/_user': typeof UserRouteWithChildren
   '/kt-admin': typeof KtAdminRouteWithChildren
   '/kt-admin-login': typeof KtAdminLoginRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
-  '/_user/dashboard': typeof UserDashboardRoute
-  '/_user/history': typeof UserHistoryRoute
-  '/_user/spin': typeof UserSpinRoute
-  '/_user/tasks': typeof UserTasksRoute
+  '/user': typeof UserRouteWithChildren
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
   '/kt-admin/users': typeof KtAdminUsersRoute
+  '/user/dashboard': typeof UserDashboardRoute
+  '/user/deposit': typeof UserDepositRoute
+  '/user/history': typeof UserHistoryRoute
+  '/user/packages': typeof UserPackagesRoute
+  '/user/profile': typeof UserProfileRoute
+  '/user/refer': typeof UserReferRoute
+  '/user/spin': typeof UserSpinRoute
+  '/user/tasks': typeof UserTasksRoute
+  '/user/withdraw': typeof UserWithdrawRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -149,14 +197,20 @@ export interface FileRouteTypes {
     | '/kt-admin-login'
     | '/login'
     | '/register'
-    | '/dashboard'
-    | '/history'
-    | '/spin'
-    | '/tasks'
+    | '/user'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/tasks'
     | '/kt-admin/users'
+    | '/user/dashboard'
+    | '/user/deposit'
+    | '/user/history'
+    | '/user/packages'
+    | '/user/profile'
+    | '/user/refer'
+    | '/user/spin'
+    | '/user/tasks'
+    | '/user/withdraw'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -164,43 +218,61 @@ export interface FileRouteTypes {
     | '/kt-admin-login'
     | '/login'
     | '/register'
-    | '/dashboard'
-    | '/history'
-    | '/spin'
-    | '/tasks'
+    | '/user'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/tasks'
     | '/kt-admin/users'
+    | '/user/dashboard'
+    | '/user/deposit'
+    | '/user/history'
+    | '/user/packages'
+    | '/user/profile'
+    | '/user/refer'
+    | '/user/spin'
+    | '/user/tasks'
+    | '/user/withdraw'
   id:
     | '__root__'
     | '/'
-    | '/_user'
     | '/kt-admin'
     | '/kt-admin-login'
     | '/login'
     | '/register'
-    | '/_user/dashboard'
-    | '/_user/history'
-    | '/_user/spin'
-    | '/_user/tasks'
+    | '/user'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/tasks'
     | '/kt-admin/users'
+    | '/user/dashboard'
+    | '/user/deposit'
+    | '/user/history'
+    | '/user/packages'
+    | '/user/profile'
+    | '/user/refer'
+    | '/user/spin'
+    | '/user/tasks'
+    | '/user/withdraw'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  UserRoute: typeof UserRouteWithChildren
   KtAdminRoute: typeof KtAdminRouteWithChildren
   KtAdminLoginRoute: typeof KtAdminLoginRoute
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
+  UserRoute: typeof UserRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/user': {
+      id: '/user'
+      path: '/user'
+      fullPath: '/user'
+      preLoaderRoute: typeof UserRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/register': {
       id: '/register'
       path: '/register'
@@ -229,19 +301,75 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KtAdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_user': {
-      id: '/_user'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof UserRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/user/withdraw': {
+      id: '/user/withdraw'
+      path: '/withdraw'
+      fullPath: '/user/withdraw'
+      preLoaderRoute: typeof UserWithdrawRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/tasks': {
+      id: '/user/tasks'
+      path: '/tasks'
+      fullPath: '/user/tasks'
+      preLoaderRoute: typeof UserTasksRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/spin': {
+      id: '/user/spin'
+      path: '/spin'
+      fullPath: '/user/spin'
+      preLoaderRoute: typeof UserSpinRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/refer': {
+      id: '/user/refer'
+      path: '/refer'
+      fullPath: '/user/refer'
+      preLoaderRoute: typeof UserReferRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/profile': {
+      id: '/user/profile'
+      path: '/profile'
+      fullPath: '/user/profile'
+      preLoaderRoute: typeof UserProfileRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/packages': {
+      id: '/user/packages'
+      path: '/packages'
+      fullPath: '/user/packages'
+      preLoaderRoute: typeof UserPackagesRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/history': {
+      id: '/user/history'
+      path: '/history'
+      fullPath: '/user/history'
+      preLoaderRoute: typeof UserHistoryRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/deposit': {
+      id: '/user/deposit'
+      path: '/deposit'
+      fullPath: '/user/deposit'
+      preLoaderRoute: typeof UserDepositRouteImport
+      parentRoute: typeof UserRoute
+    }
+    '/user/dashboard': {
+      id: '/user/dashboard'
+      path: '/dashboard'
+      fullPath: '/user/dashboard'
+      preLoaderRoute: typeof UserDashboardRouteImport
+      parentRoute: typeof UserRoute
     }
     '/kt-admin/users': {
       id: '/kt-admin/users'
@@ -271,52 +399,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KtAdminDashboardRouteImport
       parentRoute: typeof KtAdminRoute
     }
-    '/_user/tasks': {
-      id: '/_user/tasks'
-      path: '/tasks'
-      fullPath: '/tasks'
-      preLoaderRoute: typeof UserTasksRouteImport
-      parentRoute: typeof UserRoute
-    }
-    '/_user/spin': {
-      id: '/_user/spin'
-      path: '/spin'
-      fullPath: '/spin'
-      preLoaderRoute: typeof UserSpinRouteImport
-      parentRoute: typeof UserRoute
-    }
-    '/_user/history': {
-      id: '/_user/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof UserHistoryRouteImport
-      parentRoute: typeof UserRoute
-    }
-    '/_user/dashboard': {
-      id: '/_user/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof UserDashboardRouteImport
-      parentRoute: typeof UserRoute
-    }
   }
 }
-
-interface UserRouteChildren {
-  UserDashboardRoute: typeof UserDashboardRoute
-  UserHistoryRoute: typeof UserHistoryRoute
-  UserSpinRoute: typeof UserSpinRoute
-  UserTasksRoute: typeof UserTasksRoute
-}
-
-const UserRouteChildren: UserRouteChildren = {
-  UserDashboardRoute: UserDashboardRoute,
-  UserHistoryRoute: UserHistoryRoute,
-  UserSpinRoute: UserSpinRoute,
-  UserTasksRoute: UserTasksRoute,
-}
-
-const UserRouteWithChildren = UserRoute._addFileChildren(UserRouteChildren)
 
 interface KtAdminRouteChildren {
   KtAdminDashboardRoute: typeof KtAdminDashboardRoute
@@ -335,13 +419,39 @@ const KtAdminRouteChildren: KtAdminRouteChildren = {
 const KtAdminRouteWithChildren =
   KtAdminRoute._addFileChildren(KtAdminRouteChildren)
 
+interface UserRouteChildren {
+  UserDashboardRoute: typeof UserDashboardRoute
+  UserDepositRoute: typeof UserDepositRoute
+  UserHistoryRoute: typeof UserHistoryRoute
+  UserPackagesRoute: typeof UserPackagesRoute
+  UserProfileRoute: typeof UserProfileRoute
+  UserReferRoute: typeof UserReferRoute
+  UserSpinRoute: typeof UserSpinRoute
+  UserTasksRoute: typeof UserTasksRoute
+  UserWithdrawRoute: typeof UserWithdrawRoute
+}
+
+const UserRouteChildren: UserRouteChildren = {
+  UserDashboardRoute: UserDashboardRoute,
+  UserDepositRoute: UserDepositRoute,
+  UserHistoryRoute: UserHistoryRoute,
+  UserPackagesRoute: UserPackagesRoute,
+  UserProfileRoute: UserProfileRoute,
+  UserReferRoute: UserReferRoute,
+  UserSpinRoute: UserSpinRoute,
+  UserTasksRoute: UserTasksRoute,
+  UserWithdrawRoute: UserWithdrawRoute,
+}
+
+const UserRouteWithChildren = UserRoute._addFileChildren(UserRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  UserRoute: UserRouteWithChildren,
   KtAdminRoute: KtAdminRouteWithChildren,
   KtAdminLoginRoute: KtAdminLoginRoute,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,
+  UserRoute: UserRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

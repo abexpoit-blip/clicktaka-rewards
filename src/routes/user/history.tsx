@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
-export const Route = createFileRoute("/_user/history")({ component: HistoryPage });
+export const Route = createFileRoute("/user/history")({ component: HistoryPage });
 
 type Tx = { id: number; type: string; amount: number; balance_after: number | null; note: string | null; created_at: string };
 type Completion = { id: number; reward: number; completed_at: string; title: string; type: string };

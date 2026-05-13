@@ -5,7 +5,7 @@ import { DashboardSkeleton, ErrorState, EmptyState } from "@/components/ui-state
 import { LiveTicker } from "@/components/live-ticker";
 import { Leaderboard } from "@/components/leaderboard";
 
-export const Route = createFileRoute("/_user/dashboard")({ component: Dashboard });
+export const Route = createFileRoute("/user/dashboard")({ component: Dashboard });
 
 type Pkg = { id: number; name: string; expires_at: string; tasks_done_today: number; daily_task_limit: number; daily_earning: number };
 type Completion = { id: number; reward: number; completed_at: string; title: string; type: string };
