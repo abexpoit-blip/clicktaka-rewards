@@ -38,7 +38,8 @@ function Dashboard() {
 
   const u = d.user;
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
+      <LiveTicker />
       {/* Balance hero */}
       <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-2xl p-6 shadow-lg">
         <p className="text-sm opacity-80">স্বাগতম</p>
@@ -77,7 +78,7 @@ function Dashboard() {
       <section>
         <h2 className="text-lg font-semibold mb-3">আপনার Active প্যাকেজ</h2>
         {pkgs.length === 0 ? (
-          <Card><p className="text-center text-gray-500 py-4">কোন active package নেই। <Link to="/user/packages" className="text-purple-600 font-medium">প্যাকেজ কিনুন →</Link></p></Card>
+          <EmptyState icon="📦" title="কোনো active package নেই" description="প্যাকেজ কিনে আজই income শুরু করুন।" action={{ label: "প্যাকেজ কিনুন", to: "/user/packages" }} />
         ) : (
           <div className="grid sm:grid-cols-2 gap-4">
             {pkgs.map((p) => (
@@ -113,6 +114,8 @@ function Dashboard() {
           )}
         </Card>
       </section>
+
+      <Leaderboard />
 
       {/* Transactions */}
       <section>
