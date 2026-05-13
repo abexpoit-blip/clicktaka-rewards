@@ -20,6 +20,7 @@ import { Route as KtAdminTasksRouteImport } from './routes/kt-admin.tasks'
 import { Route as KtAdminEarningsRouteImport } from './routes/kt-admin.earnings'
 import { Route as KtAdminDashboardRouteImport } from './routes/kt-admin.dashboard'
 import { Route as UserTasksRouteImport } from './routes/_user/tasks'
+import { Route as UserSpinRouteImport } from './routes/_user/spin'
 import { Route as UserHistoryRouteImport } from './routes/_user/history'
 import { Route as UserDashboardRouteImport } from './routes/_user/dashboard'
 
@@ -77,6 +78,11 @@ const UserTasksRoute = UserTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => UserRoute,
 } as any)
+const UserSpinRoute = UserSpinRouteImport.update({
+  id: '/spin',
+  path: '/spin',
+  getParentRoute: () => UserRoute,
+} as any)
 const UserHistoryRoute = UserHistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/register': typeof RegisterRoute
   '/dashboard': typeof UserDashboardRoute
   '/history': typeof UserHistoryRoute
+  '/spin': typeof UserSpinRoute
   '/tasks': typeof UserTasksRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/register': typeof RegisterRoute
   '/dashboard': typeof UserDashboardRoute
   '/history': typeof UserHistoryRoute
+  '/spin': typeof UserSpinRoute
   '/tasks': typeof UserTasksRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_user/dashboard': typeof UserDashboardRoute
   '/_user/history': typeof UserHistoryRoute
+  '/_user/spin': typeof UserSpinRoute
   '/_user/tasks': typeof UserTasksRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
@@ -142,6 +151,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/dashboard'
     | '/history'
+    | '/spin'
     | '/tasks'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/dashboard'
     | '/history'
+    | '/spin'
     | '/tasks'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_user/dashboard'
     | '/_user/history'
+    | '/_user/spin'
     | '/_user/tasks'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
@@ -266,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UserTasksRouteImport
       parentRoute: typeof UserRoute
     }
+    '/_user/spin': {
+      id: '/_user/spin'
+      path: '/spin'
+      fullPath: '/spin'
+      preLoaderRoute: typeof UserSpinRouteImport
+      parentRoute: typeof UserRoute
+    }
     '/_user/history': {
       id: '/_user/history'
       path: '/history'
@@ -286,12 +305,14 @@ declare module '@tanstack/react-router' {
 interface UserRouteChildren {
   UserDashboardRoute: typeof UserDashboardRoute
   UserHistoryRoute: typeof UserHistoryRoute
+  UserSpinRoute: typeof UserSpinRoute
   UserTasksRoute: typeof UserTasksRoute
 }
 
 const UserRouteChildren: UserRouteChildren = {
   UserDashboardRoute: UserDashboardRoute,
   UserHistoryRoute: UserHistoryRoute,
+  UserSpinRoute: UserSpinRoute,
   UserTasksRoute: UserTasksRoute,
 }
 
@@ -325,3 +346,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

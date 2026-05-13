@@ -132,6 +132,33 @@ r.get('/transactions', authUser, async (req, res) => {
   res.json({ transactions: rows });
 });
 
+// Daily Spin Wheel — দিনে ১ বার ৳1–10 random reward
+r.get('/spin/status', authUser, async (req, res) => {
+  const rows = await q(
+    'SELECT id, reward, created_at FROM daily_spins WHERE user_id=? AND spin_date=CURDATE() LIMIT 1',
+    [req.user.id]
+  );
+  res.json({ spun_today: rows.length > 0, last: rows[0] || null });
+});
+
+r.post('/spin', authUser, async (req, res) => {
+  const exists = await q(
+    'SELECT id FROM daily_spins WHERE user_id=? AND spin_date=CURDATE() LIMIT 1',
+    [req.user.id]
+  );
+  if (exists.length) return res.status(409).json({ error: 'আজকের spin ইতিমধ্যে নেওয়া হয়েছে — কাল আবার আসুন' });
+
+  const reward = Math.floor(Math.random() * 10) + 1; // 1..10 BDT
+  await q('INSERT INTO daily_spins (user_id, spin_date, reward) VALUES (?, CURDATE(), ?)', [req.user.id, reward]);
+  await q('UPDATE users SET balance = balance + ? WHERE id=?', [reward, req.user.id]);
+  const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
+  await q(
+    "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'admin', ?, ?, ?)",
+    [req.user.id, reward, Number(after[0].balance), 'Daily Spin Bonus']
+  );
+  res.json({ ok: true, reward, balance: Number(after[0].balance) });
+});
+
 r.get('/referrals', authUser, async (req, res) => {
   const rows = await q(
     `SELECT r.id, r.commission, r.created_at, u.phone, u.name
