@@ -2,8 +2,48 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { q } from '../db.js';
 import { authAdmin } from '../middleware.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import zlib from 'node:zlib';
 
 const r = Router();
+
+function findRepoRoot(start = process.cwd()) {
+  let dir = start;
+  for (let i = 0; i < 8; i += 1) {
+    if (fs.existsSync(path.join(dir, '.git'))) return dir;
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return process.cwd();
+}
+
+function readGitInfo() {
+  const repo = findRepoRoot();
+  const gitDir = path.join(repo, '.git');
+  const empty = { full_commit: null, branch: null, message: null, author: null, commit_time: null };
+  try {
+    let head = fs.readFileSync(path.join(gitDir, 'HEAD'), 'utf8').trim();
+    let branch = null;
+    if (head.startsWith('ref: ')) {
+      const ref = head.slice(5);
+      branch = ref.replace(/^refs\/heads\//, '');
+      head = fs.readFileSync(path.join(gitDir, ref), 'utf8').trim();
+    }
+    const objectPath = path.join(gitDir, 'objects', head.slice(0, 2), head.slice(2));
+    if (!fs.existsSync(objectPath)) return { ...empty, full_commit: head, branch };
+    const raw = zlib.inflateSync(fs.readFileSync(objectPath)).toString('utf8');
+    const body = raw.slice(raw.indexOf('\0') + 1);
+    const [headers, ...messageParts] = body.split('\n\n');
+    const authorLine = headers.split('\n').find((line) => line.startsWith('author '));
+    const authorMatch = authorLine?.match(/^author\s+(.+?)\s+<.*>\s+(\d+)\s+([+-]\d{4})$/);
+    const commitTime = authorMatch ? new Date(Number(authorMatch[2]) * 1000).toISOString() : null;
+    return { ...empty, full_commit: head, branch, message: messageParts.join('\n\n').split('\n')[0] || null, author: authorMatch?.[1] || null, commit_time: commitTime };
+  } catch {
+    return empty;
+  }
+}
 
 // Overview stats
 r.get('/stats', authAdmin, async (req, res) => {
@@ -120,28 +160,22 @@ r.get('/earnings', authAdmin, async (req, res) => {
 
 // Deploy / git info
 r.get('/deploy-info', authAdmin, async (_req, res) => {
-  const { execSync } = await import('child_process');
-  const fs = await import('fs');
-  const path = await import('path');
-  const run = (cmd) => {
-    try { return execSync(cmd, { cwd: process.cwd(), encoding: 'utf8', timeout: 2000 }).trim(); }
-    catch { return null; }
-  };
+  const git = readGitInfo();
   let deployedAt = null;
   try {
-    const candidates = ['dist', '.output', 'build', 'server'];
+    const candidates = ['dist', '.output', 'build', 'server', '.git/FETCH_HEAD'];
     for (const d of candidates) {
       const p = path.resolve(process.cwd(), d);
       if (fs.existsSync(p)) { deployedAt = fs.statSync(p).mtime.toISOString(); break; }
     }
   } catch {}
   res.json({
-    commit: run('git rev-parse --short HEAD'),
-    full_commit: run('git rev-parse HEAD'),
-    branch: run('git rev-parse --abbrev-ref HEAD'),
-    message: run('git log -1 --pretty=%s'),
-    author: run('git log -1 --pretty=%an'),
-    commit_time: run('git log -1 --pretty=%cI'),
+    commit: git.full_commit ? git.full_commit.slice(0, 7) : null,
+    full_commit: git.full_commit,
+    branch: git.branch,
+    message: git.message,
+    author: git.author,
+    commit_time: git.commit_time,
     deployed_at: deployedAt,
     server_time: new Date().toISOString(),
     uptime_sec: Math.floor(process.uptime()),
