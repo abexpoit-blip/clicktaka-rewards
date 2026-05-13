@@ -34,36 +34,77 @@ function TasksPage() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
   const REQUIRED_SECONDS = 30;
-  const [active, setActive] = useState<{ task: Task; viewed: number; awayOnce: boolean } | null>(null);
+  const [active, setActive] = useState<{ task: Task; viewed: number; awayOnce: boolean; awayMs: number; needsAway: boolean } | null>(() => {
+    // Resume from localStorage if user navigated here from dashboard / refreshed
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = localStorage.getItem("ct_active_task_v1");
+      if (!raw) return null;
+      const v = JSON.parse(raw) as { id: number; startedAt: number; awayMs: number; needsAway: boolean };
+      // We can't restore the full Task here without server data; defer until tasks load
+      return null;
+    } catch { return null; }
+  });
 
   function load() {
     api<Data>("/user/tasks").then(setD).catch((e) => setErr(e.message));
   }
   useEffect(load, []);
 
-  // Count seconds — only when the user is actually viewing the ad
-  // (i.e. the ClickTaka tab is hidden / window blurred). Pause when they come back
-  // before the minimum view time. Visual-link tasks (no url) count regardless.
+  // After tasks load, resume an active task from localStorage if present
+  useEffect(() => {
+    if (!d || active) return;
+    try {
+      const raw = localStorage.getItem("ct_active_task_v1");
+      if (!raw) return;
+      const v = JSON.parse(raw) as { id: number; startedAt: number; awayMs: number; needsAway: boolean };
+      const task = d.tasks.find((t) => t.id === v.id);
+      if (!task) { localStorage.removeItem("ct_active_task_v1"); return; }
+      const viewed = v.needsAway
+        ? Math.min(REQUIRED_SECONDS, Math.floor(v.awayMs / 1000))
+        : Math.min(REQUIRED_SECONDS, Math.floor((Date.now() - v.startedAt) / 1000));
+      setActive({ task, viewed, awayOnce: v.awayMs > 0, awayMs: v.awayMs, needsAway: v.needsAway });
+    } catch {}
+  }, [d, active]);
+
+  // Persist + notify dashboard whenever active changes
+  useEffect(() => {
+    try {
+      if (!active) {
+        localStorage.removeItem("ct_active_task_v1");
+      } else {
+        localStorage.setItem("ct_active_task_v1", JSON.stringify({
+          id: active.task.id,
+          startedAt: Date.now() - active.viewed * 1000,
+          awayMs: active.awayMs,
+          needsAway: active.needsAway,
+        }));
+      }
+      window.dispatchEvent(new Event("ct:active-task"));
+    } catch {}
+  }, [active]);
+
+  // Tick — for url-tasks count only when ClickTaka tab is hidden / blurred
   useEffect(() => {
     if (!active) return;
     if (active.viewed >= REQUIRED_SECONDS) return;
-    const needsAway = !!active.task.url; // only ad/url tasks need actual viewing
     const t = setInterval(() => {
       setActive((a) => {
         if (!a) return a;
         const isAway = document.hidden || !document.hasFocus();
-        if (needsAway && !isAway) return a; // paused — user not viewing the ad
+        if (a.needsAway && !isAway) return a; // paused
         const viewed = Math.min(REQUIRED_SECONDS, a.viewed + 1);
-        return { ...a, viewed, awayOnce: a.awayOnce || isAway };
+        const awayMs = a.awayMs + (a.needsAway ? 1000 : 0);
+        return { ...a, viewed, awayMs, awayOnce: a.awayOnce || isAway };
       });
     }, 1000);
     return () => clearInterval(t);
   }, [active]);
 
   async function startTask(task: Task) {
-    setActive({ task, viewed: 0, awayOnce: false });
+    const needsAway = !!task.url;
+    setActive({ task, viewed: 0, awayOnce: false, awayMs: 0, needsAway });
     if (task.url) {
-      // open AFTER state is set so the visibility change is observed
       setTimeout(() => window.open(task.url!, "_blank", "noopener,noreferrer"), 50);
       toast.message("Ad খুলছে — কমপক্ষে 30s দেখুন, তারপর Claim চালু হবে", { duration: 3500 });
     }
