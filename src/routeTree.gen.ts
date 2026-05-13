@@ -19,6 +19,7 @@ import { Route as KtAdminUsersRouteImport } from './routes/kt-admin.users'
 import { Route as KtAdminTasksRouteImport } from './routes/kt-admin.tasks'
 import { Route as KtAdminEarningsRouteImport } from './routes/kt-admin.earnings'
 import { Route as KtAdminDashboardRouteImport } from './routes/kt-admin.dashboard'
+import { Route as UserTasksRouteImport } from './routes/_user/tasks'
 import { Route as UserDashboardRouteImport } from './routes/_user/dashboard'
 
 const RegisterRoute = RegisterRouteImport.update({
@@ -70,6 +71,11 @@ const KtAdminDashboardRoute = KtAdminDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => KtAdminRoute,
 } as any)
+const UserTasksRoute = UserTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => UserRoute,
+} as any)
 const UserDashboardRoute = UserDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof UserDashboardRoute
+  '/tasks': typeof UserTasksRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/dashboard': typeof UserDashboardRoute
+  '/tasks': typeof UserTasksRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_user/dashboard': typeof UserDashboardRoute
+  '/_user/tasks': typeof UserTasksRoute
   '/kt-admin/dashboard': typeof KtAdminDashboardRoute
   '/kt-admin/earnings': typeof KtAdminEarningsRoute
   '/kt-admin/tasks': typeof KtAdminTasksRoute
@@ -123,6 +132,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
+    | '/tasks'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/tasks'
@@ -135,6 +145,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/dashboard'
+    | '/tasks'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/tasks'
@@ -148,6 +159,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_user/dashboard'
+    | '/_user/tasks'
     | '/kt-admin/dashboard'
     | '/kt-admin/earnings'
     | '/kt-admin/tasks'
@@ -235,6 +247,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KtAdminDashboardRouteImport
       parentRoute: typeof KtAdminRoute
     }
+    '/_user/tasks': {
+      id: '/_user/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof UserTasksRouteImport
+      parentRoute: typeof UserRoute
+    }
     '/_user/dashboard': {
       id: '/_user/dashboard'
       path: '/dashboard'
@@ -247,10 +266,12 @@ declare module '@tanstack/react-router' {
 
 interface UserRouteChildren {
   UserDashboardRoute: typeof UserDashboardRoute
+  UserTasksRoute: typeof UserTasksRoute
 }
 
 const UserRouteChildren: UserRouteChildren = {
   UserDashboardRoute: UserDashboardRoute,
+  UserTasksRoute: UserTasksRoute,
 }
 
 const UserRouteWithChildren = UserRoute._addFileChildren(UserRouteChildren)
