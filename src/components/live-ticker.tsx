@@ -2,14 +2,20 @@
 import { useEffect, useState } from "react";
 import { Flame, CheckCircle2 } from "lucide-react";
 
+// 80% male, 20% female — varied Bangladeshi names
 const NAMES = [
-  "Sohel Rana", "Tania Akter", "Sumi Begum", "Naim Hasan", "Arif Hossain",
-  "Rakib Khan", "Mehedi Hasan", "Faria Islam", "Tasnim Sultana", "Sabbir Ahmed",
-  "Nadia Akter", "Bappi Mia", "Shihab Uddin", "Mim Akter", "Rahim Uddin",
-  "Karim Sheikh", "Sajid Rahman", "Riya Akter", "Jubayer Hossain", "Lima Khatun",
-  "Asif Mahmud", "Nabila Ferdous", "Tanvir Alam", "Sadia Rahman", "Imran Kabir",
+  // Male (28)
+  "Sohel Rana", "Naim Hasan", "Arif Hossain", "Rakib Khan", "Mehedi Hasan",
+  "Sabbir Ahmed", "Bappi Mia", "Shihab Uddin", "Rahim Uddin", "Karim Sheikh",
+  "Sajid Rahman", "Jubayer Hossain", "Asif Mahmud", "Tanvir Alam", "Imran Kabir",
+  "Mahin Chowdhury", "Foysal Ahmed", "Rasel Mia", "Jewel Rana", "Abdul Karim",
+  "Shakib Hasan", "Mizanur Rahman", "Tarek Aziz", "Hasibul Islam", "Nayeem Sarker",
+  "Rifat Khan", "Sumon Mahmud", "Zahid Hossain",
+  // Female (7)
+  "Tania Akter", "Sumi Begum", "Faria Islam", "Nadia Akter", "Mim Akter",
+  "Riya Akter", "Sadia Rahman",
 ];
-const METHODS = ["Bkash", "Nagad", "Bkash", "Nagad", "Rocket", "Upay"];
+const METHODS = ["Bkash", "Nagad", "Bkash", "Nagad", "Bkash"];
 const AMOUNTS = [200, 300, 500, 750, 1000, 1500, 2000, 3000, 5000];
 
 function rand<T>(arr: T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -27,8 +33,6 @@ function genItem() {
 const METHOD_STYLE: Record<string, string> = {
   Bkash: "bg-pink-100 text-pink-700 border-pink-200",
   Nagad: "bg-orange-100 text-orange-700 border-orange-200",
-  Rocket: "bg-purple-100 text-purple-700 border-purple-200",
-  Upay: "bg-emerald-100 text-emerald-700 border-emerald-200",
 };
 
 export function LiveTicker() {
