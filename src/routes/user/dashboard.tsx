@@ -8,7 +8,16 @@ import {
   Wallet, TrendingUp, Coins, Target, Package, Activity,
   ArrowUpRight, ArrowDownRight, Sparkles, Zap, Crown, Flame,
   Trophy, Rocket, Shield, Star, Play, ArrowRight, Calendar, Award, BadgeCheck,
+  ExternalLink, Video, AppWindow, Share2, Gamepad2,
 } from "lucide-react";
+
+const TASK_TYPE: Record<string, { icon: any; grad: string; label: string }> = {
+  ad:     { icon: ExternalLink, grad: "from-violet-500 to-fuchsia-500", label: "Sponsored Ad" },
+  video:  { icon: Video,        grad: "from-rose-500 to-orange-500",    label: "Video Watch" },
+  app:    { icon: AppWindow,    grad: "from-sky-500 to-cyan-500",       label: "App Install" },
+  social: { icon: Share2,       grad: "from-emerald-500 to-teal-500",   label: "Social Action" },
+  game:   { icon: Gamepad2,     grad: "from-amber-500 to-orange-600",   label: "Mini Game" },
+};
 
 export const Route = createFileRoute("/user/dashboard")({ component: Dashboard });
 
