@@ -1,106 +1,152 @@
 
-# ClickTaka — Earning Platform Plan (Bangla)
+# ClickTaka — Architecture & Build Plan
 
-আমি bdt69.com-এ লগইন করে পুরো সিস্টেম দেখেছি। নিচে একই রকম ফিচার ও সিস্টেম নিয়ে clicktaka24.com বানানোর সম্পূর্ণ প্ল্যান দিচ্ছি (কোড কপি নয়, একই ফাংশনালিটি নতুনভাবে বানানো হবে)।
+## Stack (final)
 
-## সাইটের মূল ধারণা
+```
+┌─────────────────────────────────────────────────────────┐
+│  Frontend: React 19 + TanStack Start + Tailwind v4      │
+│  (Lovable-এ এডিট, GitHub-এ auto push)                   │
+└──────────────────┬──────────────────────────────────────┘
+                   │ fetch /api/*
+┌──────────────────▼──────────────────────────────────────┐
+│  Backend API: Node.js + Express + JWT                   │
+│  (একই repo, /server folder)                             │
+└──────────────────┬──────────────────────────────────────┘
+                   │ mysql2
+┌──────────────────▼──────────────────────────────────────┐
+│  MySQL 8 on Contabo VPS (port 3306 public, IP whitelist)│
+└─────────────────────────────────────────────────────────┘
 
-ব্যবহারকারী টাকা ডিপোজিট করে একটা **প্যাকেজ** কেনে (Silver, Silver2…), তারপর প্রতিদিন কিছু **বিজ্ঞাপন/টাস্ক** দেখে বা গেম খেলে দৈনিক ইনকাম পায়। জমা হওয়া ব্যালেন্স bKash/Nagad এ উইথড্র করা যায়। **রেফারেল** সিস্টেমে বন্ধু আনলে কমিশন পায়।
+Deploy:  Lovable → GitHub → VPS git pull → pm2 restart
+```
 
-## ১. সাইটের পেজ লিস্ট (যা যা থাকবে)
+## Folder structure
 
-**পাবলিক পেজ**
-- হোম / ল্যান্ডিং পেজ — হিরো, পরিসংখ্যান (মোট ইউজার, ডিপোজিট, উইথড্র), কেন বেছে নিবেন, রেজিস্টার/লগইন বাটন
-- About — আমাদের সম্পর্কে
-- লগইন (ফোন + পাসওয়ার্ড)
-- রেজিস্ট্রেশন (নাম, ফোন, পাসওয়ার্ড, রেফার কোড — অপশনাল)
+```
+/                          # Lovable repo root
+├── src/                   # React frontend (TanStack Start)
+│   ├── routes/
+│   │   ├── index.tsx              # Landing
+│   │   ├── login.tsx              # User login
+│   │   ├── register.tsx
+│   │   ├── kt-admin-login.tsx     # Admin login (different URL)
+│   │   ├── _user/                 # User dashboard (protected)
+│   │   │   ├── dashboard.tsx
+│   │   │   ├── tasks.tsx
+│   │   │   ├── packages.tsx
+│   │   │   ├── deposit.tsx
+│   │   │   ├── withdraw.tsx
+│   │   │   ├── refer.tsx
+│   │   │   ├── history.tsx
+│   │   │   └── profile.tsx
+│   │   └── _kt-admin/             # Admin panel (protected)
+│   │       ├── dashboard.tsx
+│   │       ├── users.tsx
+│   │       ├── deposits.tsx
+│   │       ├── withdrawals.tsx
+│   │       ├── tasks.tsx
+│   │       └── settings.tsx
+│   └── lib/api.ts                 # fetch wrapper
+│
+├── server/                # Node.js API (deploy on VPS)
+│   ├── index.js           # Express app
+│   ├── db.js              # mysql2 pool
+│   ├── auth.js            # JWT helpers
+│   ├── middleware.js      # authUser, authAdmin
+│   └── routes/
+│       ├── auth.js        # login/register
+│       ├── user.js        # profile, balance, refer
+│       ├── tasks.js       # task list, complete
+│       ├── packages.js    # buy package
+│       ├── deposit.js     # request deposit
+│       ├── withdraw.js    # request withdraw
+│       └── admin.js       # all admin endpoints
+│
+├── database/
+│   └── schema.sql         # MySQL schema (run once on VPS)
+│
+└── deploy/
+    ├── ecosystem.config.js  # PM2 config
+    ├── nginx.conf           # nginx reverse proxy
+    └── DEPLOY.md            # step-by-step deploy guide (Bangla)
+```
 
-**ইউজার ড্যাশবোর্ড (লগইন আবশ্যক)**
-- Dashboard — ব্যালেন্স, "Tap Balance" (দৈনিক ইনকাম ক্লেইম), নোটিশ ব্যানার, ৮টা মেইন আইকন
-- Task — আজকের বিজ্ঞাপন/টাস্ক দেখা ও ইনকাম, ভিডিও/অ্যাড ভিউ কাউন্টার, রিফ্রেশ, পেন্ডিং, প্যাকেজ
-- Plan / Package — ইনভেস্টমেন্ট প্যাকেজ লিস্ট (Silver ৳৫০০, Silver2 ৳১০০০, Silver3 ৳২০০০, ইত্যাদি)
-- Deposit — bKash/Nagad সিলেক্ট, amount, transaction ID দিয়ে জমার রিকোয়েস্ট
-- Withdraw — bKash/Nagad সিলেক্ট, ফোন, amount দিয়ে উইথড্র রিকোয়েস্ট (min ৫০০ টাকা)
-- Refer — নিজের রেফার কোড/লিংক, কতজন রেফার করেছে, কত কমিশন পেয়েছে
-- Transaction — সব ডিপোজিট, উইথড্র, ইনকাম, প্যাকেজ পারচেজের হিস্ট্রি
-- Profile — নাম, ফোন, পাসওয়ার্ড পরিবর্তন, পেমেন্ট নাম্বার সেট
+## Database schema (MySQL)
 
-**অ্যাডমিন প্যানেল (আলাদা লগইন)**
-- ড্যাশবোর্ড — মোট ইউজার, পেন্ডিং ডিপোজিট/উইথড্র, আজকের নতুন ইউজার
-- ইউজার ম্যানেজমেন্ট — লিস্ট, সার্চ, ব্যালেন্স অ্যাডজাস্ট, ব্লক/আনব্লক
-- ডিপোজিট রিকোয়েস্ট — Approve / Reject (Approve হলে ইউজারের ব্যালেন্সে যোগ হবে)
-- উইথড্র রিকোয়েস্ট — Approve / Reject (Approve হলে ব্যালেন্স কাটা হবে)
-- প্যাকেজ ম্যানেজমেন্ট — নাম, দাম, দৈনিক ইনকাম, মেয়াদ (দিন), দৈনিক টাস্ক সংখ্যা
-- টাস্ক / অ্যাড ম্যানেজমেন্ট — ভিডিও/অ্যাড URL যোগ-বাদ
-- নোটিশ / ব্যানার ম্যানেজমেন্ট
-- পেমেন্ট সেটিংস — bKash/Nagad merchant নাম্বার
+12 tables — same as bdt69:
+- `users` (id, phone UNIQUE, password_hash, name, balance, refer_code, refer_by, status, is_admin, created_at)
+- `packages` (id, name, price, daily_task_limit, daily_earning, validity_days, image)
+- `user_packages` (id, user_id, package_id, expires_at, tasks_done_today, last_reset)
+- `tasks` (id, title, type, url, reward, package_required, active)
+- `task_completions` (id, user_id, task_id, completed_at)
+- `deposits` (id, user_id, amount, method, txn_id, status, created_at)
+- `withdrawals` (id, user_id, amount, method, account, status, created_at)
+- `referrals` (id, referrer_id, referred_id, commission, level)
+- `transactions` (id, user_id, type, amount, note, created_at)
+- `notices` (id, title, body, active)
+- `payment_settings` (id, method, number, instructions)
+- `admin_logs` (id, admin_id, action, target, created_at)
 
-## ২. ডেটাবেস কাঠামো (Lovable Cloud)
+## Build phases
 
-- `profiles` — id (auth.users-এর সাথে FK), name, phone, payment_number, balance, total_earned, referred_by
-- `user_roles` — user_id, role ('user' / 'admin')
-- `packages` — name, price, daily_income, duration_days, daily_tasks, is_active
-- `user_packages` — user_id, package_id, purchased_at, expires_at, status, last_claim_date
-- `tasks` — title, ad_url / video_url, reward (অপশনাল), is_active
-- `task_completions` — user_id, task_id, completed_at, reward
-- `deposits` — user_id, method (bkash/nagad), amount, transaction_id, status (pending/approved/rejected), created_at
-- `withdrawals` — user_id, method, phone, amount, status, created_at, processed_at
-- `referrals` — referrer_id, referred_id, commission_earned
-- `transactions` — user_id, type (deposit/withdraw/income/package/referral), amount, balance_after, note, created_at
-- `notices` — title, message, is_active
-- `payment_settings` — bkash_number, nagad_number, min_deposit, min_withdraw, referral_percent
+**Phase 1 (this turn):** Frontend skeleton + API skeleton + DB schema + deploy guide
+- Remove Supabase remnants, set up Express server folder
+- Create MySQL schema file
+- Build login/register pages + landing
+- Auth API (register, login, JWT)
+- One protected user dashboard route working end-to-end
+- DEPLOY.md with exact commands (Bangla, beginner-friendly)
 
-সব টেবিলে RLS অন থাকবে। ইউজার শুধু নিজের ডেটা দেখবে, অ্যাডমিন `has_role()` security definer ফাংশন দিয়ে সব দেখবে।
+**Phase 2:** Tasks, packages, user pages
+**Phase 3:** Deposit/withdraw flow
+**Phase 4:** Full admin panel
+**Phase 5:** Referral system + polish
 
-## ৩. মূল ব্যবসায়িক লজিক
+## Auth approach
 
-- **প্যাকেজ কিনলে** — ব্যালেন্স থেকে কাটা হবে, `user_packages`-এ এন্ট্রি, expiry সেট হবে
-- **দৈনিক ইনকাম** — অ্যাকটিভ প্যাকেজের নির্ধারিত সংখ্যক টাস্ক/অ্যাড দেখার পর ব্যালেন্সে যোগ হবে; দিনে একবার
-- **রেফারেল কমিশন** — referred ইউজার প্রথম ডিপোজিট/প্যাকেজ কিনলে referrer একটা % কমিশন পাবে
-- **ডিপোজিট/উইথড্র** — ম্যানুয়াল অ্যাপ্রুভাল (অ্যাডমিন), অ্যাপ্রুভ হলে অটো ব্যালেন্স আপডেট + transaction এন্ট্রি
+- JWT in httpOnly cookie (secure)
+- User login: `/login` → `/user/dashboard`
+- Admin login: `/kt-admin-login` (gopon URL) → `/kt-admin/dashboard`
+- Same `users` table, `is_admin` flag controls admin access
+- Middleware checks `is_admin` for `/api/admin/*` routes
 
-সব ব্যালেন্স আপডেট সার্ভার সাইডে server function-এ হবে (ক্লায়েন্টে কখনো না)।
+## Environment (VPS)
 
-## ৪. ডিজাইন
+```
+# server/.env (VPS-এ তৈরি হবে, GitHub-এ যাবে না)
+DB_HOST=localhost
+DB_USER=clicktaka
+DB_PASS=<vps-password>
+DB_NAME=clicktaka
+JWT_SECRET=<random-64-char>
+PORT=3001
+```
 
-- নাম: **ClickTaka** (টাইটেল, লোগো, ব্র্যান্ডিং)
-- ভাষা: পুরো UI বাংলায়
-- কালার: পার্পল-ব্লু গ্রেডিয়েন্ট হেডার + হালকা ব্যাকগ্রাউন্ড + কালারফুল আইকন কার্ড (BDT69 এর মত প্রিমিয়াম মোবাইল-ফ্রেন্ডলি লুক, কিন্তু আমাদের নিজস্ব)
-- মোবাইল-ফার্স্ট রেসপন্সিভ লেআউট
+## Deploy flow (after every code change)
 
-## ৫. কাজের ধাপ (যেভাবে বানাব)
+```bash
+ssh root@your-vps
+cd /var/www/clicktaka
+git pull
+cd server && npm install   # if dependencies changed
+cd .. && npm install && npm run build
+pm2 restart clicktaka-api
+pm2 restart clicktaka-web
+pm2 logs --lines 50         # check logs
+```
 
-1. Lovable Cloud চালু করা (auth + database + storage)
-2. সব টেবিল + RLS + `has_role` ফাংশন + ট্রিগার (signup-এ profile auto-create) মাইগ্রেশন
-3. Auth: রেজিস্টার (ফোন+পাসওয়ার্ড+রেফার কোড), লগইন, লগআউট, প্রোটেক্টেড রুট
-4. পাবলিক ল্যান্ডিং পেজ + পরিসংখ্যান
-5. ইউজার ড্যাশবোর্ড শেল (হেডার + ৮ আইকন গ্রিড + নোটিশ)
-6. Package পেজ + কেনার ফ্লো (server function)
-7. Task পেজ + অ্যাড দেখার ফ্লো + দৈনিক ইনকাম ক্লেইম
-8. Deposit পেজ + অ্যাডমিন অ্যাপ্রুভাল
-9. Withdraw পেজ + অ্যাডমিন অ্যাপ্রুভাল
-10. Refer পেজ + কমিশন লজিক
-11. Transaction হিস্ট্রি, Profile পেজ
-12. অ্যাডমিন প্যানেল (আলাদা `/admin` রুট, role-based protection)
-13. টেস্ট + ডিপ্লয় গাইড
+I'll write the full DEPLOY.md (Bangla) with VPS setup, MySQL install, nginx, SSL, PM2 — everything step-by-step.
 
----
+## Confirmation
 
-## ⚠️ গুরুত্বপূর্ণ কথা
+আমি Phase 1 শুরু করব। এতে যা পাবেন:
+1. Working landing + login + register page
+2. Express API with JWT auth
+3. MySQL schema file (`database/schema.sql`)
+4. Complete `deploy/DEPLOY.md` (Bangla, copy-paste ready)
+5. PM2 + nginx config
 
-১. আমি **bdt69-এর কোড কপি করব না** — শুধু একই ফাংশনালিটি নতুনভাবে বানাব। ব্র্যান্ড নাম/লোগো/ছবি সব আমাদের নিজের ClickTaka-র হবে।
+আপনি Phase 1 শেষ হলে VPS-এ deploy করে test করবেন। সব ঠিক থাকলে Phase 2 শুরু করব।
 
-২. এটা **অনেক বড় প্রজেক্ট** (১০+ পেজ, অ্যাডমিন প্যানেল, পেমেন্ট লজিক)। একসাথে সব না বানিয়ে আমি ধাপে ধাপে এগোব। প্রথম ব্যাচে: Cloud setup + ডেটাবেস + Auth + ল্যান্ডিং + ইউজার ড্যাশবোর্ড শেল। তারপর পরের ধাপে Task/Package/Deposit/Withdraw, শেষে অ্যাডমিন প্যানেল।
-
-৩. **bKash/Nagad আসল API ইন্টিগ্রেশন নাই** — সবাই যেভাবে করে (bdt69-ও তাই করে), ইউজার ম্যানুয়ালি টাকা পাঠিয়ে transaction ID দেবে, অ্যাডমিন চেক করে অ্যাপ্রুভ করবে।
-
-## আপনাকে কয়েকটা প্রশ্ন
-
-প্ল্যানটা কনফার্ম করার আগে জানালে ভালো হয়:
-
-- **প্যাকেজের দাম/ইনকাম** কি bdt69-এর মতই রাখব (Silver ৳৫০০ → ৳৩০০/দিন × ৭০ দিন ইত্যাদি), নাকি আপনি নিজের রেট দিবেন?
-- **মিনিমাম ডিপোজিট ৫০০, মিনিমাম উইথড্র ৫০০** — ঠিক আছে?
-- **রেফারেল কমিশন** কত % রাখব? (যেমন ১০%)
-- **অ্যাডমিন লগইন** — প্রথম অ্যাডমিন ইউজার কোন ফোন নাম্বারে বানাবো?
-
-আপনি "Approve plan" চাপলেই আমি ধাপ ১-৫ (Cloud + DB + Auth + Landing + Dashboard shell) দিয়ে কাজ শুরু করব, প্রতি ধাপ শেষে আপনাকে দেখিয়ে দেব এবং deploy কমান্ড + লগ-চেক কমান্ড দিয়ে দেব।
+**Approve করলে Phase 1 শুরু করছি।**
