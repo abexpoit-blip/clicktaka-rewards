@@ -172,14 +172,15 @@ CREATE TABLE IF NOT EXISTS admin_logs (
 -- ============================================
 -- SEED DATA: 5 packages (bdt69 style)
 -- ============================================
-INSERT INTO packages (name, price, daily_task_limit, daily_earning, validity_days) VALUES
-('Silver',   500,    10, 50,   365),
-('Silver 2', 1000,   15, 110,  365),
-('Silver 3', 2000,   20, 230,  365),
-('Gold',     5000,   30, 600,  365),
-('Diamond',  10000,  50, 1300, 365);
+INSERT INTO packages (name, price, daily_task_limit, daily_earning, validity_days)
+SELECT 'Silver', 500, 10, 50, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Silver')
+UNION ALL SELECT 'Silver 2', 1000, 15, 110, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Silver 2')
+UNION ALL SELECT 'Silver 3', 2000, 20, 230, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Silver 3')
+UNION ALL SELECT 'Gold', 5000, 30, 600, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Gold')
+UNION ALL SELECT 'Diamond', 10000, 50, 1300, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Diamond');
 
 INSERT IGNORE INTO payment_settings (id) VALUES (1);
 
-INSERT INTO notices (title, body) VALUES
-('স্বাগতম ClickTaka-তে!', 'Task complete করে দৈনিক income করুন।');
+INSERT INTO notices (title, body)
+SELECT 'স্বাগতম ClickTaka-তে!', 'Task complete করে দৈনিক income করুন।'
+WHERE NOT EXISTS (SELECT 1 FROM notices WHERE title='স্বাগতম ClickTaka-তে!');
