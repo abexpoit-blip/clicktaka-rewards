@@ -33,22 +33,40 @@ function TasksPage() {
   const [d, setD] = useState<Data | null>(null);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
-  const [active, setActive] = useState<{ task: Task; remaining: number } | null>(null);
+  const REQUIRED_SECONDS = 30;
+  const [active, setActive] = useState<{ task: Task; viewed: number; awayOnce: boolean } | null>(null);
 
   function load() {
     api<Data>("/user/tasks").then(setD).catch((e) => setErr(e.message));
   }
   useEffect(load, []);
 
+  // Count seconds — only when the user is actually viewing the ad
+  // (i.e. the ClickTaka tab is hidden / window blurred). Pause when they come back
+  // before the minimum view time. Visual-link tasks (no url) count regardless.
   useEffect(() => {
-    if (!active || active.remaining <= 0) return;
-    const t = setTimeout(() => setActive((a) => (a ? { ...a, remaining: a.remaining - 1 } : a)), 1000);
-    return () => clearTimeout(t);
+    if (!active) return;
+    if (active.viewed >= REQUIRED_SECONDS) return;
+    const needsAway = !!active.task.url; // only ad/url tasks need actual viewing
+    const t = setInterval(() => {
+      setActive((a) => {
+        if (!a) return a;
+        const isAway = document.hidden || !document.hasFocus();
+        if (needsAway && !isAway) return a; // paused — user not viewing the ad
+        const viewed = Math.min(REQUIRED_SECONDS, a.viewed + 1);
+        return { ...a, viewed, awayOnce: a.awayOnce || isAway };
+      });
+    }, 1000);
+    return () => clearInterval(t);
   }, [active]);
 
   async function startTask(task: Task) {
-    if (task.url) window.open(task.url, "_blank", "noopener");
-    setActive({ task, remaining: 15 });
+    setActive({ task, viewed: 0, awayOnce: false });
+    if (task.url) {
+      // open AFTER state is set so the visibility change is observed
+      setTimeout(() => window.open(task.url!, "_blank", "noopener,noreferrer"), 50);
+      toast.message("Ad খুলছে — কমপক্ষে 30s দেখুন, তারপর Claim চালু হবে", { duration: 3500 });
+    }
   }
 
   async function complete(task: Task) {
