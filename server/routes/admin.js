@@ -93,6 +93,15 @@ r.post('/tasks/:id/toggle', authAdmin, async (req, res) => {
   res.json({ ok: true, active: !!next });
 });
 
+// Delete task (only if no completions)
+r.delete('/tasks/:id', authAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const c = await q('SELECT COUNT(*) AS c FROM task_completions WHERE task_id=?', [id]);
+  if (c[0].c > 0) return res.status(409).json({ error: 'Completions আছে — শুধু pause করুন' });
+  await q('DELETE FROM tasks WHERE id=?', [id]);
+  res.json({ ok: true });
+});
+
 // Recent earnings (task completions across all users)
 r.get('/earnings', authAdmin, async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 50, 200);
