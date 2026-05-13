@@ -329,15 +329,17 @@ function TasksPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {d.tasks.map((t) => {
                 const isDone = done.has(t.id);
-                const disabled = isDone || limitReached || active !== null;
+                const justOk = justClaimed?.id === t.id;
+                const otherActive = active !== null && active.task.id !== t.id;
+                const disabled = isDone || limitReached || otherActive;
                 const m = typeMeta(t.type);
                 const Icon = m.icon;
                 return (
-                  <article key={t.id} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all">
+                  <article key={t.id} className={`group relative overflow-hidden rounded-2xl border bg-card shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all ${justOk ? "border-success ring-2 ring-success/30 animate-pulse" : "border-border/70"}`}>
                     <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.grad}`} />
-                    {isDone && (
+                    {(isDone || justOk) && (
                       <span className="absolute top-2.5 right-2.5 inline-flex items-center gap-1 rounded-full bg-success/15 text-success px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                        <CheckCircle2 className="h-3 w-3" /> Completed
+                        <CheckCircle2 className="h-3 w-3" /> {justOk ? `+৳${justClaimed!.reward}` : "Completed"}
                       </span>
                     )}
                     <div className="p-4">
