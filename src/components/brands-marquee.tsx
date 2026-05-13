@@ -2,11 +2,15 @@
 import { Handshake } from "lucide-react";
 
 const BRANDS = [
+  // Foreign Ad networks & sponsors
+  "Google AdSense", "Adsterra", "ExoClick", "PropellerAds", "Media.net",
+  "Meta Audience", "AdMob", "Unity Ads", "ironSource", "TrafficStars",
+  "Amazon Associates", "AliExpress", "ClickBank", "Taboola", "Outbrain",
+  // Local payment & telcos
   "bKash", "Nagad", "Rocket", "Upay", "TallyKhata",
-  "Google Ads", "Meta Audience", "AdMob", "Unity Ads", "ironSource",
-  "Daraz", "Pathao", "Foodpanda", "Shohoz", "Chaldal",
   "Grameenphone", "Robi", "Banglalink", "Teletalk",
-  "Amazon Associates", "AliExpress", "ClickBank",
+  // Local commerce
+  "Daraz", "Pathao", "Foodpanda", "Shohoz", "Chaldal",
 ];
 
 export function BrandsMarquee() {
