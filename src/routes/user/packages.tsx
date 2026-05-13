@@ -179,15 +179,10 @@ function PackagesPage() {
 
                   {/* CTA */}
                   <button
-                    onClick={() => buy(p)}
-                    disabled={buying === p.id}
-                    className={`mt-6 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-bold text-sm transition shadow-brand disabled:opacity-60 ${
-                      can
-                        ? `bg-gradient-to-r ${t.grad} text-white hover:scale-[1.02]`
-                        : "bg-muted text-muted-foreground cursor-not-allowed"
-                    }`}
+                    onClick={() => openUpgrade(p)}
+                    className={`mt-6 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-bold text-sm transition shadow-brand bg-gradient-to-r ${t.grad} text-white hover:scale-[1.02]`}
                   >
-                    {buying === p.id ? "Activating..." : can ? <>Activate Now <ArrowRight className="h-4 w-4" /></> : "Balance অপ্রতুল"}
+                    <Crown className="h-4 w-4" /> Upgrade Now <ArrowRight className="h-4 w-4" />
                   </button>
                   {!can && (
                     <Link to="/user/deposit" className="block mt-2 text-center text-xs font-semibold text-primary hover:underline">
