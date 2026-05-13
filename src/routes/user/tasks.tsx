@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 
-export const Route = createFileRoute("/_user/tasks")({ component: TasksPage });
+export const Route = createFileRoute("/user/tasks")({ component: TasksPage });
 
 type Task = { id: number; title: string; type: string; url: string | null; reward: number };
 type Pkg = { id: number; name: string; tasks_done_today: number; daily_task_limit: number; daily_earning: number; expires_at: string };

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_user/spin")({ component: SpinPage });
+export const Route = createFileRoute("/user/spin")({ component: SpinPage });
 
 const SLICES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 const COLORS = ["#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626", "#0891b2", "#9333ea", "#16a34a", "#ea580c", "#be185d"];
