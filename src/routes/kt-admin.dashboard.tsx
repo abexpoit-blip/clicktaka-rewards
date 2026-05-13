@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { ErrorState, Skeleton } from "@/components/ui-states";
 
 export const Route = createFileRoute("/kt-admin/dashboard")({ component: AdminDashboard });
 
@@ -18,14 +19,29 @@ function AdminDashboard() {
   const [s, setS] = useState<Stats | null>(null);
   const [earnings, setEarnings] = useState<EarningRow[]>([]);
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api<Stats>("/admin/stats").then(setS).catch((e) => setErr(e.message));
-    api<{ earnings: EarningRow[] }>("/admin/earnings?limit=20").then((r) => setEarnings(r.earnings)).catch(() => {});
-  }, []);
+  function load() {
+    setLoading(true); setErr("");
+    Promise.all([
+      api<Stats>("/admin/stats").then(setS),
+      api<{ earnings: EarningRow[] }>("/admin/earnings?limit=20").then((r) => setEarnings(r.earnings)).catch(() => setEarnings([])),
+    ]).catch((e) => setErr(e.message)).finally(() => setLoading(false));
+  }
+  useEffect(load, []);
 
-  if (err) return <div className="text-red-400">{err}</div>;
-  if (!s) return <div>লোডিং...</div>;
+  if (err) return <ErrorState dark message={err} onRetry={load} />;
+  if (loading || !s) {
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <Skeleton className="h-8 w-40" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        </div>
+        <Skeleton className="h-72 w-full rounded-xl" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
