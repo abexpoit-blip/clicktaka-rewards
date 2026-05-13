@@ -28,6 +28,11 @@ function AdminTasks() {
   async function toggle(id: number) {
     await api(`/admin/tasks/${id}/toggle`, { method: "POST" }); load();
   }
+  async function del(id: number) {
+    if (!confirm(`Task #${id} delete করবেন?`)) return;
+    try { await api(`/admin/tasks/${id}`, { method: "DELETE" }); load(); }
+    catch (e: any) { alert(e.message); }
+  }
 
   return (
     <div className="space-y-6">
