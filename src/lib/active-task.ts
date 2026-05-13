@@ -26,7 +26,6 @@ export function writeActive(a: ActiveTask | null) {
   try {
     if (a == null) localStorage.removeItem(KEY);
     else localStorage.setItem(KEY, JSON.stringify(a));
-    // notify listeners (same-tab; storage event fires only across tabs)
     window.dispatchEvent(new Event("ct:active-task"));
   } catch {}
 }
@@ -38,4 +37,13 @@ export function clearActive() { writeActive(null); }
 export function viewedSeconds(a: ActiveTask): number {
   if (a.needsAway) return Math.min(REQUIRED_SECONDS, Math.floor(a.awayMs / 1000));
   return Math.min(REQUIRED_SECONDS, Math.floor((Date.now() - a.startedAt) / 1000));
+}
+
+// ─── Optimistic balance bus ─────────────────────────────────────────────
+// Any page (e.g. tasks page Claim) can call bumpBalance(+5) and the layout
+// header instantly reflects it without a refetch.
+export const BALANCE_EVENT = "ct:balance-delta";
+export function bumpBalance(delta: number) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(BALANCE_EVENT, { detail: { delta } }));
 }
