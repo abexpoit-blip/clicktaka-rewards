@@ -176,8 +176,13 @@ function TasksPage() {
         </section>
       )}
 
-      {/* Active running task — sticky modal-like */}
-      {active && (
+      {/* Active running task — sticky modal-like with verification */}
+      {active && (() => {
+        const remaining = Math.max(0, REQUIRED_SECONDS - active.viewed);
+        const needsAway = !!active.task.url;
+        const ready = remaining === 0 && (!needsAway || active.awayOnce);
+        const pctDone = Math.round((active.viewed / REQUIRED_SECONDS) * 100);
+        return (
         <div className="fixed inset-x-0 bottom-0 z-40 px-4 pb-4 sm:px-6 sm:pb-6 animate-fade-in">
           <div className="max-w-2xl mx-auto relative overflow-hidden rounded-3xl bg-gradient-to-br from-amber-500 via-orange-500 to-pink-500 text-white shadow-2xl p-5 sm:p-6">
             <div aria-hidden className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-white/20 blur-2xl" />
@@ -186,18 +191,25 @@ function TasksPage() {
             </button>
             <div className="relative flex items-center gap-4">
               <div className="grid place-items-center h-16 w-16 rounded-2xl bg-white/20 backdrop-blur shrink-0">
-                {active.remaining > 0 ? (
-                  <span className="font-display text-2xl font-bold tabular-nums">{active.remaining}s</span>
+                {!ready ? (
+                  <span className="font-display text-2xl font-bold tabular-nums">{remaining}s</span>
                 ) : (
                   <CheckCircle2 className="h-8 w-8" />
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[11px] uppercase tracking-wider font-bold text-white/80">▶ Task Running</p>
+                <p className="text-[11px] uppercase tracking-wider font-bold text-white/80">▶ Verifying View</p>
                 <h3 className="font-display text-lg font-bold mt-0.5 truncate">{active.task.title}</h3>
-                <p className="text-sm text-white/90">Reward: <b>৳{active.task.reward}</b></p>
+                <p className="text-sm text-white/90">
+                  Reward: <b>৳{active.task.reward}</b>
+                  {needsAway && !active.awayOnce && (
+                    <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
+                      ⚠ Ad tab খুলুন
+                    </span>
+                  )}
+                </p>
               </div>
-              {active.remaining <= 0 && (
+              {ready ? (
                 <button
                   onClick={() => complete(active.task)}
                   disabled={busy === active.task.id}
@@ -205,16 +217,24 @@ function TasksPage() {
                 >
                   <CheckCircle2 className="h-4 w-4" /> {busy === active.task.id ? "..." : "Claim"}
                 </button>
+              ) : (
+                <div className="text-right text-[11px] text-white/85 max-w-[120px]">
+                  {needsAway && !active.awayOnce ? "Ad tab-এ যান" : "Verify হচ্ছে…"}
+                </div>
               )}
             </div>
-            {active.remaining > 0 && (
-              <div className="relative mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
-                <div className="h-full bg-white rounded-full transition-all" style={{ width: `${((15 - active.remaining) / 15) * 100}%` }} />
-              </div>
-            )}
+            <div className="relative mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
+              <div className="h-full bg-white rounded-full transition-all" style={{ width: `${pctDone}%` }} />
+            </div>
+            <p className="relative mt-2 text-[11px] text-white/85 leading-relaxed">
+              {needsAway
+                ? "🛡️ Ad tab-এ যান ও কমপক্ষে 30s দেখুন। ClickTaka tab-এ ফিরে আসলে timer pause হয়ে যাবে।"
+                : "⏱ কমপক্ষে 30 সেকেন্ড অপেক্ষা করুন।"}
+            </p>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Available tasks */}
       <section>
