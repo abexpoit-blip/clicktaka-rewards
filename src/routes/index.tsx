@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 
 type Pkg = { id: number; name: string; price: number; daily_task_limit: number; daily_earning: number };
+type ActivePkg = { id: number; name: string; daily_task_limit: number; daily_earning: number; expires_at?: string };
+type Me = { user: { id: number; phone: string }; packages: ActivePkg[] };
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -23,12 +25,24 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   const [packages, setPackages] = useState<Pkg[]>([]);
+  const [me, setMe] = useState<Me | null>(null);
+  const [authed, setAuthed] = useState<boolean>(false);
 
   useEffect(() => {
     api<{ packages: Pkg[] }>("/packages")
       .then((d) => setPackages(d.packages))
       .catch(() => {});
+    api<Me>("/user/me")
+      .then((d) => { setMe(d); setAuthed(true); })
+      .catch(() => setAuthed(false));
   }, []);
+
+  const activePkgPrice = (() => {
+    if (!me?.packages?.length || !packages.length) return 0;
+    const names = new Set(me.packages.map((p) => p.name));
+    const matched = packages.filter((p) => names.has(p.name));
+    return matched.reduce((m, p) => Math.max(m, Number(p.price)), 0);
+  })();
 
   return (
     <div className="min-h-screen grid-noise">
