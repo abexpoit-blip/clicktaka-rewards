@@ -29,6 +29,9 @@ function PackagesPage() {
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState<number | null>(null);
   const [balance, setBalance] = useState<number>(0);
+  const [modalPkg, setModalPkg] = useState<Package | null>(null);
+  const [step, setStep] = useState<"select" | "confirm">("select");
+  const [method, setMethod] = useState<string>("balance");
 
   function load() {
     api<{ packages: Package[] }>("/packages")
@@ -40,16 +43,32 @@ function PackagesPage() {
   }
   useEffect(load, []);
 
-  async function buy(p: Package) {
-    if (balance < p.price) {
-      toast.error(`Balance কম! আপনার আছে ৳${balance.toLocaleString()}, দরকার ৳${p.price.toLocaleString()}। আগে Deposit করুন।`);
+  function openUpgrade(p: Package) {
+    setModalPkg(p);
+    setStep("select");
+    setMethod("balance");
+  }
+  function closeModal() {
+    if (buying !== null) return;
+    setModalPkg(null);
+  }
+
+  async function confirmBuy() {
+    if (!modalPkg) return;
+    const p = modalPkg;
+    if (method === "balance" && balance < p.price) {
+      toast.error(`Balance কম! আপনার আছে ৳${balance.toLocaleString()}, দরকার ৳${p.price.toLocaleString()}।`);
       return;
     }
-    if (!confirm(`${p.name} প্যাকেজ কিনতে চান? (৳${p.price})`)) return;
+    if (method !== "balance") {
+      toast.info("এই payment method এখন setup হচ্ছে — আপাতত Balance থেকে activate করুন।");
+      return;
+    }
     setBuying(p.id);
     try {
       await api(`/user/packages/${p.id}/buy`, { method: "POST" });
       toast.success(`${p.name} package activate হয়েছে! 🎉`);
+      setModalPkg(null);
       load();
     } catch (e: any) {
       toast.error(e.message);
