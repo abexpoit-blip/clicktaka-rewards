@@ -300,7 +300,7 @@ function TasksPage() {
                         </div>
                         <div className="rounded-xl bg-info/10 text-info py-2 text-center">
                           <p className="text-[10px] uppercase tracking-wider opacity-80">Duration</p>
-                          <p className="font-display font-bold tabular-nums text-base">~15s</p>
+                          <p className="font-display font-bold tabular-nums text-base">~30s</p>
                         </div>
                       </div>
 
