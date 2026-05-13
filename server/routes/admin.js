@@ -182,4 +182,127 @@ r.get('/deploy-info', authAdmin, async (_req, res) => {
   });
 });
 
+// ─── Payment Settings ──────────────────────────────────────────────────
+r.get('/payment-settings', authAdmin, async (_req, res) => {
+  const rows = await q(
+    'SELECT bkash_number, nagad_number, min_deposit, min_withdraw, referral_percent FROM payment_settings WHERE id=1 LIMIT 1'
+  );
+  const s = rows[0] || { bkash_number: '', nagad_number: '', min_deposit: 500, min_withdraw: 500, referral_percent: 10 };
+  res.json({
+    settings: {
+      bkash_number: s.bkash_number,
+      nagad_number: s.nagad_number,
+      min_deposit: Number(s.min_deposit),
+      min_withdraw: Number(s.min_withdraw),
+      referral_percent: Number(s.referral_percent),
+    },
+  });
+});
+
+r.put('/payment-settings', authAdmin, async (req, res) => {
+  try {
+    const data = z.object({
+      bkash_number: z.string().max(50).default(''),
+      nagad_number: z.string().max(50).default(''),
+      min_deposit: z.number().min(0).max(1000000),
+      min_withdraw: z.number().min(0).max(1000000),
+      referral_percent: z.number().min(0).max(100),
+    }).parse(req.body);
+    await q('INSERT IGNORE INTO payment_settings (id) VALUES (1)');
+    await q(
+      `UPDATE payment_settings SET bkash_number=?, nagad_number=?, min_deposit=?, min_withdraw=?, referral_percent=? WHERE id=1`,
+      [data.bkash_number, data.nagad_number, data.min_deposit, data.min_withdraw, data.referral_percent]
+    );
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(400).json({ error: e?.errors?.[0]?.message || 'Invalid input' });
+  }
+});
+
+// ─── Deposits queue ───────────────────────────────────────────────────
+r.get('/deposits', authAdmin, async (req, res) => {
+  const status = (req.query.status || 'pending').toString();
+  const where = status === 'all' ? '' : 'WHERE d.status=?';
+  const params = status === 'all' ? [] : [status];
+  const rows = await q(
+    `SELECT d.id, d.user_id, d.amount, d.method, d.txn_id AS transaction_id,
+            d.status, d.admin_note, d.created_at,
+            u.phone, u.name
+     FROM deposits d JOIN users u ON u.id = d.user_id
+     ${where}
+     ORDER BY d.id DESC LIMIT 200`,
+    params
+  );
+  res.json({ deposits: rows });
+});
+
+async function decideDeposit(req, res, action) {
+  const id = Number(req.params.id);
+  const note = (req.body?.note || '').toString().slice(0, 500);
+  const rows = await q('SELECT id, user_id, amount, status FROM deposits WHERE id=? LIMIT 1', [id]);
+  if (!rows.length) return res.status(404).json({ error: 'Not found' });
+  const dep = rows[0];
+  if (dep.status !== 'pending') return res.status(409).json({ error: 'Already processed' });
+
+  if (action === 'approve') {
+    const amount = Number(dep.amount);
+    await q('UPDATE users SET balance = balance + ? WHERE id=?', [amount, dep.user_id]);
+    const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [dep.user_id]);
+    await q('UPDATE deposits SET status="approved", admin_note=? WHERE id=?', [note, id]);
+    await q(
+      "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'deposit', ?, ?, ?)",
+      [dep.user_id, amount, Number(after[0].balance), `Deposit #${id} approved`]
+    );
+  } else {
+    await q('UPDATE deposits SET status="rejected", admin_note=? WHERE id=?', [note, id]);
+  }
+  res.json({ ok: true });
+}
+r.post('/deposits/:id/approve', authAdmin, (req, res) => decideDeposit(req, res, 'approve'));
+r.post('/deposits/:id/reject',  authAdmin, (req, res) => decideDeposit(req, res, 'reject'));
+
+// ─── Withdrawals queue ────────────────────────────────────────────────
+r.get('/withdrawals', authAdmin, async (req, res) => {
+  const status = (req.query.status || 'pending').toString();
+  const where = status === 'all' ? '' : 'WHERE w.status=?';
+  const params = status === 'all' ? [] : [status];
+  const rows = await q(
+    `SELECT w.id, w.user_id, w.amount, w.method, w.account AS payment_number,
+            w.status, w.admin_note, w.created_at,
+            u.phone, u.name
+     FROM withdrawals w JOIN users u ON u.id = w.user_id
+     ${where}
+     ORDER BY w.id DESC LIMIT 200`,
+    params
+  );
+  res.json({ withdrawals: rows });
+});
+
+async function decideWithdrawal(req, res, action) {
+  const id = Number(req.params.id);
+  const note = (req.body?.note || '').toString().slice(0, 500);
+  const rows = await q('SELECT id, user_id, amount, status FROM withdrawals WHERE id=? LIMIT 1', [id]);
+  if (!rows.length) return res.status(404).json({ error: 'Not found' });
+  const wd = rows[0];
+  if (wd.status !== 'pending') return res.status(409).json({ error: 'Already processed' });
+  const amount = Number(wd.amount);
+
+  if (action === 'approve') {
+    // Money already debited at submit-time. Just mark approved.
+    await q('UPDATE withdrawals SET status="approved", admin_note=? WHERE id=?', [note, id]);
+  } else {
+    // Refund: credit balance back
+    await q('UPDATE users SET balance = balance + ? WHERE id=?', [amount, wd.user_id]);
+    const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [wd.user_id]);
+    await q('UPDATE withdrawals SET status="rejected", admin_note=? WHERE id=?', [note, id]);
+    await q(
+      "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'refund', ?, ?, ?)",
+      [wd.user_id, amount, Number(after[0].balance), `Withdraw #${id} rejected — refund`]
+    );
+  }
+  res.json({ ok: true });
+}
+r.post('/withdrawals/:id/approve', authAdmin, (req, res) => decideWithdrawal(req, res, 'approve'));
+r.post('/withdrawals/:id/reject',  authAdmin, (req, res) => decideWithdrawal(req, res, 'reject'));
+
 export default r;
