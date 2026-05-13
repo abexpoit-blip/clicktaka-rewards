@@ -275,11 +275,20 @@ function TasksPage() {
             <div className="relative mt-4 h-1.5 bg-white/20 rounded-full overflow-hidden">
               <div className="h-full bg-white rounded-full transition-all" style={{ width: `${pctDone}%` }} />
             </div>
-            <p className="relative mt-2 text-[11px] text-white/85 leading-relaxed">
-              {needsAway
-                ? "🛡️ Ad tab-এ যান ও কমপক্ষে 30s দেখুন। ClickTaka tab-এ ফিরে আসলে timer pause হয়ে যাবে।"
-                : "⏱ কমপক্ষে 30 সেকেন্ড অপেক্ষা করুন।"}
-            </p>
+            <div className="relative mt-2 flex items-center justify-between gap-2 text-[11px] text-white/85 leading-relaxed">
+              <p className="flex-1">
+                {needsAway
+                  ? "🛡️ Ad tab-এ যান ও কমপক্ষে 30s দেখুন। ফিরে আসলে timer pause হবে।"
+                  : "⏱ কমপক্ষে 30 সেকেন্ড অপেক্ষা করুন।"}
+              </p>
+              <button
+                type="button"
+                onClick={() => { setActive(null); toast.message("Active task reset হয়েছে — আবার Start করুন"); }}
+                className="inline-flex items-center gap-1 rounded-full bg-white/20 hover:bg-white/30 px-2.5 py-1 font-bold uppercase tracking-wider transition shrink-0"
+              >
+                <RotateCcw className="h-3 w-3" /> Reset
+              </button>
+            </div>
           </div>
         </div>
         );
