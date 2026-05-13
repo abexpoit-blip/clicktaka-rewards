@@ -318,3 +318,69 @@ function EarnMoreBanner({ pkgs }: { pkgs: Pkg[] }) {
 function Chip({ children }: { children: React.ReactNode }) {
   return <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur px-2.5 py-1 font-medium">{children}</span>;
 }
+
+function AchievementStrip({ totalEarned, completions, hasPkg }: { totalEarned: number; completions: number; hasPkg: boolean }) {
+  const tiers = [
+    { name: "Rookie",  min: 0,     icon: Shield,  grad: "from-slate-400 to-slate-600" },
+    { name: "Hustler", min: 500,   icon: Rocket,  grad: "from-emerald-500 to-teal-500" },
+    { name: "Pro",     min: 2500,  icon: Star,    grad: "from-sky-500 to-indigo-500" },
+    { name: "Elite",   min: 10000, icon: Trophy,  grad: "from-amber-400 to-orange-500" },
+    { name: "Legend",  min: 50000, icon: Crown,   grad: "from-fuchsia-500 to-purple-600" },
+  ];
+  let idx = 0;
+  for (let i = 0; i < tiers.length; i++) if (totalEarned >= tiers[i].min) idx = i;
+  const cur = tiers[idx];
+  const next = tiers[Math.min(idx + 1, tiers.length - 1)];
+  const isMax = idx === tiers.length - 1;
+  const span = Math.max(1, next.min - cur.min);
+  const pct = isMax ? 100 : Math.max(4, Math.min(100, Math.round(((totalEarned - cur.min) / span) * 100)));
+  const CurIcon = cur.icon;
+
+  return (
+    <section className="rounded-3xl border border-border/70 bg-card shadow-card overflow-hidden">
+      <div className="grid md:grid-cols-[auto_1fr_auto] gap-5 items-center p-5 sm:p-6">
+        <div className="flex items-center gap-4">
+          <div className={`relative grid place-items-center h-16 w-16 rounded-2xl bg-gradient-to-br ${cur.grad} text-white shadow-brand`}>
+            <CurIcon className="h-7 w-7" />
+            <span className="absolute -bottom-1 -right-1 grid place-items-center h-6 w-6 rounded-full bg-white text-foreground text-[10px] font-bold border border-border">L{idx + 1}</span>
+          </div>
+          <div>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">Your Tier</p>
+            <p className="font-display text-xl font-bold">{cur.name}</p>
+            <p className="text-[11px] text-muted-foreground">{completions} task complete</p>
+          </div>
+        </div>
+
+        <div className="min-w-0">
+          <div className="flex items-center justify-between text-xs mb-1.5">
+            <span className="font-semibold inline-flex items-center gap-1.5"><Award className="h-3.5 w-3.5 text-primary" /> Progress to <b>{isMax ? cur.name : next.name}</b></span>
+            <span className="tabular-nums font-bold">৳{totalEarned.toLocaleString()}{!isMax && <span className="text-muted-foreground"> / ৳{next.min.toLocaleString()}</span>}</span>
+          </div>
+          <div className="h-2.5 rounded-full bg-muted overflow-hidden relative">
+            <div className={`h-full bg-gradient-to-r ${cur.grad} rounded-full transition-all`} style={{ width: `${pct}%` }} />
+          </div>
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {tiers.map((t, i) => {
+              const TIcon = t.icon; const reached = i <= idx;
+              return (
+                <span key={t.name} className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${reached ? `bg-gradient-to-r ${t.grad} text-white` : "bg-muted text-muted-foreground"}`}>
+                  <TIcon className="h-2.5 w-2.5" /> {t.name}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex md:flex-col gap-2 md:items-end">
+          <Link to={hasPkg ? "/user/tasks" : "/user/packages"}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-brand text-white px-4 py-2.5 text-xs font-bold shadow-brand hover:scale-[1.03] transition whitespace-nowrap">
+            {hasPkg ? <><Zap className="h-3.5 w-3.5" /> Earn More</> : <><Crown className="h-3.5 w-3.5" /> Unlock</>}
+          </Link>
+          <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+            <BadgeCheck className="h-3.5 w-3.5 text-success" /> Verified Account
+          </span>
+        </div>
+      </div>
+    </section>
+  );
+}
