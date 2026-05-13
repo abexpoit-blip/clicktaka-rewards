@@ -7,7 +7,7 @@ export const Route = createFileRoute("/kt-admin-login")({
   component: AdminLogin,
 });
 
-function AdminLogin() {
+export function AdminLogin() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
