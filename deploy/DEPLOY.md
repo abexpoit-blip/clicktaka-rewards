@@ -41,71 +41,59 @@ ufw --force enable
 
 ---
 
-## ধাপ ২: MySQL database তৈরি
+## ধাপ ২: Database তৈরি (বিদ্যমান MariaDB ব্যবহার — নিরাপদ পথ)
 
-প্রথমে MySQL service চালু আছে কিনা নিশ্চিত করুন। আপনার screenshot-এর `ERROR 2002 ... mysqld.sock` মানে MySQL server এখনো চালু নেই/ইনস্টল হয়নি।
+> ⚠️ **গুরুত্বপূর্ণ:** আপনার VPS-এ আগে থেকেই MariaDB + অন্য প্রজেক্টের database আছে। **কিছু purge/remove করবেন না।** MariaDB হলো MySQL-compatible — আমাদের schema হুবহু কাজ করবে। নতুন MySQL ইনস্টলের দরকার **নেই**।
+>
+> যদি ভুল করে `apt purge` চালিয়ে এই purple prompt দেখেন — **`Remove all MariaDB databases?` → অবশ্যই `<No>` সিলেক্ট করুন (Tab → No → Enter)।** তারপর `Ctrl+C` দিয়ে বের হয়ে নিচের ধাপে যান। এটা না করলে অন্য প্রজেক্টের সব data মুছে যাবে।
 
-```bash
-apt update
-apt install -y mysql-server
-systemctl enable --now mysql
-systemctl status mysql --no-pager
-
-# যদি status-এ inactive/failed দেখায়:
-journalctl -u mysql -n 80 --no-pager
-```
-
-যদি log-এ `MySQL has been frozen to prevent damage to your system` দেখায়, তাহলে সাধারণত পুরোনো/broken MySQL-MariaDB files থেকে conflict হচ্ছে। এই প্রজেক্টের VPS যদি নতুন হয় এবং কোনো গুরুত্বপূর্ণ old database না থাকে, নিচের **fresh reinstall** চালান:
+### 2.1 MariaDB service চেক (অন্য প্রজেক্টের জন্য এটা ইতিমধ্যেই চলছে)
 
 ```bash
-systemctl stop mysql || true
-systemctl reset-failed mysql || true
-
-apt purge -y mysql-server mysql-client mysql-common mariadb-server mariadb-client mariadb-common
-apt autoremove -y
-
-mv /etc/mysql /root/mysql-config-backup-$(date +%F-%H%M%S) 2>/dev/null || true
-mv /var/lib/mysql /root/mysql-data-backup-$(date +%F-%H%M%S) 2>/dev/null || true
-rm -rf /var/run/mysqld
-
-apt update
-apt install -y mysql-server
-systemctl enable --now mysql
-systemctl status mysql --no-pager -l
+systemctl status mariadb --no-pager | head -20
 ```
 
-⚠️ যদি VPS-এ আগে থেকেই কোনো দরকারি database থাকে, `/var/lib/mysql` move/delete করবেন না—আগে backup নিন।
+`active (running)` দেখালে এগিয়ে যান। না দেখালে: `systemctl start mariadb`।
 
-`active (running)` দেখালে database/user তৈরি করুন। Ubuntu VPS-এ root user দিয়ে সবচেয়ে সহজ command:
+### 2.2 শুধু আমাদের database + user বানান (অন্য DB-তে হাত পড়বে না)
 
 ```bash
 mysql -u root
 ```
 
-MySQL prompt-এ এগুলো paste করুন (password পাল্টে নিন):
+প্রম্পটে paste করুন:
 
 ```sql
-CREATE DATABASE clicktaka CHARACTER SET utf8mb4;
-CREATE USER 'clicktaka'@'%' IDENTIFIED BY 'এখানে-শক্ত-পাসওয়ার্ড-দিন';
+CREATE DATABASE clicktaka CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'clicktaka'@'localhost' IDENTIFIED BY 'Clicktaka247';
+CREATE USER 'clicktaka'@'%' IDENTIFIED BY 'Clicktaka247';
+GRANT ALL PRIVILEGES ON clicktaka.* TO 'clicktaka'@'localhost';
 GRANT ALL PRIVILEGES ON clicktaka.* TO 'clicktaka'@'%';
 FLUSH PRIVILEGES;
 EXIT;
 ```
 
-Login test করুন:
+> এখানে `GRANT` শুধু `clicktaka.*` এর উপর — **অন্য কোনো database স্পর্শ হবে না।**
+
+### 2.3 Login test
 
 ```bash
-mysql -h 127.0.0.1 -u clicktaka -p clicktaka -e "SHOW TABLES;"
+mysql -h 127.0.0.1 -u clicktaka -pClicktaka247 clicktaka -e "SELECT 1;"
 ```
 
-MySQL-কে remote (Lovable preview থেকে) connect করতে দিন:
+`1` রিটার্ন আসলে কাজ হয়েছে।
+
+### 2.4 (Optional) Remote connect দরকার হলেই শুধু
+
+> বেশিরভাগ ক্ষেত্রে দরকার নেই — backend আর DB একই VPS-এ, `localhost` যথেষ্ট।
 
 ```bash
-nano /etc/mysql/mysql.conf.d/mysqld.cnf
-# খুঁজুন:  bind-address = 127.0.0.1
-# পাল্টে দিন:  bind-address = 0.0.0.0
-systemctl restart mysql
+nano /etc/mysql/mariadb.conf.d/50-server.cnf
+# bind-address = 127.0.0.1  →  bind-address = 0.0.0.0
+systemctl restart mariadb
+ufw allow 3306/tcp
 ```
+
 
 ---
 
