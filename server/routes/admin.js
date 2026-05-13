@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { q } from '../db.js';
 import { authAdmin } from '../middleware.js';
+import fs from 'node:fs';
+import path from 'node:path';
 
 const r = Router();
 
@@ -120,28 +122,22 @@ r.get('/earnings', authAdmin, async (req, res) => {
 
 // Deploy / git info
 r.get('/deploy-info', authAdmin, async (_req, res) => {
-  const { execSync } = await import('child_process');
-  const fs = await import('fs');
-  const path = await import('path');
-  const run = (cmd) => {
-    try { return execSync(cmd, { cwd: process.cwd(), encoding: 'utf8', timeout: 2000 }).trim(); }
-    catch { return null; }
-  };
+  const git = readGitInfo();
   let deployedAt = null;
   try {
-    const candidates = ['dist', '.output', 'build', 'server'];
+    const candidates = ['dist', '.output', 'build', 'server', '.git/FETCH_HEAD'];
     for (const d of candidates) {
       const p = path.resolve(process.cwd(), d);
       if (fs.existsSync(p)) { deployedAt = fs.statSync(p).mtime.toISOString(); break; }
     }
   } catch {}
   res.json({
-    commit: run('git rev-parse --short HEAD'),
-    full_commit: run('git rev-parse HEAD'),
-    branch: run('git rev-parse --abbrev-ref HEAD'),
-    message: run('git log -1 --pretty=%s'),
-    author: run('git log -1 --pretty=%an'),
-    commit_time: run('git log -1 --pretty=%cI'),
+    commit: git.full_commit ? git.full_commit.slice(0, 7) : null,
+    full_commit: git.full_commit,
+    branch: git.branch,
+    message: git.message,
+    author: git.author,
+    commit_time: git.commit_time,
     deployed_at: deployedAt,
     server_time: new Date().toISOString(),
     uptime_sec: Math.floor(process.uptime()),
