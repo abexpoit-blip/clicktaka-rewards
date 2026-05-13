@@ -79,10 +79,10 @@ function Landing() {
 
           {/* Hero stats */}
           <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
-            <HeroStat icon={Users} label="Active User" value="১,৮০,০০০+" />
-            <HeroStat icon={Wallet} label="Total Paid" value="৳২.৪ কোটি+" />
+            <HeroStat icon={Users} label="Active User" value="৫৩,২৬৯+" />
+            <HeroStat icon={Wallet} label="Total Paid" value="৳৭,৩২,০০০+" />
             <HeroStat icon={Zap} label="Avg Withdraw" value="১০ মিনিট" />
-            <HeroStat icon={ShieldCheck} label="Trust Score" value="৪.৯ / ৫" />
+            <HeroStat icon={ShieldCheck} label="Trust Score" value="৪.৫ / ৫.০" />
           </div>
         </div>
       </section>
