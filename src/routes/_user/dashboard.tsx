@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { DashboardSkeleton, ErrorState, EmptyState } from "@/components/ui-states";
+import { LiveTicker } from "@/components/live-ticker";
+import { Leaderboard } from "@/components/leaderboard";
 
 export const Route = createFileRoute("/_user/dashboard")({ component: Dashboard });
 
@@ -19,14 +22,19 @@ function Dashboard() {
   const [d, setD] = useState<DashData | null>(null);
   const [pkgs, setPkgs] = useState<Pkg[]>([]);
   const [err, setErr] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api<DashData>("/user/dashboard").then(setD).catch((e) => setErr(e.message));
-    api<{ packages: Pkg[] }>("/user/me").then((r) => setPkgs(r.packages || [])).catch(() => {});
-  }, []);
+  function load() {
+    setLoading(true); setErr("");
+    Promise.all([
+      api<DashData>("/user/dashboard").then(setD),
+      api<{ packages: Pkg[] }>("/user/me").then((r) => setPkgs(r.packages || [])).catch(() => setPkgs([])),
+    ]).catch((e) => setErr(e.message)).finally(() => setLoading(false));
+  }
+  useEffect(load, []);
 
-  if (err) return <div className="text-red-600">{err}</div>;
-  if (!d) return <div>লোডিং...</div>;
+  if (err) return <ErrorState message={err} onRetry={load} />;
+  if (loading || !d) return <DashboardSkeleton />;
 
   const u = d.user;
   return (
