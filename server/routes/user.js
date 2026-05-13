@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { z } from 'zod';
 import { q } from '../db.js';
 import { authUser } from '../middleware.js';
 
@@ -167,6 +168,94 @@ r.get('/referrals', authUser, async (req, res) => {
     [req.user.id]
   );
   res.json({ referrals: rows, refer_code: req.user.refer_code });
+});
+
+// ─── Deposits ───────────────────────────────────────────────────────────
+const depositSchema = z.object({
+  method: z.enum(['bkash', 'nagad']),
+  amount: z.number().positive().max(1000000),
+  transaction_id: z.string().min(4).max(100),
+});
+
+r.post('/deposit', authUser, async (req, res) => {
+  try {
+    const data = depositSchema.parse(req.body);
+    const settings = await q('SELECT min_deposit FROM payment_settings WHERE id=1 LIMIT 1');
+    const minDep = Number(settings[0]?.min_deposit || 0);
+    if (data.amount < minDep) return res.status(400).json({ error: `Minimum deposit ৳${minDep}` });
+
+    // Prevent duplicate txn submissions
+    const dup = await q('SELECT id FROM deposits WHERE txn_id=? LIMIT 1', [data.transaction_id]);
+    if (dup.length) return res.status(409).json({ error: 'এই Transaction ID আগেই submit হয়েছে' });
+
+    const ins = await q(
+      'INSERT INTO deposits (user_id, amount, method, txn_id) VALUES (?,?,?,?)',
+      [req.user.id, data.amount, data.method, data.transaction_id]
+    );
+    res.json({ ok: true, id: ins.insertId });
+  } catch (e) {
+    if (e?.errors) return res.status(400).json({ error: e.errors[0].message });
+    console.error('deposit error:', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+r.get('/deposits', authUser, async (req, res) => {
+  const rows = await q(
+    `SELECT id, method, amount, txn_id AS transaction_id, status, admin_note, created_at
+     FROM deposits WHERE user_id=? ORDER BY id DESC LIMIT 50`,
+    [req.user.id]
+  );
+  res.json({ deposits: rows });
+});
+
+// ─── Withdrawals ───────────────────────────────────────────────────────
+const withdrawSchema = z.object({
+  method: z.enum(['bkash', 'nagad']),
+  amount: z.number().positive().max(1000000),
+  payment_number: z.string().regex(/^01[3-9]\d{8}$/, 'সঠিক 11-digit number দিন'),
+});
+
+r.post('/withdraw', authUser, async (req, res) => {
+  try {
+    const data = withdrawSchema.parse(req.body);
+    const settings = await q('SELECT min_withdraw FROM payment_settings WHERE id=1 LIMIT 1');
+    const minWd = Number(settings[0]?.min_withdraw || 0);
+    if (data.amount < minWd) return res.status(400).json({ error: `Minimum withdraw ৳${minWd}` });
+
+    const balRows = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
+    const bal = Number(balRows[0]?.balance || 0);
+    if (data.amount > bal) return res.status(400).json({ error: 'Balance যথেষ্ট না' });
+
+    // Hold balance: deduct now, log transaction; on reject we refund
+    await q('UPDATE users SET balance = balance - ? WHERE id=?', [data.amount, req.user.id]);
+    const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
+    const ins = await q(
+      'INSERT INTO withdrawals (user_id, amount, method, account) VALUES (?,?,?,?)',
+      [req.user.id, data.amount, data.method, data.payment_number]
+    );
+    await q(
+      "INSERT INTO transactions (user_id, type, amount, balance_after, note, ref_id) VALUES (?, 'withdraw', ?, ?, ?, ?)",
+      [req.user.id, -data.amount, Number(after[0].balance), `Withdraw ${data.method} → ${data.payment_number}`, ins.insertId]
+    ).catch(() => q(
+      "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'withdraw', ?, ?, ?)",
+      [req.user.id, -data.amount, Number(after[0].balance), `Withdraw ${data.method} → ${data.payment_number}`]
+    ));
+    res.json({ ok: true, id: ins.insertId });
+  } catch (e) {
+    if (e?.errors) return res.status(400).json({ error: e.errors[0].message });
+    console.error('withdraw error:', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+r.get('/withdrawals', authUser, async (req, res) => {
+  const rows = await q(
+    `SELECT id, method, amount, account AS payment_number, status, admin_note, created_at
+     FROM withdrawals WHERE user_id=? ORDER BY id DESC LIMIT 50`,
+    [req.user.id]
+  );
+  res.json({ withdrawals: rows });
 });
 
 export default r;
