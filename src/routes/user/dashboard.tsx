@@ -6,7 +6,7 @@ import { LiveTicker } from "@/components/live-ticker";
 import { Leaderboard } from "@/components/leaderboard";
 import {
   Wallet, TrendingUp, Coins, Copy, Check, Target, Package, Activity,
-  ArrowUpRight, ArrowDownRight, Calendar, Sparkles, Gift, Zap,
+  ArrowUpRight, ArrowDownRight, Calendar, Sparkles, Gift, Zap, Crown, Flame,
 } from "lucide-react";
 
 export const Route = createFileRoute("/user/dashboard")({ component: Dashboard });
@@ -90,6 +90,13 @@ function Dashboard() {
         <QuickCard icon={Package} tone="info" label="Active Packages" value={pkgs.length} sub="Validity বাকি আছে" linkLabel="প্যাকেজ" to="/user/packages" />
         <QuickCard icon={Activity} tone="success" label="Recent Activity" value={d.recent_completions.length} sub="শেষ task complete" linkLabel="History" to="/user/history" />
       </div>
+
+      {/* Upgrade CTA — eye-catching, drives package purchase */}
+      {pkgs.length === 0 ? (
+        <UpgradeBanner />
+      ) : (
+        <EarnMoreBanner pkgs={pkgs} />
+      )}
 
       {/* Active packages */}
       <section>
@@ -241,4 +248,69 @@ function SectionTitle({ icon: Icon, title }: { icon: React.ComponentType<{classN
       <h2 className="font-display text-lg sm:text-xl font-semibold tracking-tight">{title}</h2>
     </div>
   );
+}
+
+function UpgradeBanner() {
+  return (
+    <section className="relative overflow-hidden rounded-3xl bg-gradient-brand text-white shadow-brand p-6 sm:p-8">
+      <div aria-hidden className="absolute -top-16 -right-12 h-56 w-56 rounded-full bg-white/15 blur-3xl animate-float" />
+      <div aria-hidden className="absolute -bottom-16 -left-12 h-56 w-56 rounded-full bg-primary-glow/40 blur-3xl" />
+      <div className="relative grid md:grid-cols-[1fr_auto] gap-6 items-center">
+        <div>
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur px-3 py-1 text-[11px] uppercase tracking-wider font-bold">
+            <Sparkles className="h-3 w-3" /> Unlock Earnings
+          </div>
+          <h2 className="font-display text-2xl sm:text-3xl font-bold mt-3 tracking-tight">
+            🔒 আপনার আয় শুরু হবে — Package activate করার পরই
+          </h2>
+          <p className="mt-2 text-white/85 text-sm sm:text-base max-w-xl">
+            একটা package নিন, প্রতিদিন <b>৭০ — ১৩০০ টাকা</b> পর্যন্ত আয় করুন। বিকাশ/নগদে instant withdraw। কোনো ঝামেলা নেই।
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2 text-xs">
+            <Chip>✓ ৩৬৫ দিন valid</Chip>
+            <Chip>✓ Daily guaranteed income</Chip>
+            <Chip>✓ Refer commission ১০%</Chip>
+            <Chip>✓ Spin & bonus reward</Chip>
+          </div>
+        </div>
+        <Link to="/user/packages" className="group inline-flex items-center gap-2 px-6 py-3.5 bg-white text-primary font-bold rounded-2xl shadow-2xl hover:scale-[1.03] transition whitespace-nowrap">
+          <Crown className="h-4 w-4" /> Upgrade এখনই <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 transition" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function EarnMoreBanner({ pkgs }: { pkgs: Pkg[] }) {
+  const totalDaily = pkgs.reduce((s, p) => s + Number(p.daily_earning || 0), 0);
+  return (
+    <section className="relative overflow-hidden rounded-3xl border border-border/70 bg-card p-5 sm:p-6 shadow-card">
+      <div className="grid md:grid-cols-[1fr_auto] gap-4 items-center">
+        <div className="flex items-center gap-4">
+          <div className="grid place-items-center h-14 w-14 rounded-2xl bg-gradient-brand text-white shadow-brand shrink-0">
+            <Flame className="h-6 w-6" />
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">আজকের earning potential</p>
+            <p className="font-display text-2xl font-bold mt-0.5">
+              ৳<span className="tabular-nums">{totalDaily.toLocaleString()}</span> <span className="text-sm font-normal text-muted-foreground">আজ আনলক করুন</span>
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">Tasks complete করুন এবং আজই reward নিন।</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <Link to="/user/packages" className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-card border border-border text-sm font-semibold hover:border-primary/40 transition">
+            <Crown className="h-4 w-4 text-primary" /> Upgrade
+          </Link>
+          <Link to="/user/tasks" className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-brand text-white text-sm font-semibold shadow-brand hover:scale-[1.02] transition">
+            <Zap className="h-4 w-4" /> Start Earning
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Chip({ children }: { children: React.ReactNode }) {
+  return <span className="inline-flex items-center gap-1 rounded-full bg-white/15 backdrop-blur px-2.5 py-1 font-medium">{children}</span>;
 }
