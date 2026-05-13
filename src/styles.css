@@ -131,11 +131,14 @@
 
 @layer base {
   * { border-color: var(--color-border); }
+  html { font-feature-settings: 'cv11','ss01'; }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-family: 'Hind Siliguri', 'Noto Sans Bengali', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Hind Siliguri', 'Noto Sans Bengali', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
+  h1,h2,h3,h4,.font-display { font-family: 'Space Grotesk', 'Plus Jakarta Sans', 'Hind Siliguri', system-ui, sans-serif; letter-spacing: -0.02em; }
 }
 
 @layer utilities {
@@ -149,8 +152,19 @@
     background-clip: text;
     color: transparent;
   }
+  .glass {
+    background: color-mix(in oklab, white 65%, transparent);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+  }
+  .ring-brand { box-shadow: 0 0 0 1px color-mix(in oklab, var(--primary) 25%, transparent), 0 12px 40px -14px color-mix(in oklab, var(--primary) 45%, transparent); }
+  .grid-noise {
+    background-image:
+      radial-gradient(circle at 15% 5%, color-mix(in oklab, var(--primary) 18%, transparent) 0%, transparent 45%),
+      radial-gradient(circle at 85% 0%, color-mix(in oklab, var(--primary-glow) 22%, transparent) 0%, transparent 45%),
+      linear-gradient(180deg, oklch(0.99 0.005 270), oklch(0.97 0.012 280));
+  }
 }
-
 
 @keyframes shimmer {
   0% { background-position: 200% 0; }
@@ -160,5 +174,23 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes pulse-glow {
+  0%,100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--primary) 45%, transparent); }
+  50% { box-shadow: 0 0 0 14px color-mix(in oklab, var(--primary) 0%, transparent); }
+}
 .animate-fade-in { animation: fade-in 0.4s ease-out; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2.4s ease-in-out infinite; }
+.shimmer-text {
+  background: linear-gradient(90deg, currentColor 0%, color-mix(in oklab, currentColor 35%, white) 50%, currentColor 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 3s linear infinite;
+}
 
