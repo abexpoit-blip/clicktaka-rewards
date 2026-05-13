@@ -1,7 +1,26 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SCRIPT_APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+APP_DIR="${APP_DIR:-}"
+
+if [[ -z "$APP_DIR" ]]; then
+  if [[ -d "$SCRIPT_APP_DIR/.git" ]]; then
+    APP_DIR="$SCRIPT_APP_DIR"
+  elif [[ -d "/var/www/clicktaka/.git" ]]; then
+    APP_DIR="/var/www/clicktaka"
+  elif [[ -d "/var/www/clicktaka-rewards/.git" ]]; then
+    APP_DIR="/var/www/clicktaka-rewards"
+  elif [[ -d "/var/www/clicktaka" ]]; then
+    APP_DIR="/var/www/clicktaka"
+  elif [[ -d "/var/www/clicktaka-rewards" ]]; then
+    APP_DIR="/var/www/clicktaka-rewards"
+  else
+    echo "ERROR: App directory not found. Expected /var/www/clicktaka or /var/www/clicktaka-rewards." >&2
+    exit 1
+  fi
+fi
+
 cd "$APP_DIR"
 
 echo "==> Deploying from: $APP_DIR"
