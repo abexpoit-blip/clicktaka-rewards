@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { readActive, viewedSeconds, REQUIRED_SECONDS, type ActiveTask } from "@/lib/active-task";
+import { CheckCircle2 } from "lucide-react";
 import { DashboardSkeleton, ErrorState, EmptyState } from "@/components/ui-states";
 import { LiveTicker } from "@/components/live-ticker";
 import { Leaderboard } from "@/components/leaderboard";
@@ -25,7 +27,7 @@ type Pkg = { id: number; name: string; expires_at: string; tasks_done_today: num
 type Completion = { id: number; reward: number; completed_at: string; title: string; type: string };
 type Tx = { id: number; type: string; amount: number; balance_after: number | null; note: string | null; created_at: string };
 type Task = { id: number; title: string; type: string; url: string | null; reward: number };
-type TaskData = { tasks: Task[]; today_completed: number; daily_limit: number };
+type TaskData = { tasks: Task[]; today_completed: number; daily_limit: number; completed_task_ids_today?: number[] };
 type DashData = {
   user: { id: number; phone: string; name: string | null; balance: number; refer_code: string };
   available_tasks: number;
@@ -126,7 +128,7 @@ function Dashboard() {
         </div>
       </section>
 
-      {/* Today's task preview — 3-5 quick tasks with Start/Continue */}
+      {/* Today's task preview — 3-5 quick tasks with live progress */}
       {availableTasks.length > 0 && (
         <section>
           <div className="flex items-center justify-between mb-3">
@@ -141,30 +143,13 @@ function Dashboard() {
             </Link>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {availableTasks.slice(0, 5).map((t) => {
-              const m = TASK_TYPE[t.type] || TASK_TYPE.ad;
-              const Icon = m.icon;
-              const inProgress = false; // simple preview — full progress tracked on /user/tasks
-              return (
-                <article key={t.id} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all">
-                  <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.grad}`} />
-                  <div className="p-3.5 flex items-center gap-3">
-                    <div className={`grid place-items-center h-11 w-11 rounded-xl bg-gradient-to-br ${m.grad} text-white shadow-md shrink-0`}>
-                      <Icon className="h-5 w-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{m.label}</p>
-                      <h3 className="font-semibold text-sm truncate">{t.title}</h3>
-                      <p className="text-[11px] text-success font-bold tabular-nums">+৳{Number(t.reward).toFixed(2)} · ~30s</p>
-                    </div>
-                    <Link to="/user/tasks"
-                      className={`inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold whitespace-nowrap shrink-0 bg-gradient-to-r ${m.grad} text-white shadow-md hover:scale-[1.05] transition`}>
-                      {inProgress ? "Continue" : "Start"} <ArrowRight className="h-3 w-3" />
-                    </Link>
-                  </div>
-                </article>
-              );
-            })}
+            {availableTasks.slice(0, 5).map((t) => (
+              <QuickTaskCard
+                key={t.id}
+                task={t}
+                done={(tdata?.completed_task_ids_today || []).includes(t.id)}
+              />
+            ))}
           </div>
         </section>
       )}
@@ -297,6 +282,91 @@ function HeroStat({ icon: Icon, label, value, accent }: { icon: React.ComponentT
       </div>
       <p className="mt-1.5 font-display text-xl sm:text-2xl font-bold tabular-nums">{value}</p>
     </div>
+  );
+}
+
+function QuickTaskCard({ task, done }: { task: Task; done: boolean }) {
+  const m = TASK_TYPE[task.type] || TASK_TYPE.ad;
+  const Icon = m.icon;
+  const [active, setActive] = useState<ActiveTask | null>(() => readActive());
+  const [, force] = useState(0);
+
+  // Live tick + cross-tab sync
+  useEffect(() => {
+    const onChange = () => setActive(readActive());
+    window.addEventListener("ct:active-task", onChange);
+    window.addEventListener("storage", onChange);
+    const t = setInterval(() => force((x) => x + 1), 1000);
+    return () => {
+      window.removeEventListener("ct:active-task", onChange);
+      window.removeEventListener("storage", onChange);
+      clearInterval(t);
+    };
+  }, []);
+
+  const isMine = active?.id === task.id;
+  const viewed = isMine ? viewedSeconds(active!) : 0;
+  const remaining = Math.max(0, REQUIRED_SECONDS - viewed);
+  const pct = Math.round((viewed / REQUIRED_SECONDS) * 100);
+  const ready = isMine && remaining === 0;
+  const otherActive = !!active && !isMine;
+
+  let label: React.ReactNode = <>Start <ArrowRight className="h-3 w-3" /></>;
+  if (done) label = <><CheckCircle2 className="h-3.5 w-3.5" /> Done</>;
+  else if (ready) label = <><CheckCircle2 className="h-3.5 w-3.5" /> Claim</>;
+  else if (isMine) label = <>Continue <ArrowRight className="h-3 w-3" /></>;
+  else if (otherActive) label = <>Locked</>;
+
+  const btnDisabled = done || otherActive;
+
+  return (
+    <article className={`group relative overflow-hidden rounded-2xl border ${isMine ? "border-primary/50 ring-2 ring-primary/15" : "border-border/70"} bg-card shadow-card hover:shadow-brand transition-all`}>
+      <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.grad}`} />
+      <div className="p-3.5">
+        <div className="flex items-center gap-3">
+          <div className={`grid place-items-center h-11 w-11 rounded-xl bg-gradient-to-br ${m.grad} text-white shadow-md shrink-0 relative`}>
+            <Icon className="h-5 w-5" />
+            {done && <span className="absolute inset-0 grid place-items-center bg-success/90 rounded-xl"><CheckCircle2 className="h-5 w-5 text-white" /></span>}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{m.label}</p>
+            <h3 className="font-semibold text-sm truncate">{task.title}</h3>
+            <p className="text-[11px] tabular-nums">
+              <span className="text-success font-bold">+৳{Number(task.reward).toFixed(2)}</span>
+              <span className="text-muted-foreground"> · {isMine && !ready ? `${remaining}s বাকি` : "~30s"}</span>
+            </p>
+          </div>
+          {btnDisabled ? (
+            <span className={`inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold whitespace-nowrap shrink-0 ${done ? "bg-success/15 text-success" : "bg-muted text-muted-foreground cursor-not-allowed"}`}>
+              {label}
+            </span>
+          ) : (
+            <Link to="/user/tasks"
+              className={`inline-flex items-center gap-1 rounded-xl px-3 py-2 text-xs font-bold whitespace-nowrap shrink-0 text-white shadow-md hover:scale-[1.05] transition ${
+                ready ? "bg-gradient-to-r from-emerald-500 to-teal-500" : `bg-gradient-to-r ${m.grad}`
+              }`}>
+              {label}
+            </Link>
+          )}
+        </div>
+
+        {/* Progress bar — only visible while this task is being watched */}
+        {isMine && (
+          <div className="mt-3">
+            <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${ready ? "bg-success" : `bg-gradient-to-r ${m.grad}`}`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+            <p className="mt-1 text-[10px] text-muted-foreground tabular-nums flex items-center justify-between">
+              <span>{ready ? "✓ Verified — Claim করুন" : `Verifying ad view… ${viewed}/${REQUIRED_SECONDS}s`}</span>
+              <span className="font-bold">{pct}%</span>
+            </p>
+          </div>
+        )}
+      </div>
+    </article>
   );
 }
 
