@@ -101,8 +101,8 @@ ufw allow 3306/tcp
 
 ```bash
 mkdir -p /var/www && cd /var/www
-git clone https://github.com/<your-username>/<repo-name>.git clicktaka
-cd clicktaka
+git clone https://github.com/<your-username>/<repo-name>.git clicktaka-rewards
+cd clicktaka-rewards
 
 # MySQL schema লোড করুন
 mysql -u clicktaka -p clicktaka < database/schema.sql
@@ -113,7 +113,7 @@ mysql -u clicktaka -p clicktaka < database/schema.sql
 ## ধাপ ৪: Backend API setup
 
 ```bash
-cd /var/www/clicktaka/server
+cd /var/www/clicktaka-rewards/server
 cp .env.example .env
 nano .env
 ```
@@ -144,7 +144,7 @@ openssl rand -hex 32
 Dependencies install:
 
 ```bash
-cd /var/www/clicktaka/server
+cd /var/www/clicktaka-rewards/server
 npm install
 ```
 
@@ -153,7 +153,7 @@ npm install
 ## ধাপ ৫: Frontend build
 
 ```bash
-cd /var/www/clicktaka
+cd /var/www/clicktaka-rewards
 npm install
 npm run build
 ```
@@ -163,7 +163,7 @@ npm run build
 ## ধাপ ৬: PM2 দিয়ে দুটোই start
 
 ```bash
-cd /var/www/clicktaka
+cd /var/www/clicktaka-rewards
 pm2 start deploy/ecosystem.config.cjs
 pm2 save
 pm2 startup       # যে command দেখাবে সেটা copy-paste করুন
@@ -181,7 +181,7 @@ pm2 logs --lines 30
 ## ধাপ ৭: Nginx + SSL
 
 ```bash
-cp /var/www/clicktaka/deploy/nginx.conf /etc/nginx/sites-available/clicktaka24.com
+cp /var/www/clicktaka-rewards/deploy/nginx.conf /etc/nginx/sites-available/clicktaka24.com
 ln -sf /etc/nginx/sites-available/clicktaka24.com /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
@@ -212,20 +212,8 @@ EXIT;
 
 ```bash
 ssh root@your-vps-ip
-cd /var/www/clicktaka
-git pull
-
-# Backend dependency পাল্টালে
-cd server && npm install && cd ..
-
-# Frontend rebuild
-npm install && npm run build
-
-# Restart
-pm2 restart clicktaka-api clicktaka-web
-
-# Logs দেখুন
-pm2 logs --lines 50
+cd /var/www/clicktaka-rewards
+bash deploy/update.sh
 ```
 
 ---
@@ -244,8 +232,8 @@ pm2 logs --lines 50
 ## 📁 গুরুত্বপূর্ণ ফাইল location
 
 ```
-/var/www/clicktaka/                  ← কোড
-/var/www/clicktaka/server/.env       ← secrets (GitHub-এ যাবে না)
+/var/www/clicktaka-rewards/                  ← কোড
+/var/www/clicktaka-rewards/server/.env       ← secrets (GitHub-এ যাবে না)
 /etc/nginx/sites-available/clicktaka24.com  ← nginx config
 ~/.pm2/logs/                          ← app logs
 ```
