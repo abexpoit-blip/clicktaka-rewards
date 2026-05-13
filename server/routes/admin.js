@@ -118,4 +118,34 @@ r.get('/earnings', authAdmin, async (req, res) => {
   res.json({ earnings: rows });
 });
 
+// Deploy / git info
+r.get('/deploy-info', authAdmin, async (_req, res) => {
+  const { execSync } = await import('child_process');
+  const fs = await import('fs');
+  const path = await import('path');
+  const run = (cmd) => {
+    try { return execSync(cmd, { cwd: process.cwd(), encoding: 'utf8', timeout: 2000 }).trim(); }
+    catch { return null; }
+  };
+  let deployedAt = null;
+  try {
+    const candidates = ['dist', '.output', 'build', 'server'];
+    for (const d of candidates) {
+      const p = path.resolve(process.cwd(), d);
+      if (fs.existsSync(p)) { deployedAt = fs.statSync(p).mtime.toISOString(); break; }
+    }
+  } catch {}
+  res.json({
+    commit: run('git rev-parse --short HEAD'),
+    full_commit: run('git rev-parse HEAD'),
+    branch: run('git rev-parse --abbrev-ref HEAD'),
+    message: run('git log -1 --pretty=%s'),
+    author: run('git log -1 --pretty=%an'),
+    commit_time: run('git log -1 --pretty=%cI'),
+    deployed_at: deployedAt,
+    server_time: new Date().toISOString(),
+    uptime_sec: Math.floor(process.uptime()),
+  });
+});
+
 export default r;
