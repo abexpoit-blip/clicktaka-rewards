@@ -7,6 +7,7 @@ import { Leaderboard } from "@/components/leaderboard";
 import {
   Wallet, TrendingUp, Coins, Copy, Check, Target, Package, Activity,
   ArrowUpRight, ArrowDownRight, Calendar, Sparkles, Gift, Zap, Crown, Flame,
+  Trophy, Rocket, Shield, Star, Award, BadgeCheck,
 } from "lucide-react";
 
 export const Route = createFileRoute("/user/dashboard")({ component: Dashboard });
