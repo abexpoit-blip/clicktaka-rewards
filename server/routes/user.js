@@ -212,13 +212,13 @@ async function ensureDailySpinsTable() {
          WHERE table_schema = DATABASE() AND table_name = 'daily_spins' AND index_name = 'uniq_user_date'
          LIMIT 1`
       );
-      if (uniqueIndex.length) await q('ALTER TABLE daily_spins DROP INDEX uniq_user_date');
       const dateIndex = await q(
         `SELECT 1 FROM information_schema.statistics
          WHERE table_schema = DATABASE() AND table_name = 'daily_spins' AND index_name = 'idx_user_date'
          LIMIT 1`
       );
       if (!dateIndex.length) await q('ALTER TABLE daily_spins ADD INDEX idx_user_date (user_id, spin_date)');
+      if (uniqueIndex.length) await q('ALTER TABLE daily_spins DROP INDEX uniq_user_date');
     })().catch((error) => {
       dailySpinsTableReady = undefined;
       throw error;
