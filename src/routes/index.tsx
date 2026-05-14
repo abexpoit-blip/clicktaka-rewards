@@ -4,6 +4,8 @@ import { api } from "@/lib/api";
 import { LiveTicker } from "@/components/live-ticker";
 import { Reviews } from "@/components/reviews";
 import { BrandsMarquee } from "@/components/brands-marquee";
+import bkashLogo from "@/assets/bkash-logo.png";
+import nagadLogo from "@/assets/nagad-logo.png";
 import {
   Banknote, Rocket, ShieldCheck, Zap, Users, Wallet, Target, Crown,
   CheckCircle2, ArrowRight, TrendingUp, Smartphone, Sparkles,
