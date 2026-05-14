@@ -189,21 +189,66 @@ r.get('/transactions', authUser, async (req, res) => {
   res.json({ transactions: rows });
 });
 
-// Daily Spin Wheel — দিনে ১ বার ৳1–10 random reward
-r.get('/spin/status', authUser, async (req, res) => {
-  const rows = await q(
-    'SELECT id, reward, created_at FROM daily_spins WHERE user_id=? AND spin_date=CURDATE() LIMIT 1',
-    [req.user.id]
+// Daily Spin Wheel — package অনুযায়ী দৈনিক spin limit
+// 500=1, 1000=2, 2000=3, 5000=5, 10000=8, 20000=12 ; package না থাকলে 0
+function spinLimitForPrice(price) {
+  const p = Number(price) || 0;
+  if (p >= 20000) return 12;
+  if (p >= 10000) return 8;
+  if (p >= 5000)  return 5;
+  if (p >= 2000)  return 3;
+  if (p >= 1000)  return 2;
+  if (p >= 500)   return 1;
+  return 0;
+}
+
+async function getSpinContext(userId) {
+  // highest-priced active (non-expired) package
+  const pkgs = await q(
+    `SELECT p.price FROM user_packages up
+     JOIN packages p ON p.id = up.package_id
+     WHERE up.user_id=? AND up.expires_at >= CURDATE()
+     ORDER BY p.price DESC LIMIT 1`,
+    [userId]
   );
-  res.json({ spun_today: rows.length > 0, last: rows[0] || null });
+  const price = pkgs.length ? Number(pkgs[0].price) : 0;
+  const limit = spinLimitForPrice(price);
+  const used = await q(
+    'SELECT COUNT(*) AS c FROM daily_spins WHERE user_id=? AND spin_date=CURDATE()',
+    [userId]
+  );
+  const last = await q(
+    'SELECT reward, created_at FROM daily_spins WHERE user_id=? AND spin_date=CURDATE() ORDER BY id DESC LIMIT 1',
+    [userId]
+  );
+  return {
+    has_package: price > 0,
+    package_price: price,
+    spins_limit: limit,
+    spins_used: Number(used[0].c),
+    spins_left: Math.max(0, limit - Number(used[0].c)),
+    last: last[0] || null,
+  };
+}
+
+r.get('/spin/status', authUser, async (req, res) => {
+  const ctx = await getSpinContext(req.user.id);
+  res.json({
+    ...ctx,
+    spun_today: ctx.spins_left <= 0,   // backwards-compat for old client
+  });
 });
 
 r.post('/spin', authUser, async (req, res) => {
-  const exists = await q(
-    'SELECT id FROM daily_spins WHERE user_id=? AND spin_date=CURDATE() LIMIT 1',
-    [req.user.id]
-  );
-  if (exists.length) return res.status(409).json({ error: 'আজকের spin ইতিমধ্যে নেওয়া হয়েছে — কাল আবার আসুন' });
+  const ctx = await getSpinContext(req.user.id);
+  if (!ctx.has_package) {
+    return res.status(403).json({ error: 'Spin করতে হলে আগে একটি package activate করুন' });
+  }
+  if (ctx.spins_left <= 0) {
+    return res.status(409).json({
+      error: `আজকের ${ctx.spins_limit} টি spin শেষ — কাল আবার আসুন`,
+    });
+  }
 
   const reward = Math.floor(Math.random() * 10) + 1; // 1..10 BDT
   await q('INSERT INTO daily_spins (user_id, spin_date, reward) VALUES (?, CURDATE(), ?)', [req.user.id, reward]);
@@ -213,7 +258,13 @@ r.post('/spin', authUser, async (req, res) => {
     "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'admin', ?, ?, ?)",
     [req.user.id, reward, Number(after[0].balance), 'Daily Spin Bonus']
   );
-  res.json({ ok: true, reward, balance: Number(after[0].balance) });
+  res.json({
+    ok: true,
+    reward,
+    balance: Number(after[0].balance),
+    spins_left: ctx.spins_left - 1,
+    spins_limit: ctx.spins_limit,
+  });
 });
 
 r.get('/referrals', authUser, async (req, res) => {
