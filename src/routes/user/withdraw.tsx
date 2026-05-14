@@ -87,7 +87,9 @@ function WithdrawPage() {
                   className={`relative rounded-2xl border p-3 text-center transition ${
                     active ? "border-primary ring-2 ring-primary/20 bg-gradient-brand-soft" : "border-border/70 hover:border-primary/40 bg-card"
                   }`}>
-                  <div className={`mx-auto grid place-items-center h-10 w-10 rounded-xl bg-gradient-to-br ${mm.color} text-white text-lg shadow-md`}>{mm.emoji}</div>
+                  <div className="mx-auto grid place-items-center h-12 w-12 rounded-xl bg-white border border-border/60 shadow-md overflow-hidden">
+                    <img src={mm.logo} alt={mm.label} className="h-9 w-9 object-contain" />
+                  </div>
                   <p className="mt-2 text-xs font-bold">{mm.label}</p>
                 </button>
               );
