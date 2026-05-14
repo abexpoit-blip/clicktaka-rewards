@@ -170,6 +170,20 @@ else
   echo "  skipped: server/.env or migration file missing"
 fi
 
+if [[ -f "server/.env" && -f "database/migrations/2026_05_spin_packages.sql" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source server/.env
+  set +a
+  MYSQL_PWD="${DB_PASS:-${DB_PASSWORD:-}}" mysql \
+    -h "${DB_HOST:-localhost}" \
+    -P "${DB_PORT:-3306}" \
+    -u "${DB_USER:-clicktaka}" \
+    "${DB_NAME:-clicktaka}" < database/migrations/2026_05_spin_packages.sql
+else
+  echo "  skipped: server/.env or spin migration file missing"
+fi
+
 echo "==> Ensuring admin user"
 node server/scripts/ensure-admin.mjs
 
