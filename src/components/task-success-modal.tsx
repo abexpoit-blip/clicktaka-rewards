@@ -64,38 +64,38 @@ export function TaskSuccessModal({ open, reward, taskTitle, newBalance, onClose 
         </div>
 
         {/* Top gradient banner with check */}
-        <div className="relative bg-gradient-to-br from-emerald-500 via-green-500 to-teal-500 text-white px-6 pt-8 pb-6 text-center overflow-hidden">
-          <div aria-hidden className="absolute -top-10 -right-10 h-40 w-40 rounded-full bg-white/20 blur-2xl" />
-          <div aria-hidden className="absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
+        <div className="relative bg-gradient-to-br from-emerald-500 via-green-500 to-teal-500 text-white px-5 sm:px-6 pt-6 sm:pt-8 pb-5 sm:pb-6 text-center overflow-hidden">
+          <div aria-hidden className="absolute -top-10 -right-10 h-32 sm:h-40 w-32 sm:w-40 rounded-full bg-white/20 blur-2xl" />
+          <div aria-hidden className="absolute -bottom-10 -left-10 h-32 sm:h-40 w-32 sm:w-40 rounded-full bg-white/15 blur-2xl" />
 
           <button
             onClick={onClose}
             aria-label="Close"
-            className="absolute top-3 right-3 grid place-items-center h-8 w-8 rounded-full bg-white/20 hover:bg-white/30 transition"
+            className="absolute top-2.5 right-2.5 grid place-items-center h-7 w-7 sm:h-8 sm:w-8 rounded-full bg-white/20 hover:bg-white/30 transition"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </button>
 
-          <div className="relative mx-auto grid place-items-center h-20 w-20 rounded-full bg-white shadow-2xl animate-[checkPop_0.6s_cubic-bezier(0.34,1.56,0.64,1)_0.15s_both]">
-            <CheckCircle2 className="h-12 w-12 text-emerald-500" strokeWidth={2.5} />
+          <div className="relative mx-auto grid place-items-center h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-white shadow-2xl animate-[checkPop_0.6s_cubic-bezier(0.34,1.56,0.64,1)_0.15s_both]">
+            <CheckCircle2 className="h-10 w-10 sm:h-12 sm:w-12 text-emerald-500" strokeWidth={2.5} />
           </div>
 
-          <p className="relative mt-4 text-[11px] font-bold uppercase tracking-[0.2em] text-white/90">
+          <p className="relative mt-3 sm:mt-4 text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.2em] text-white/90">
             <Sparkles className="inline h-3 w-3 mr-1" /> Task Complete
           </p>
-          <h2 className="relative font-display text-2xl font-bold mt-1">অভিনন্দন! 🎉</h2>
+          <h2 className="relative font-display text-xl sm:text-2xl font-bold mt-1">অভিনন্দন! 🎉</h2>
         </div>
 
         {/* Reward body */}
-        <div className="px-6 py-6 text-center space-y-4">
+        <div className="px-5 sm:px-6 py-5 sm:py-6 text-center space-y-3 sm:space-y-4">
           {taskTitle && (
-            <p className="text-sm text-muted-foreground line-clamp-2">{taskTitle}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{taskTitle}</p>
           )}
 
-          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 px-5 py-4">
+          <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 px-4 sm:px-5 py-3 sm:py-4">
             <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">আপনি পেলেন</p>
-            <p className="font-display text-4xl font-bold tabular-nums text-emerald-600 mt-1 inline-flex items-center gap-1.5">
-              <Coins className="h-7 w-7" /> +৳{Number(reward).toFixed(0)}
+            <p className="font-display text-3xl sm:text-4xl font-bold tabular-nums text-emerald-600 mt-1 inline-flex items-center gap-1.5">
+              <Coins className="h-6 w-6 sm:h-7 sm:w-7" /> +৳{Number(reward).toFixed(0)}
             </p>
           </div>
 
@@ -107,7 +107,7 @@ export function TaskSuccessModal({ open, reward, taskTitle, newBalance, onClose 
 
           <button
             onClick={onClose}
-            className="w-full rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold py-3 hover:scale-[1.02] transition shadow-lg"
+            className="w-full rounded-xl sm:rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 text-white font-bold py-2.5 sm:py-3 text-sm sm:text-base hover:scale-[1.02] transition shadow-lg"
           >
             চালিয়ে যান →
           </button>
