@@ -41,7 +41,7 @@ export function TaskSuccessModal({ open, reward, taskTitle, newBalance, onClose 
 
       {/* Card */}
       <div
-        className="relative w-full max-w-sm rounded-3xl bg-card shadow-2xl border border-border overflow-hidden animate-[popIn_0.45s_cubic-bezier(0.34,1.56,0.64,1)]"
+        className="relative w-[calc(100%-1rem)] max-w-sm rounded-2xl sm:rounded-3xl bg-card shadow-2xl border border-border overflow-hidden animate-[popIn_0.45s_cubic-bezier(0.34,1.56,0.64,1)] my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Confetti burst from center */}
