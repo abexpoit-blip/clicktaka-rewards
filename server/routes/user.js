@@ -195,17 +195,31 @@ let dailySpinsTableReady;
 
 async function ensureDailySpinsTable() {
   if (!dailySpinsTableReady) {
-    dailySpinsTableReady = q(`
-      CREATE TABLE IF NOT EXISTS daily_spins (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        spin_date DATE NOT NULL,
-        reward DECIMAL(10,2) NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        INDEX idx_user_date (user_id, spin_date),
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-      ) ENGINE=InnoDB
-    `).catch((error) => {
+    dailySpinsTableReady = (async () => {
+      await q(`
+        CREATE TABLE IF NOT EXISTS daily_spins (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          user_id INT NOT NULL,
+          spin_date DATE NOT NULL,
+          reward DECIMAL(10,2) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          INDEX idx_user_date (user_id, spin_date),
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB
+      `);
+      const uniqueIndex = await q(
+        `SELECT 1 FROM information_schema.statistics
+         WHERE table_schema = DATABASE() AND table_name = 'daily_spins' AND index_name = 'uniq_user_date'
+         LIMIT 1`
+      );
+      if (uniqueIndex.length) await q('ALTER TABLE daily_spins DROP INDEX uniq_user_date');
+      const dateIndex = await q(
+        `SELECT 1 FROM information_schema.statistics
+         WHERE table_schema = DATABASE() AND table_name = 'daily_spins' AND index_name = 'idx_user_date'
+         LIMIT 1`
+      );
+      if (!dateIndex.length) await q('ALTER TABLE daily_spins ADD INDEX idx_user_date (user_id, spin_date)');
+    })().catch((error) => {
       dailySpinsTableReady = undefined;
       throw error;
     });
