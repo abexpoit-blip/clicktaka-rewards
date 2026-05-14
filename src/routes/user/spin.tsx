@@ -142,10 +142,10 @@ function SpinPage() {
 
       {err && <div className="bg-red-50 text-red-700 p-3 rounded text-sm">{err}</div>}
 
-      <div className="relative mx-auto aspect-square w-full max-w-[320px]">
-        <div className="absolute left-1/2 -top-2 -translate-x-1/2 z-10 w-0 h-0 border-l-[14px] border-r-[14px] border-t-[24px] border-l-transparent border-r-transparent border-t-red-600 drop-shadow-lg" />
+      <div className="relative mx-auto aspect-square w-full max-w-[340px]">
+        <div className="absolute left-1/2 -top-3 -translate-x-1/2 z-20 w-0 h-0 border-l-[14px] border-r-[14px] border-t-[26px] border-l-transparent border-r-transparent border-t-red-600 drop-shadow-lg" />
         <div
-          className="w-full h-full rounded-full shadow-2xl border-8 border-white"
+          className="relative w-full h-full rounded-full shadow-2xl border-8 border-white overflow-hidden"
           style={{
             background: `conic-gradient(${gradient})`,
             transform: `rotate(${angle}deg)`,
@@ -157,10 +157,10 @@ function SpinPage() {
             return (
               <div
                 key={n}
-                className="absolute left-1/2 top-1/2 text-white font-bold text-base sm:text-lg select-none"
+                className="absolute left-1/2 top-1/2 text-white font-bold text-sm sm:text-base select-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
                 style={{
-                  transform: `rotate(${a}deg) translateY(-36%) rotate(-${a}deg)`,
-                  transformOrigin: "0 0",
+                  transform: `translate(-50%, -50%) rotate(${a}deg) translateY(-110px)`,
+                  transformOrigin: "center center",
                 }}
               >
                 ৳{n}
@@ -168,7 +168,7 @@ function SpinPage() {
             );
           })}
         </div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white shadow-inner border-4 border-yellow-400 flex items-center justify-center text-2xl">🎁</div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white shadow-xl border-4 border-yellow-400 flex items-center justify-center text-3xl z-10">🎁</div>
       </div>
 
       <div className="text-center">

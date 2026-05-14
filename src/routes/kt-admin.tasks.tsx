@@ -5,21 +5,23 @@ import { toast } from "sonner";
 import {
   Sparkles, Plus, Search, Target, Video, AppWindow, Share2, Gamepad2,
   ExternalLink, Pause, Play, Trash2, Coins, Activity, TrendingUp, Filter,
-  CheckCircle2, Zap, Layers,
+  CheckCircle2, Zap, Layers, UserPlus, ClipboardList, MonitorPlay, Megaphone,
 } from "lucide-react";
 
 export const Route = createFileRoute("/kt-admin/tasks")({ component: AdminTasks });
 
 type T = { id: number; title: string; type: string; url: string | null; reward: number; active: number; created_at: string; completions: number };
 
-const TYPE_META: Record<string, { icon: any; grad: string; chip: string }> = {
-  ad:     { icon: ExternalLink, grad: "from-violet-500 to-fuchsia-500",  chip: "bg-violet-100 text-violet-700" },
-  video:  { icon: Video,        grad: "from-rose-500 to-orange-500",     chip: "bg-rose-100 text-rose-700" },
-  app:    { icon: AppWindow,    grad: "from-sky-500 to-cyan-500",        chip: "bg-sky-100 text-sky-700" },
-  social: { icon: Share2,       grad: "from-emerald-500 to-teal-500",    chip: "bg-emerald-100 text-emerald-700" },
-  game:   { icon: Gamepad2,     grad: "from-amber-500 to-orange-600",    chip: "bg-amber-100 text-amber-800" },
+const TYPE_META: Record<string, { icon: any; grad: string; chip: string; label: string }> = {
+  signup: { icon: UserPlus,    grad: "from-indigo-500 to-blue-600",     chip: "bg-indigo-100 text-indigo-700", label: "Signup" },
+  ad:     { icon: Megaphone,   grad: "from-violet-500 to-fuchsia-500",  chip: "bg-violet-100 text-violet-700", label: "Ad Watch" },
+  video:  { icon: MonitorPlay, grad: "from-rose-500 to-orange-500",     chip: "bg-rose-100 text-rose-700",     label: "Video Watch" },
+  survey: { icon: ClipboardList, grad: "from-cyan-500 to-blue-500",     chip: "bg-cyan-100 text-cyan-700",     label: "Survey" },
+  app:    { icon: AppWindow,   grad: "from-sky-500 to-cyan-500",        chip: "bg-sky-100 text-sky-700",       label: "App Install" },
+  social: { icon: Share2,      grad: "from-emerald-500 to-teal-500",    chip: "bg-emerald-100 text-emerald-700", label: "Social" },
+  game:   { icon: Gamepad2,    grad: "from-amber-500 to-orange-600",    chip: "bg-amber-100 text-amber-800",   label: "Game" },
 };
-function meta(t: string) { return TYPE_META[t] || { icon: Target, grad: "from-slate-500 to-slate-700", chip: "bg-slate-100 text-slate-700" }; }
+function meta(t: string) { return TYPE_META[t] || { icon: Target, grad: "from-slate-500 to-slate-700", chip: "bg-slate-100 text-slate-700", label: t }; }
 
 function AdminTasks() {
   const [tasks, setTasks] = useState<T[]>([]);
@@ -118,12 +120,12 @@ function AdminTasks() {
               className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 focus:border-fuchsia-400/50 transition" />
           </Field>
           <Field className="sm:col-span-3" label="Type">
-            <div className="grid grid-cols-5 gap-1.5">
-              {(["ad","video","app","social","game"] as const).map((tp) => {
+            <div className="grid grid-cols-7 gap-1.5">
+              {(["signup","ad","video","survey","app","social","game"] as const).map((tp) => {
                 const m = meta(tp); const Icon = m.icon; const sel = form.type === tp;
                 return (
                   <button type="button" key={tp} onClick={() => setForm({ ...form, type: tp })}
-                    aria-label={tp}
+                    aria-label={m.label} title={m.label}
                     className={`relative grid place-items-center aspect-square rounded-xl border transition ${sel ? `bg-gradient-to-br ${m.grad} text-white border-transparent shadow-brand scale-[1.02]` : "border-border bg-background text-muted-foreground hover:text-foreground hover:border-primary/40"}`}>
                     <Icon className="h-4 w-4" />
                   </button>

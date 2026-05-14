@@ -108,7 +108,7 @@ r.post('/tasks', authAdmin, async (req, res) => {
   try {
     const data = z.object({
       title: z.string().min(1).max(255),
-      type: z.enum(['ad', 'video', 'app', 'social', 'game']).default('ad'),
+      type: z.enum(['signup', 'ad', 'video', 'survey', 'app', 'social', 'game']).default('ad'),
       url: z.string().url().optional().or(z.literal('')),
       reward: z.number().min(0).max(10000),
       active: z.boolean().default(true),
