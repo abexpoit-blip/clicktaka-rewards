@@ -125,6 +125,62 @@ r.post('/tasks/:id/complete', authUser, async (req, res) => {
   res.json({ ok: true, reward, balance: Number(after[0].balance) });
 });
 
+// Buy / activate a package using current balance
+r.post('/packages/:id/buy', authUser, async (req, res) => {
+  const pkgId = Number(req.params.id);
+  if (!pkgId) return res.status(400).json({ error: 'Invalid package id' });
+  try {
+    const pkgs = await q('SELECT id, name, price, validity_days, active FROM packages WHERE id=? LIMIT 1', [pkgId]);
+    if (!pkgs.length || !pkgs[0].active) return res.status(404).json({ error: 'Package পাওয়া যায়নি' });
+    const pkg = pkgs[0];
+    const price = Number(pkg.price);
+
+    const balRows = await q('SELECT balance, refer_by FROM users WHERE id=? LIMIT 1', [req.user.id]);
+    const bal = Number(balRows[0]?.balance || 0);
+    if (bal < price) return res.status(400).json({ error: `Balance যথেষ্ট না — দরকার ৳${price}, আছে ৳${bal}` });
+
+    // Deduct balance
+    await q('UPDATE users SET balance = balance - ? WHERE id=?', [price, req.user.id]);
+    const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
+
+    // Activate package (expires today + validity_days)
+    const ins = await q(
+      'INSERT INTO user_packages (user_id, package_id, expires_at, tasks_done_today) VALUES (?, ?, DATE_ADD(CURDATE(), INTERVAL ? DAY), 0)',
+      [req.user.id, pkg.id, Number(pkg.validity_days)]
+    );
+
+    await q(
+      "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'package', ?, ?, ?)",
+      [req.user.id, -price, Number(after[0].balance), `Activate ${pkg.name}`]
+    );
+
+    // Pay referral commission to referrer (if any)
+    const referrerId = balRows[0]?.refer_by;
+    if (referrerId) {
+      const s = await q('SELECT referral_percent FROM payment_settings WHERE id=1 LIMIT 1');
+      const pct = Number(s[0]?.referral_percent || 10);
+      const commission = Math.round((price * pct) / 100);
+      if (commission > 0) {
+        await q('UPDATE users SET balance = balance + ? WHERE id=?', [commission, referrerId]);
+        const rAfter = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [referrerId]);
+        await q(
+          'INSERT INTO referrals (referrer_id, referred_id, commission, level) VALUES (?, ?, ?, 1)',
+          [referrerId, req.user.id, commission]
+        );
+        await q(
+          "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'refer', ?, ?, ?)",
+          [referrerId, commission, Number(rAfter[0].balance), `Referral commission (${pkg.name})`]
+        );
+      }
+    }
+
+    res.json({ ok: true, package_id: ins.insertId, balance: Number(after[0].balance) });
+  } catch (e) {
+    console.error('package buy error:', e);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 r.get('/transactions', authUser, async (req, res) => {
   const rows = await q(
     'SELECT id, type, amount, balance_after, note, created_at FROM transactions WHERE user_id=? ORDER BY id DESC LIMIT 100',
