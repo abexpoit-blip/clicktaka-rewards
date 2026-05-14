@@ -177,10 +177,8 @@ function Landing() {
           <div className="text-center mb-6">
             <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Accepted Payment Methods</p>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-2.5">
-              <PayLogo name="bKash" bg="bg-pink-600" />
-              <PayLogo name="Nagad" bg="bg-orange-500" />
-              <PayLogo name="Rocket" bg="bg-purple-700" />
-              <PayLogo name="Upay" bg="bg-emerald-600" />
+              <PayLogo name="bKash" logo={bkashLogo} />
+              <PayLogo name="Nagad" logo={nagadLogo} />
             </div>
           </div>
           <div className="border-t border-border/60 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
