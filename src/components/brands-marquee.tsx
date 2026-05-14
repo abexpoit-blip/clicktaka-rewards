@@ -2,7 +2,6 @@
 import { Handshake } from "lucide-react";
 import bkashLogo from "@/assets/bkash-logo.png";
 import nagadLogo from "@/assets/nagad-logo.png";
-import rocketLogo from "@/assets/rocket-logo.png";
 
 const BRANDS = [
   // Foreign Ad networks & sponsors
@@ -10,7 +9,7 @@ const BRANDS = [
   "Meta Audience", "AdMob", "Unity Ads", "ironSource", "TrafficStars",
   "Amazon Associates", "AliExpress", "ClickBank", "Taboola", "Outbrain",
   // Local payment & telcos
-  "bKash", "Nagad", "Rocket", "Upay", "TallyKhata",
+  "bKash", "Nagad", "TallyKhata",
   "Grameenphone", "Robi", "Banglalink", "Teletalk",
   // Local commerce
   "Daraz", "Pathao", "Foodpanda", "Shohoz", "Chaldal",
@@ -61,7 +60,7 @@ export function BrandsMarquee() {
 const BRAND_MARKS: Record<string, { logo: string; word: string; color: string }> = {
   bKash:  { logo: bkashLogo,  word: "bKash",  color: "#E2136E" },
   Nagad:  { logo: nagadLogo,  word: "Nagad",  color: "#EC1C24" },
-  Rocket: { logo: rocketLogo, word: "Rocket", color: "#8C3494" },
+  
 };
 
 function BrandChip({ name, variant }: { name: string; variant?: boolean }) {

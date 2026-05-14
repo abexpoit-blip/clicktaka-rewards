@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Check } from "lucide-react";
 import bkashLogo from "@/assets/bkash-logo.png";
 import nagadLogo from "@/assets/nagad-logo.png";
-import rocketLogo from "@/assets/rocket-logo.png";
 
 const NAMES = [
   "Sohel Rana", "Naim Hasan", "Arif Hossain", "Rakib Khan", "Mehedi Hasan",
@@ -17,7 +16,6 @@ const NAMES = [
 const METHODS = [
   { name: "bKash", cls: "bg-pink-50 text-pink-700 border-pink-200",      logo: bkashLogo },
   { name: "Nagad", cls: "bg-orange-50 text-orange-700 border-orange-200", logo: nagadLogo },
-  { name: "Rocket", cls: "bg-purple-50 text-purple-700 border-purple-200", logo: rocketLogo },
   { name: "bKash", cls: "bg-pink-50 text-pink-700 border-pink-200",      logo: bkashLogo },
   { name: "Nagad", cls: "bg-orange-50 text-orange-700 border-orange-200", logo: nagadLogo },
 ] as const;

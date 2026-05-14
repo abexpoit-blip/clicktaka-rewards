@@ -4,6 +4,8 @@ import { api } from "@/lib/api";
 import { LiveTicker } from "@/components/live-ticker";
 import { Reviews } from "@/components/reviews";
 import { BrandsMarquee } from "@/components/brands-marquee";
+import bkashLogo from "@/assets/bkash-logo.png";
+import nagadLogo from "@/assets/nagad-logo.png";
 import {
   Banknote, Rocket, ShieldCheck, Zap, Users, Wallet, Target, Crown,
   CheckCircle2, ArrowRight, TrendingUp, Smartphone, Sparkles,
@@ -127,13 +129,15 @@ function Landing() {
               প্রতি <span className="text-gradient-brand">৩ সেকেন্ডে</span> একজন<br />টাকা withdraw করছেন
             </h2>
             <p className="text-muted-foreground mt-3">
-              নিচের list real-time update হয়। বিকাশ, নগদ, রকেট — সব method সাপোর্টেড। আপনার পরের নাম-ও এখানে আসবে 🎉
+              নিচের list real-time update হয়। বিকাশ ও নগদ — দুটো method-ই সাপোর্টেড। আপনার পরের নাম-ও এখানে আসবে 🎉
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-pink-50 text-pink-700 px-3 py-1.5 text-xs font-semibold">📱 bKash</span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 text-orange-700 px-3 py-1.5 text-xs font-semibold">📱 Nagad</span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-purple-50 text-purple-700 px-3 py-1.5 text-xs font-semibold">📱 Rocket</span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 text-blue-700 px-3 py-1.5 text-xs font-semibold">💳 Upay</span>
+              <span className="inline-flex items-center gap-2 rounded-xl border border-pink-200 bg-pink-50 text-pink-700 px-3 py-1.5 text-xs font-semibold">
+                <img src={bkashLogo} alt="bKash" className="h-5 w-5 rounded-md object-contain" /> bKash
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 text-orange-700 px-3 py-1.5 text-xs font-semibold">
+                <img src={nagadLogo} alt="Nagad" className="h-5 w-5 rounded-md object-contain" /> Nagad
+              </span>
             </div>
           </div>
           <div>
@@ -173,10 +177,8 @@ function Landing() {
           <div className="text-center mb-6">
             <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">Accepted Payment Methods</p>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-2.5">
-              <PayLogo name="bKash" bg="bg-pink-600" />
-              <PayLogo name="Nagad" bg="bg-orange-500" />
-              <PayLogo name="Rocket" bg="bg-purple-700" />
-              <PayLogo name="Upay" bg="bg-emerald-600" />
+              <PayLogo name="bKash" logo={bkashLogo} />
+              <PayLogo name="Nagad" logo={nagadLogo} />
             </div>
           </div>
           <div className="border-t border-border/60 pt-5 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-muted-foreground">
@@ -216,10 +218,10 @@ function Feature({ icon: Icon, title, desc, tone }: { icon: React.ComponentType<
   );
 }
 
-function PayLogo({ name, bg }: { name: string; bg: string }) {
+function PayLogo({ name, logo }: { name: string; logo: string }) {
   return (
     <div className="inline-flex items-center gap-2 rounded-xl border border-border/70 bg-card px-3.5 py-2 shadow-sm">
-      <span className={`grid place-items-center h-7 w-7 rounded-lg text-white text-[11px] font-bold ${bg}`}>{name[0]}</span>
+      <img src={logo} alt={`${name} logo`} className="h-7 w-7 rounded-lg object-contain" />
       <span className="font-semibold text-sm text-foreground">{name}</span>
     </div>
   );
