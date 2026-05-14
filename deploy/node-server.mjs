@@ -100,6 +100,13 @@ const server = createServer(async (req, res) => {
     response.headers.forEach((v, k) => {
       resHeaders[k] = v;
     });
+    // Never cache SSR HTML — guarantees users see latest deploy immediately
+    const ct = (resHeaders["content-type"] || "").toLowerCase();
+    if (ct.includes("text/html")) {
+      resHeaders["cache-control"] = "no-store, no-cache, must-revalidate, max-age=0";
+      resHeaders["pragma"] = "no-cache";
+      resHeaders["expires"] = "0";
+    }
     res.writeHead(response.status, resHeaders);
 
     if (response.body) {

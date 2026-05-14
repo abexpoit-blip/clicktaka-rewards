@@ -38,8 +38,14 @@ pm2 update >/dev/null 2>&1 || true
 echo "==> Installing frontend dependencies"
 npm install --no-audit --no-fund
 
-echo "==> Building frontend"
+echo "==> Building frontend (clean)"
+rm -rf dist
 npm run build
+if [[ ! -f "dist/server/index.js" ]]; then
+  echo "ERROR: Build failed — dist/server/index.js missing. Aborting deploy." >&2
+  exit 1
+fi
+echo "  ✓ Build complete: $(ls -la dist/server/index.js | awk '{print $5, $6, $7, $8}')"
 
 echo "==> Installing backend dependencies"
 npm install --prefix server --no-audit --no-fund
