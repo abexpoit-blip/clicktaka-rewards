@@ -153,25 +153,81 @@ function PackagesPage() {
         <Badge icon={Gift} title="Refer Bonus" sub="১০% commission" tone="info" />
       </div>
 
+      {/* Active packages banner — shows what user currently owns */}
+      {activePkgs.length > 0 && (
+        <section className="relative overflow-hidden rounded-3xl border-2 border-success/30 bg-gradient-to-br from-emerald-50 via-green-50 to-teal-50 p-5 sm:p-6 shadow-brand">
+          <div aria-hidden className="absolute -top-12 -right-12 h-40 w-40 rounded-full bg-emerald-300/30 blur-3xl" />
+          <div className="relative flex items-start gap-4 flex-wrap">
+            <div className="grid place-items-center h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 text-white shadow-lg shrink-0">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-emerald-700">✓ Currently Active</p>
+              <h3 className="font-display text-lg sm:text-xl font-bold mt-0.5 text-emerald-900">
+                আপনার {activePkgs.length} টি package চলমান 🎉
+              </h3>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {activePkgs.map((a) => (
+                  <span key={a.id} className="inline-flex items-center gap-1.5 rounded-xl bg-white border border-emerald-200 text-emerald-800 px-3 py-1.5 text-xs font-bold shadow-sm">
+                    <Crown className="h-3.5 w-3.5 text-amber-500" />
+                    {a.name}
+                    <span className="text-emerald-600 font-normal">· ৳{Number(a.daily_earning).toLocaleString()}/day</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+            {nextUpgrade && (
+              <div className="rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-pink-500 text-white p-3 sm:p-4 shadow-lg max-w-[260px] w-full sm:w-auto">
+                <p className="text-[10px] font-bold uppercase tracking-wider opacity-90 inline-flex items-center gap-1">
+                  <Flame className="h-3 w-3" /> Upgrade Offer
+                </p>
+                <p className="font-display text-base font-bold mt-0.5 leading-tight">
+                  {nextUpgrade.name} নিয়ে দৈনিক <span className="tabular-nums">৳{Number(nextUpgrade.daily_earning).toLocaleString()}</span> income করুন!
+                </p>
+                <p className="text-[11px] opacity-90 mt-0.5">
+                  এখনই +৳{(Number(nextUpgrade.daily_earning) - Math.max(...activePkgs.map(a => Number(a.daily_earning)), 0)).toLocaleString()}/day extra
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Packages grid */}
       <section>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {packages.map((p, i) => {
             const t = THEMES[i % THEMES.length];
             const Icon = t.icon;
-            const featured = i === Math.min(2, packages.length - 1);
+            const active = activeByName.get(p.name);
+            const isUpgrade = nextUpgrade?.id === p.id;
+            const featured = !active && (isUpgrade || (activePkgs.length === 0 && i === Math.min(2, packages.length - 1)));
             const roi = p.price > 0 ? Math.round((Number(p.daily_earning) * p.validity_days / Number(p.price)) * 100) : 0;
             const can = balance >= p.price;
 
             return (
               <article
                 key={p.id}
-                className={`group relative overflow-hidden rounded-3xl bg-card border border-border/70 shadow-card hover:shadow-brand transition-all hover:-translate-y-1 ${featured ? `ring-2 ${t.ring} ${t.glow} shadow-2xl` : ""}`}
+                className={`group relative overflow-hidden rounded-3xl bg-card border shadow-card hover:shadow-brand transition-all hover:-translate-y-1 ${
+                  active
+                    ? "border-emerald-400 ring-2 ring-emerald-300 shadow-2xl shadow-emerald-200/50"
+                    : featured
+                    ? `border-border/70 ring-2 ${t.ring} ${t.glow} shadow-2xl`
+                    : "border-border/70"
+                }`}
               >
                 {/* Top gradient stripe */}
-                <div aria-hidden className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${t.grad}`} />
+                <div aria-hidden className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${active ? "from-emerald-500 to-green-600" : t.grad}`} />
 
-                {featured && (
+                {active ? (
+                  <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-emerald-500 to-green-600 text-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-lg z-10">
+                    <CheckCircle2 className="h-3 w-3" /> Active
+                  </span>
+                ) : isUpgrade ? (
+                  <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-lg z-10 animate-pulse">
+                    <Flame className="h-3 w-3" /> Upgrade & Earn More
+                  </span>
+                ) : featured && (
                   <span className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 text-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-lg z-10">
                     <Crown className="h-3 w-3" /> Most Popular
                   </span>
@@ -200,6 +256,16 @@ function PackagesPage() {
                     <TrendingUp className="h-3 w-3" /> {roi}% ROI in {p.validity_days} days
                   </div>
 
+                  {/* Active status detail */}
+                  {active && (
+                    <div className="mt-3 rounded-xl bg-emerald-50 border border-emerald-200 p-2.5 text-[11px] text-emerald-800">
+                      <p className="font-bold inline-flex items-center gap-1">
+                        <CheckCircle2 className="h-3.5 w-3.5" /> আজ {active.tasks_done_today}/{active.daily_task_limit} task complete
+                      </p>
+                      <p className="opacity-80 mt-0.5">Expires: {new Date(active.expires_at).toLocaleDateString()}</p>
+                    </div>
+                  )}
+
                   {/* Features */}
                   <ul className="mt-5 space-y-2.5 text-sm">
                     <Feature icon={Target}     label={<>দৈনিক <b className="tabular-nums">{p.daily_task_limit}</b> টি task</>} />
@@ -210,16 +276,27 @@ function PackagesPage() {
                   </ul>
 
                   {/* CTA */}
-                  <button
-                    onClick={() => openUpgrade(p)}
-                    className={`mt-6 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-bold text-sm transition shadow-brand bg-gradient-to-r ${t.grad} text-white hover:scale-[1.02]`}
-                  >
-                    <Crown className="h-4 w-4" /> Upgrade Now <ArrowRight className="h-4 w-4" />
-                  </button>
-                  {!can && (
-                    <Link to="/user/deposit" className="block mt-2 text-center text-xs font-semibold text-primary hover:underline">
-                      ৳{(p.price - balance).toLocaleString()} আরো deposit করুন →
+                  {active ? (
+                    <Link
+                      to="/user/tasks"
+                      className="mt-6 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-bold text-sm transition bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg hover:scale-[1.02]"
+                    >
+                      <CheckCircle2 className="h-4 w-4" /> Tasks করুন → Earn করুন
                     </Link>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => openUpgrade(p)}
+                        className={`mt-6 w-full inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 font-bold text-sm transition shadow-brand bg-gradient-to-r ${t.grad} text-white hover:scale-[1.02]`}
+                      >
+                        <Crown className="h-4 w-4" /> {isUpgrade ? "Upgrade & Earn More" : "Activate Now"} <ArrowRight className="h-4 w-4" />
+                      </button>
+                      {!can && (
+                        <Link to="/user/deposit" className="block mt-2 text-center text-xs font-semibold text-primary hover:underline">
+                          ৳{(p.price - balance).toLocaleString()} আরো deposit করুন →
+                        </Link>
+                      )}
+                    </>
                   )}
                 </div>
               </article>
