@@ -66,12 +66,16 @@ function PackagesPage() {
     }
     setBuying(p.id);
     try {
-      await api(`/user/packages/${p.id}/buy`, { method: "POST" });
-      toast.success(`${p.name} package activate হয়েছে! 🎉`);
+      const res = await api<{ ok: boolean; balance: number }>(
+        `/user/packages/${p.id}/buy`,
+        { method: "POST", json: {} }
+      );
+      if (typeof res.balance === "number") setBalance(res.balance);
+      toast.success(`${p.name} package activate হয়েছে! 🎉 নতুন balance: ৳${Number(res.balance).toLocaleString()}`);
       setModalPkg(null);
       load();
     } catch (e: any) {
-      toast.error(e.message);
+      toast.error(e.message || "Activation ব্যর্থ হয়েছে");
     } finally {
       setBuying(null);
     }
