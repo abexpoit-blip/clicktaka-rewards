@@ -1,6 +1,9 @@
 // Live withdrawals — vertical feed matching the site's light/brand theme
 import { useEffect, useMemo, useState } from "react";
 import { Check } from "lucide-react";
+import bkashLogo from "@/assets/bkash-logo.png";
+import nagadLogo from "@/assets/nagad-logo.png";
+import rocketLogo from "@/assets/rocket-logo.png";
 
 const NAMES = [
   "Sohel Rana", "Naim Hasan", "Arif Hossain", "Rakib Khan", "Mehedi Hasan",
@@ -12,11 +15,11 @@ const NAMES = [
   "Tania Akter", "Sumi Begum", "Faria Islam", "Nadia Akter", "Mim Akter",
 ];
 const METHODS = [
-  { name: "bKash", cls: "bg-pink-50 text-pink-700 border-pink-200" },
-  { name: "Nagad", cls: "bg-orange-50 text-orange-700 border-orange-200" },
-  { name: "Rocket", cls: "bg-purple-50 text-purple-700 border-purple-200" },
-  { name: "bKash", cls: "bg-pink-50 text-pink-700 border-pink-200" },
-  { name: "Nagad", cls: "bg-orange-50 text-orange-700 border-orange-200" },
+  { name: "bKash", cls: "bg-pink-50 text-pink-700 border-pink-200",      logo: bkashLogo },
+  { name: "Nagad", cls: "bg-orange-50 text-orange-700 border-orange-200", logo: nagadLogo },
+  { name: "Rocket", cls: "bg-purple-50 text-purple-700 border-purple-200", logo: rocketLogo },
+  { name: "bKash", cls: "bg-pink-50 text-pink-700 border-pink-200",      logo: bkashLogo },
+  { name: "Nagad", cls: "bg-orange-50 text-orange-700 border-orange-200", logo: nagadLogo },
 ] as const;
 // Minimum withdraw = ৳500 (site policy)
 const AMOUNTS = [500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 7500];
@@ -103,6 +106,7 @@ export function LiveTicker() {
                 <div className="flex items-center gap-2">
                   <p className="text-sm font-semibold text-foreground truncate">{it.name}</p>
                   <span className={`inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-[10px] font-bold ${it.method.cls}`}>
+                    <img src={it.method.logo} alt={`${it.method.name} logo`} loading="lazy" width={12} height={12} className="h-3 w-3 rounded-sm object-contain" />
                     {it.method.name}
                   </span>
                 </div>
