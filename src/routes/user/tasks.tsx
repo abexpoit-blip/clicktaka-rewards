@@ -50,10 +50,12 @@ function TasksPage() {
     } catch { return null; }
   });
 
-  function load() {
-    api<Data>("/user/tasks").then(setD).catch((e) => setErr(e.message));
+  function load(): Promise<Data | null> {
+    return api<Data>("/user/tasks")
+      .then((x) => { setD(x); return x; })
+      .catch((e) => { setErr(e.message); return null; });
   }
-  useEffect(load, []);
+  useEffect(() => { load(); }, []);
 
   // After tasks load, resume an active task from localStorage if present
   useEffect(() => {
