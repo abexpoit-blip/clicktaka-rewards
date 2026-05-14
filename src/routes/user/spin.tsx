@@ -6,7 +6,8 @@ import { Lock, Crown, Sparkles, Gift } from "lucide-react";
 
 export const Route = createFileRoute("/user/spin")({ component: SpinPage });
 
-const SLICES = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+// Wheel slices: ৳10, ৳20, ... ৳100 (must match server reward range)
+const SLICES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
 const COLORS = ["#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626", "#0891b2", "#9333ea", "#16a34a", "#ea580c", "#be185d"];
 
 type SpinStatus = {
@@ -84,7 +85,7 @@ function SpinPage() {
           </div>
           <h2 className="font-display text-xl sm:text-2xl font-bold mt-4">Spin করতে হলে Package activate করুন</h2>
           <p className="text-sm text-muted-foreground mt-2 max-w-md mx-auto">
-            যত বড় package, তত বেশি দৈনিক spin chance — প্রতি spin-এ ৳১ থেকে ৳১০ পর্যন্ত জিততে পারেন।
+            যত বড় package, তত বেশি দৈনিক spin chance — প্রতি spin-এ ৳১০ থেকে ৳১০০ পর্যন্ত জিততে পারেন।
           </p>
 
           <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 gap-2.5 text-left">
@@ -116,7 +117,7 @@ function SpinPage() {
     <div className="space-y-6 animate-fade-in max-w-xl mx-auto px-1">
       <div className="text-center">
         <h1 className="text-2xl font-bold">🎡 Daily Spin Wheel</h1>
-        <p className="text-sm text-gray-600 mt-1">প্রতি spin-এ ৳1 থেকে ৳10 পর্যন্ত জিতুন!</p>
+        <p className="text-sm text-gray-600 mt-1">প্রতি spin-এ ৳১০ থেকে ৳১০০ পর্যন্ত জিতুন!</p>
       </div>
 
       {status && (
