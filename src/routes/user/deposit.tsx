@@ -18,8 +18,8 @@ type Deposit = {
 };
 
 const METHODS = [
-  { id: "bkash",  label: "Bkash",  color: "from-pink-500 to-rose-500",     emoji: "📱" },
-  { id: "nagad",  label: "Nagad",  color: "from-orange-500 to-amber-500",  emoji: "🟧" },
+  { id: "bkash",  label: "bKash",  color: "from-pink-500 to-rose-500",     logo: bkashLogo },
+  { id: "nagad",  label: "Nagad",  color: "from-orange-500 to-amber-500",  logo: nagadLogo },
 ] as const;
 
 function DepositPage() {
