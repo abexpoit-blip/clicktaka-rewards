@@ -120,12 +120,12 @@ function AdminTasks() {
               className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 focus:border-fuchsia-400/50 transition" />
           </Field>
           <Field className="sm:col-span-3" label="Type">
-            <div className="grid grid-cols-5 gap-1.5">
-              {(["ad","video","app","social","game"] as const).map((tp) => {
+            <div className="grid grid-cols-7 gap-1.5">
+              {(["signup","ad","video","survey","app","social","game"] as const).map((tp) => {
                 const m = meta(tp); const Icon = m.icon; const sel = form.type === tp;
                 return (
                   <button type="button" key={tp} onClick={() => setForm({ ...form, type: tp })}
-                    aria-label={tp}
+                    aria-label={m.label} title={m.label}
                     className={`relative grid place-items-center aspect-square rounded-xl border transition ${sel ? `bg-gradient-to-br ${m.grad} text-white border-transparent shadow-brand scale-[1.02]` : "border-border bg-background text-muted-foreground hover:text-foreground hover:border-primary/40"}`}>
                     <Icon className="h-4 w-4" />
                   </button>
