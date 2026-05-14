@@ -123,8 +123,9 @@ function TasksPage() {
         `/user/tasks/${task.id}/complete`,
         { method: "POST" }
       );
-      // Optimistic balance bump for instant header update — no refresh needed
-      bumpBalance(Number(r.reward));
+      // Authoritative balance from server when available, otherwise optimistic delta
+      if (typeof r.balance === "number") setBalance(Number(r.balance));
+      else bumpBalance(Number(r.reward));
       // Inline success state on the card before refetch
       setJustClaimed({ id: task.id, reward: Number(r.reward) });
       setActive(null);
@@ -134,11 +135,16 @@ function TasksPage() {
         title: task.title,
         balance: typeof r.balance === "number" ? Number(r.balance) : null,
       });
-      // Refetch in background so status (today_completed, completed_task_ids_today) updates immediately
-      load();
+      // Refetch + verify task is marked done; retry once if backend lag
+      const fresh = await load();
+      if (fresh && !fresh.completed_task_ids_today.includes(task.id)) {
+        setTimeout(() => { load(); }, 700);
+      }
       setTimeout(() => setJustClaimed((s) => (s?.id === task.id ? null : s)), 2500);
     } catch (e: any) {
       toast.error(e.message);
+      // On failure, reload so UI reflects true state (no false "Done")
+      load();
     } finally {
       setBusy(null);
     }
