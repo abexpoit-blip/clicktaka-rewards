@@ -54,8 +54,39 @@ export function BrandsMarquee() {
   );
 }
 
+// Real brand marks for local payment partners (official colors + wordmark)
+const BRAND_MARKS: Record<string, { bg: string; fg: string; mark: string; word: string }> = {
+  bKash:   { bg: "#E2136E", fg: "#ffffff", mark: "b", word: "bKash" },
+  Nagad:   { bg: "#EC1C24", fg: "#ffffff", mark: "ন", word: "Nagad" },
+  Rocket:  { bg: "#8C3494", fg: "#ffffff", mark: "R", word: "Rocket" },
+  Upay:    { bg: "#E91D63", fg: "#ffffff", mark: "U", word: "Upay" },
+};
+
 function BrandChip({ name, variant }: { name: string; variant?: boolean }) {
-  // Deterministic gradient per brand
+  const real = BRAND_MARKS[name];
+  if (real) {
+    return (
+      <div
+        className={`shrink-0 inline-flex items-center gap-2 rounded-2xl border border-border/70 ${variant ? "bg-card" : "bg-background"} px-5 py-3 shadow-card`}
+      >
+        <span
+          aria-hidden
+          className="grid place-items-center h-7 w-7 rounded-lg text-[13px] font-extrabold shadow"
+          style={{ background: real.bg, color: real.fg, fontFamily: "system-ui, sans-serif" }}
+        >
+          {real.mark}
+        </span>
+        <span
+          className="font-display font-bold text-sm tracking-tight"
+          style={{ color: real.bg }}
+        >
+          {real.word}
+        </span>
+      </div>
+    );
+  }
+
+  // Deterministic gradient per brand (fallback for non-payment brands)
   const hue = (name.charCodeAt(0) * 17 + name.length * 23) % 360;
   return (
     <div
