@@ -269,40 +269,50 @@ async function getSpinContext(userId) {
 }
 
 r.get('/spin/status', authUser, async (req, res) => {
-  const ctx = await getSpinContext(req.user.id);
-  res.json({
-    ...ctx,
-    spun_today: ctx.spins_left <= 0,   // backwards-compat for old client
-  });
+  try {
+    const ctx = await getSpinContext(req.user.id);
+    res.json({
+      ...ctx,
+      spun_today: ctx.spins_left <= 0,   // backwards-compat for old client
+    });
+  } catch (e) {
+    console.error('spin status error:', e);
+    res.status(500).json({ error: 'Spin status load করা যায়নি' });
+  }
 });
 
 r.post('/spin', authUser, async (req, res) => {
-  const ctx = await getSpinContext(req.user.id);
-  if (!ctx.has_package) {
-    return res.status(403).json({ error: 'Spin করতে হলে আগে একটি package activate করুন' });
-  }
-  if (ctx.spins_left <= 0) {
-    return res.status(409).json({
-      error: `আজকের ${ctx.spins_limit} টি spin শেষ — কাল আবার আসুন`,
-    });
-  }
+  try {
+    const ctx = await getSpinContext(req.user.id);
+    if (!ctx.has_package) {
+      return res.status(403).json({ error: 'Spin করতে হলে আগে একটি package activate করুন' });
+    }
+    if (ctx.spins_left <= 0) {
+      return res.status(409).json({
+        error: `আজকের ${ctx.spins_limit} টি spin শেষ — কাল আবার আসুন`,
+      });
+    }
 
-  // Reward: random multiple of 10 between ৳10 and ৳100 (matches wheel slices)
-  const reward = (Math.floor(Math.random() * 10) + 1) * 10; // 10,20,...,100 BDT
-  await q('INSERT INTO daily_spins (user_id, spin_date, reward) VALUES (?, CURDATE(), ?)', [req.user.id, reward]);
-  await q('UPDATE users SET balance = balance + ? WHERE id=?', [reward, req.user.id]);
-  const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
-  await q(
-    "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'admin', ?, ?, ?)",
-    [req.user.id, reward, Number(after[0].balance), 'Daily Spin Bonus']
-  );
-  res.json({
-    ok: true,
-    reward,
-    balance: Number(after[0].balance),
-    spins_left: ctx.spins_left - 1,
-    spins_limit: ctx.spins_limit,
-  });
+    // Reward: random multiple of 10 between ৳10 and ৳100 (matches wheel slices)
+    const reward = (Math.floor(Math.random() * 10) + 1) * 10; // 10,20,...,100 BDT
+    await q('INSERT INTO daily_spins (user_id, spin_date, reward) VALUES (?, CURDATE(), ?)', [req.user.id, reward]);
+    await q('UPDATE users SET balance = balance + ? WHERE id=?', [reward, req.user.id]);
+    const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
+    await q(
+      "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'admin', ?, ?, ?)",
+      [req.user.id, reward, Number(after[0].balance), 'Daily Spin Bonus']
+    );
+    res.json({
+      ok: true,
+      reward,
+      balance: Number(after[0].balance),
+      spins_left: ctx.spins_left - 1,
+      spins_limit: ctx.spins_limit,
+    });
+  } catch (e) {
+    console.error('spin error:', e);
+    res.status(500).json({ error: 'Spin করা যায়নি — একটু পরে আবার চেষ্টা করুন' });
+  }
 });
 
 r.get('/referrals', authUser, async (req, res) => {
