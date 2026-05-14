@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { bumpBalance } from "@/lib/active-task";
+import { bumpBalance, setBalance } from "@/lib/active-task";
 import { toast } from "sonner";
 import { TaskSuccessModal } from "@/components/task-success-modal";
 import {
