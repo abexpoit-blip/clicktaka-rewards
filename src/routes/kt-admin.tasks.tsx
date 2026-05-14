@@ -5,21 +5,23 @@ import { toast } from "sonner";
 import {
   Sparkles, Plus, Search, Target, Video, AppWindow, Share2, Gamepad2,
   ExternalLink, Pause, Play, Trash2, Coins, Activity, TrendingUp, Filter,
-  CheckCircle2, Zap, Layers,
+  CheckCircle2, Zap, Layers, UserPlus, ClipboardList, MonitorPlay, Megaphone,
 } from "lucide-react";
 
 export const Route = createFileRoute("/kt-admin/tasks")({ component: AdminTasks });
 
 type T = { id: number; title: string; type: string; url: string | null; reward: number; active: number; created_at: string; completions: number };
 
-const TYPE_META: Record<string, { icon: any; grad: string; chip: string }> = {
-  ad:     { icon: ExternalLink, grad: "from-violet-500 to-fuchsia-500",  chip: "bg-violet-100 text-violet-700" },
-  video:  { icon: Video,        grad: "from-rose-500 to-orange-500",     chip: "bg-rose-100 text-rose-700" },
-  app:    { icon: AppWindow,    grad: "from-sky-500 to-cyan-500",        chip: "bg-sky-100 text-sky-700" },
-  social: { icon: Share2,       grad: "from-emerald-500 to-teal-500",    chip: "bg-emerald-100 text-emerald-700" },
-  game:   { icon: Gamepad2,     grad: "from-amber-500 to-orange-600",    chip: "bg-amber-100 text-amber-800" },
+const TYPE_META: Record<string, { icon: any; grad: string; chip: string; label: string }> = {
+  signup: { icon: UserPlus,    grad: "from-indigo-500 to-blue-600",     chip: "bg-indigo-100 text-indigo-700", label: "Signup" },
+  ad:     { icon: Megaphone,   grad: "from-violet-500 to-fuchsia-500",  chip: "bg-violet-100 text-violet-700", label: "Ad Watch" },
+  video:  { icon: MonitorPlay, grad: "from-rose-500 to-orange-500",     chip: "bg-rose-100 text-rose-700",     label: "Video Watch" },
+  survey: { icon: ClipboardList, grad: "from-cyan-500 to-blue-500",     chip: "bg-cyan-100 text-cyan-700",     label: "Survey" },
+  app:    { icon: AppWindow,   grad: "from-sky-500 to-cyan-500",        chip: "bg-sky-100 text-sky-700",       label: "App Install" },
+  social: { icon: Share2,      grad: "from-emerald-500 to-teal-500",    chip: "bg-emerald-100 text-emerald-700", label: "Social" },
+  game:   { icon: Gamepad2,    grad: "from-amber-500 to-orange-600",    chip: "bg-amber-100 text-amber-800",   label: "Game" },
 };
-function meta(t: string) { return TYPE_META[t] || { icon: Target, grad: "from-slate-500 to-slate-700", chip: "bg-slate-100 text-slate-700" }; }
+function meta(t: string) { return TYPE_META[t] || { icon: Target, grad: "from-slate-500 to-slate-700", chip: "bg-slate-100 text-slate-700", label: t }; }
 
 function AdminTasks() {
   const [tasks, setTasks] = useState<T[]>([]);
