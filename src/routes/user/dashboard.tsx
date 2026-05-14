@@ -65,7 +65,10 @@ function Dashboard() {
   const potential = availableTasks.reduce((s, t) => s + Number(t.reward || 0), 0);
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in">
+      {/* Wallet summary — balance + today + total in one premium strip */}
+      <WalletSummary balance={Number(d.user.balance)} today={Number(d.earnings.today)} total={Number(d.earnings.total)} />
+
       <LiveTicker />
 
       {/* Today's Mission — task-focused hero (replaces old profile hero) */}
