@@ -152,6 +152,13 @@ function TasksPage() {
 
   return (
     <div className="space-y-6 animate-fade-in">
+      <TaskSuccessModal
+        open={!!successModal}
+        reward={successModal?.reward ?? 0}
+        taskTitle={successModal?.title}
+        newBalance={successModal?.balance ?? null}
+        onClose={() => setSuccessModal(null)}
+      />
       {/* Hero progress card */}
       <section className="relative overflow-hidden rounded-3xl bg-gradient-brand text-white shadow-brand p-6 sm:p-7">
         <div aria-hidden className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/15 blur-3xl animate-float" />
