@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { BALANCE_EVENT } from "@/lib/active-task";
+import { BALANCE_EVENT, BALANCE_SET_EVENT } from "@/lib/active-task";
 import { Toaster } from "@/components/ui/sonner";
 import {
   LayoutDashboard, Target, Disc3, Package, Wallet, Send, Users, History, UserCircle2,
