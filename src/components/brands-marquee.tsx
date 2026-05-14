@@ -60,7 +60,7 @@ export function BrandsMarquee() {
 const BRAND_MARKS: Record<string, { logo: string; word: string; color: string }> = {
   bKash:  { logo: bkashLogo,  word: "bKash",  color: "#E2136E" },
   Nagad:  { logo: nagadLogo,  word: "Nagad",  color: "#EC1C24" },
-  Rocket: { logo: rocketLogo, word: "Rocket", color: "#8C3494" },
+  
 };
 
 function BrandChip({ name, variant }: { name: string; variant?: boolean }) {
