@@ -191,6 +191,28 @@ r.get('/transactions', authUser, async (req, res) => {
 
 // Daily Spin Wheel — package অনুযায়ী দৈনিক spin limit
 // 500=1, 1000=2, 2000=3, 5000=5, 10000=8, 20000=12 ; package না থাকলে 0
+let dailySpinsTableReady;
+
+async function ensureDailySpinsTable() {
+  if (!dailySpinsTableReady) {
+    dailySpinsTableReady = q(`
+      CREATE TABLE IF NOT EXISTS daily_spins (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        spin_date DATE NOT NULL,
+        reward DECIMAL(10,2) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        INDEX idx_user_date (user_id, spin_date),
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      ) ENGINE=InnoDB
+    `).catch((error) => {
+      dailySpinsTableReady = undefined;
+      throw error;
+    });
+  }
+  await dailySpinsTableReady;
+}
+
 function spinLimitForPrice(price) {
   const p = Number(price) || 0;
   if (p >= 20000) return 12;
@@ -203,6 +225,7 @@ function spinLimitForPrice(price) {
 }
 
 async function getSpinContext(userId) {
+  await ensureDailySpinsTable();
   // highest-priced active (non-expired) package
   const pkgs = await q(
     `SELECT p.price FROM user_packages up
