@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { bumpBalance } from "@/lib/active-task";
 import { toast } from "sonner";
+import { TaskSuccessModal } from "@/components/task-success-modal";
 import {
   Target, Trophy, Zap, Lock, CheckCircle2, Play, Clock, X, RotateCcw,
   TrendingUp, Crown, Flame, Coins, Package as PackageIcon, ExternalLink,
@@ -35,6 +36,7 @@ function TasksPage() {
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState<number | null>(null);
   const [justClaimed, setJustClaimed] = useState<{ id: number; reward: number } | null>(null);
+  const [successModal, setSuccessModal] = useState<{ reward: number; title: string; balance: number | null } | null>(null);
   const REQUIRED_SECONDS = 30;
   const [active, setActive] = useState<{ task: Task; viewed: number; awayOnce: boolean; awayMs: number; needsAway: boolean } | null>(() => {
     // Resume from localStorage if user navigated here from dashboard / refreshed
@@ -115,14 +117,22 @@ function TasksPage() {
   async function complete(task: Task) {
     setBusy(task.id);
     try {
-      const r = await api<{ ok: boolean; reward: number }>(`/user/tasks/${task.id}/complete`, { method: "POST" });
+      const r = await api<{ ok: boolean; reward: number; balance?: number }>(
+        `/user/tasks/${task.id}/complete`,
+        { method: "POST" }
+      );
       // Optimistic balance bump for instant header update — no refresh needed
       bumpBalance(Number(r.reward));
       // Inline success state on the card before refetch
       setJustClaimed({ id: task.id, reward: Number(r.reward) });
       setActive(null);
-      toast.success(`+৳${r.reward} যোগ হয়েছে 🎉`);
-      // Refetch in background; clear success badge after a moment
+      // Celebratory full-screen popup
+      setSuccessModal({
+        reward: Number(r.reward),
+        title: task.title,
+        balance: typeof r.balance === "number" ? Number(r.balance) : null,
+      });
+      // Refetch in background so status (today_completed, completed_task_ids_today) updates immediately
       load();
       setTimeout(() => setJustClaimed((s) => (s?.id === task.id ? null : s)), 2500);
     } catch (e: any) {
