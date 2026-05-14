@@ -35,8 +35,12 @@ function SpinPage() {
   const [err, setErr] = useState("");
 
   function loadStatus() {
+    setErr("");
     api<SpinStatus>("/user/spin/status")
-      .then(setStatus)
+      .then((data) => {
+        setStatus(data);
+        setErr("");
+      })
       .catch((e) => setErr(e.message));
   }
   useEffect(loadStatus, []);
@@ -50,8 +54,9 @@ function SpinPage() {
       );
       const idx = SLICES.indexOf(res.reward);
       const sliceAngle = 360 / SLICES.length;
-      const target = 360 * 5 + (360 - (idx * sliceAngle + sliceAngle / 2));
-      setAngle(target);
+      const rewardIndex = idx >= 0 ? idx : 0;
+      const target = 360 - (rewardIndex * sliceAngle + sliceAngle / 2);
+      setAngle((current) => current + 360 * 5 + ((target - (current % 360) + 360) % 360));
       setTimeout(() => {
         setSpinning(false);
         setStatus((s) => s ? {
