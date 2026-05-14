@@ -43,7 +43,13 @@ export function viewedSeconds(a: ActiveTask): number {
 // Any page (e.g. tasks page Claim) can call bumpBalance(+5) and the layout
 // header instantly reflects it without a refetch.
 export const BALANCE_EVENT = "ct:balance-delta";
+export const BALANCE_SET_EVENT = "ct:balance-set";
 export function bumpBalance(delta: number) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(BALANCE_EVENT, { detail: { delta } }));
+}
+/** Authoritative balance from server — overrides optimistic delta. */
+export function setBalance(value: number) {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(BALANCE_SET_EVENT, { detail: { value } }));
 }
