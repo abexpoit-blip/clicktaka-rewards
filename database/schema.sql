@@ -128,14 +128,14 @@ CREATE TABLE IF NOT EXISTS transactions (
   INDEX idx_user (user_id, created_at)
 ) ENGINE=InnoDB;
 
--- DAILY SPINS (Spin Wheel — 1/day)
+-- DAILY SPINS (Spin Wheel — limit per day depends on user's active package)
 CREATE TABLE IF NOT EXISTS daily_spins (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   spin_date DATE NOT NULL,
   reward DECIMAL(10,2) NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uniq_user_date (user_id, spin_date),
+  INDEX idx_user_date (user_id, spin_date),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -177,7 +177,8 @@ SELECT 'Silver', 500, 10, 50, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE
 UNION ALL SELECT 'Silver 2', 1000, 15, 110, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Silver 2')
 UNION ALL SELECT 'Silver 3', 2000, 20, 230, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Silver 3')
 UNION ALL SELECT 'Gold', 5000, 30, 600, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Gold')
-UNION ALL SELECT 'Diamond', 10000, 50, 1300, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Diamond');
+UNION ALL SELECT 'Diamond', 10000, 50, 1300, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Diamond')
+UNION ALL SELECT 'Royal', 20000, 80, 2800, 365 WHERE NOT EXISTS (SELECT 1 FROM packages WHERE name='Royal');
 
 INSERT IGNORE INTO payment_settings (id) VALUES (1);
 
