@@ -24,8 +24,11 @@ const THEMES = [
   { name: "Diamond",  ring: "ring-fuchsia-300", grad: "from-fuchsia-500 via-purple-500 to-indigo-600", chip: "bg-fuchsia-100 text-fuchsia-800", icon: Flame,    accent: "text-fuchsia-700", glow: "shadow-fuchsia-400/50" },
 ];
 
+type ActivePkg = { id: number; name: string; expires_at: string; daily_earning: number; tasks_done_today: number; daily_task_limit: number };
+
 function PackagesPage() {
   const [packages, setPackages] = useState<Package[]>([]);
+  const [activePkgs, setActivePkgs] = useState<ActivePkg[]>([]);
   const [loading, setLoading] = useState(true);
   const [buying, setBuying] = useState<number | null>(null);
   const [balance, setBalance] = useState<number>(0);
@@ -37,20 +40,36 @@ function PackagesPage() {
     api<{ packages: Package[] }>("/packages")
       .then((d) => setPackages(d.packages || []))
       .finally(() => setLoading(false));
-    api<{ user: { balance: number } }>("/user/me")
-      .then((d) => setBalance(Number(d.user.balance)))
+    api<{ user: { balance: number }; packages: ActivePkg[] }>("/user/me")
+      .then((d) => {
+        setBalance(Number(d.user.balance));
+        setActivePkgs(d.packages || []);
+      })
       .catch(() => {});
   }
   useEffect(() => {
     load();
-    // Auto-refresh balance every 10s so users see updates without reloading
+    // Auto-refresh balance + active packages every 10s
     const t = setInterval(() => {
-      api<{ user: { balance: number } }>("/user/me")
-        .then((d) => setBalance(Number(d.user.balance)))
+      api<{ user: { balance: number }; packages: ActivePkg[] }>("/user/me")
+        .then((d) => {
+          setBalance(Number(d.user.balance));
+          setActivePkgs(d.packages || []);
+        })
         .catch(() => {});
     }, 10000);
     return () => clearInterval(t);
   }, []);
+
+  // Map of active package names → details for quick lookup
+  const activeByName = new Map(activePkgs.map((a) => [a.name, a]));
+  const highestActivePrice = activePkgs.reduce((mx, a) => {
+    const match = packages.find((p) => p.name === a.name);
+    return match && match.price > mx ? match.price : mx;
+  }, 0);
+  const nextUpgrade = packages
+    .filter((p) => p.price > highestActivePrice)
+    .sort((a, b) => a.price - b.price)[0];
 
   function openUpgrade(p: Package) {
     setModalPkg(p);
