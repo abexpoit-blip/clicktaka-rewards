@@ -105,13 +105,13 @@ function AdminTasks() {
       </div>
 
       {/* Create form */}
-      <section className="rounded-3xl border border-border/70 bg-card shadow-card overflow-hidden">
-        <header className="flex items-center justify-between gap-3 border-b border-border/60 bg-gradient-brand-soft px-5 py-3">
+      <section className="rounded-3xl border border-white/10 bg-slate-900/60 backdrop-blur shadow-2xl overflow-hidden">
+        <header className="flex items-center justify-between gap-3 border-b border-white/10 bg-white/5 px-5 py-3">
           <div className="flex items-center gap-2">
             <span className="grid place-items-center h-8 w-8 rounded-xl bg-gradient-brand text-white shadow-brand"><Plus className="h-4 w-4" /></span>
             <h2 className="font-display text-base font-bold tracking-tight">New Task / Ad</h2>
           </div>
-          <span className="text-xs text-muted-foreground hidden sm:inline">দ্রুত publish করুন → User-এর কাছে instantly visible হবে।</span>
+          <span className="text-xs text-slate-400 hidden sm:inline">দ্রুত publish করুন → User-এর কাছে instantly visible হবে।</span>
         </header>
         <form onSubmit={create} className="p-5 grid grid-cols-1 sm:grid-cols-12 gap-4">
           <Field className="sm:col-span-5" label="Title">
@@ -126,7 +126,7 @@ function AdminTasks() {
                 return (
                   <button type="button" key={tp} onClick={() => setForm({ ...form, type: tp })}
                     aria-label={m.label} title={m.label}
-                    className={`relative grid place-items-center aspect-square rounded-xl border transition ${sel ? `bg-gradient-to-br ${m.grad} text-white border-transparent shadow-brand scale-[1.02]` : "border-border bg-background text-muted-foreground hover:text-foreground hover:border-primary/40"}`}>
+                    className={`relative grid place-items-center aspect-square rounded-xl border transition ${sel ? `bg-gradient-to-br ${m.grad} text-white border-transparent shadow-brand scale-[1.02]` : "border-border bg-background text-slate-400 hover:text-white hover:border-primary/40"}`}>
                     <Icon className="h-4 w-4" />
                   </button>
                 );
@@ -147,7 +147,7 @@ function AdminTasks() {
           </div>
           <Field className="sm:col-span-12" label="URL (optional)">
             <div className="relative">
-              <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="https://example.com/landing"
                 className="w-full pl-9 pr-3 py-2.5 bg-slate-950/60 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 focus:border-fuchsia-400/50 transition" />
             </div>
@@ -159,15 +159,15 @@ function AdminTasks() {
       {/* Filter bar */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Title / type / URL দিয়ে খুঁজুন..."
             className="w-full pl-9 pr-3 py-2.5 bg-slate-900/60 border border-white/10 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/30 focus:border-fuchsia-400/50 transition" />
         </div>
-        <div className="inline-flex items-center gap-1 rounded-xl border border-border bg-card p-1 shadow-card">
-          <Filter className="h-4 w-4 text-muted-foreground mx-2" />
+        <div className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-slate-900/60 p-1 shadow-xl">
+          <Filter className="h-4 w-4 text-slate-400 mx-2" />
           {([["all","All"],["active","Active"],["paused","Paused"]] as const).map(([k, l]) => (
             <button key={k} onClick={() => setFilter(k)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${filter === k ? "bg-gradient-brand text-white shadow-brand" : "text-muted-foreground hover:text-foreground"}`}>
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${filter === k ? "bg-gradient-brand text-white shadow-brand" : "text-slate-400 hover:text-white"}`}>
               {l}
             </button>
           ))}
@@ -177,22 +177,22 @@ function AdminTasks() {
       {/* Tasks grid */}
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
-          {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-44 rounded-2xl bg-card" />)}
+          {Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-44 rounded-2xl bg-slate-900/60" />)}
         </div>
       ) : visible.length === 0 ? (
-        <div className="rounded-3xl border-2 border-dashed border-border bg-card/60 p-12 text-center">
+        <div className="rounded-3xl border-2 border-dashed border-white/15 bg-slate-900/40 p-12 text-center">
           <div className="grid place-items-center h-14 w-14 rounded-2xl bg-gradient-brand-soft text-primary mx-auto mb-3">
             <Zap className="h-6 w-6" />
           </div>
           <p className="font-display font-semibold">কোনো task পাওয়া যায়নি</p>
-          <p className="text-sm text-muted-foreground mt-1">উপরের form ব্যবহার করে নতুন task যোগ করুন।</p>
+          <p className="text-sm text-slate-400 mt-1">উপরের form ব্যবহার করে নতুন task যোগ করুন।</p>
         </div>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {visible.map((t) => {
             const m = meta(t.type); const Icon = m.icon;
             return (
-              <article key={t.id} className="group relative overflow-hidden rounded-2xl border border-border/70 bg-card shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all">
+              <article key={t.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur shadow-xl hover:border-fuchsia-400/40 hover:shadow-fuchsia-500/20 hover:-translate-y-0.5 transition-all">
                 <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.grad}`} />
                 <div className="p-5">
                   <div className="flex items-start gap-3">
@@ -202,8 +202,8 @@ function AdminTasks() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${m.chip}`}>{t.type}</span>
-                        <span className="text-[10px] text-muted-foreground">#{t.id}</span>
-                        <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold ${t.active ? "bg-success/15 text-success" : "bg-muted text-muted-foreground"}`}>
+                        <span className="text-[10px] text-slate-400">#{t.id}</span>
+                        <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-bold ${t.active ? "bg-success/15 text-success" : "bg-muted text-slate-400"}`}>
                           <span className={`h-1.5 w-1.5 rounded-full ${t.active ? "bg-success animate-pulse" : "bg-muted-foreground"}`} />
                           {t.active ? "Active" : "Paused"}
                         </span>
@@ -251,7 +251,7 @@ function AdminTasks() {
 function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
   return (
     <div className={className}>
-      <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">{label}</label>
+      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-300 mb-1.5">{label}</label>
       {children}
     </div>
   );
@@ -276,10 +276,10 @@ function Kpi({ icon: Icon, label, value, tone }: { icon: any; label: string; val
     info:    "text-info bg-info/10",
   } as const;
   return (
-    <div className="rounded-2xl border border-border/70 bg-card p-4 shadow-card hover:shadow-brand transition">
+    <div className="rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur p-4 shadow-xl hover:border-fuchsia-400/40 transition">
       <div className="flex items-center justify-between">
         <span className={`grid place-items-center h-9 w-9 rounded-xl ${tones[tone]}`}><Icon className="h-4 w-4" /></span>
-        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</p>
+        <p className="text-[10px] uppercase tracking-wider text-slate-400">{label}</p>
       </div>
       <p className="mt-3 font-display text-2xl font-bold tabular-nums">{value}</p>
     </div>
