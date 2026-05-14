@@ -7,6 +7,8 @@ import {
   Wallet, Smartphone, Send, Sparkles, Info, History, ArrowUpFromLine,
 } from "lucide-react";
 import { Field, RequestRow } from "./deposit";
+import bkashLogo from "@/assets/bkash-logo.png";
+import nagadLogo from "@/assets/nagad-logo.png";
 
 export const Route = createFileRoute("/user/withdraw")({ component: WithdrawPage });
 
@@ -18,8 +20,8 @@ type Withdrawal = {
 type Me = { user: { balance: number } };
 
 const METHODS = [
-  { id: "bkash",  label: "Bkash",  color: "from-pink-500 to-rose-500",     emoji: "📱" },
-  { id: "nagad",  label: "Nagad",  color: "from-orange-500 to-amber-500",  emoji: "🟧" },
+  { id: "bkash",  label: "Bkash",  logo: bkashLogo },
+  { id: "nagad",  label: "Nagad",  logo: nagadLogo },
 ] as const;
 
 function WithdrawPage() {
