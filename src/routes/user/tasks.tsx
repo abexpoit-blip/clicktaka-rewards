@@ -169,14 +169,14 @@ function TasksPage() {
               <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur px-3 py-1 text-[11px] uppercase tracking-wider font-bold">
                 <Flame className="h-3 w-3" /> Today's Mission
               </div>
-              <h1 className="font-display text-3xl sm:text-4xl font-bold mt-3 tracking-tight">
+              <h1 className="font-display text-2xl sm:text-4xl font-bold mt-2 sm:mt-3 tracking-tight">
                 আজকের <span className="shimmer-text">Earning</span> শুরু করুন
               </h1>
-              <p className="mt-1 text-white/85 text-sm">প্রতিটা task complete = সরাসরি Balance-এ টাকা যোগ ✨</p>
+              <p className="mt-1 text-white/85 text-xs sm:text-sm">প্রতিটা task complete = সরাসরি Balance-এ টাকা যোগ ✨</p>
             </div>
             <div className="text-right">
-              <p className="text-[11px] uppercase tracking-wider text-white/70">Available Now</p>
-              <p className="font-display text-5xl font-bold tabular-nums">{d.tasks.length}</p>
+              <p className="text-[10px] sm:text-[11px] uppercase tracking-wider text-white/70">Available</p>
+              <p className="font-display text-3xl sm:text-5xl font-bold tabular-nums">{d.tasks.length}</p>
             </div>
           </div>
 
