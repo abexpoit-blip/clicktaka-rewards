@@ -127,13 +127,15 @@ function Landing() {
               প্রতি <span className="text-gradient-brand">৩ সেকেন্ডে</span> একজন<br />টাকা withdraw করছেন
             </h2>
             <p className="text-muted-foreground mt-3">
-              নিচের list real-time update হয়। বিকাশ, নগদ, রকেট — সব method সাপোর্টেড। আপনার পরের নাম-ও এখানে আসবে 🎉
+              নিচের list real-time update হয়। বিকাশ ও নগদ — দুটো method-ই সাপোর্টেড। আপনার পরের নাম-ও এখানে আসবে 🎉
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-pink-50 text-pink-700 px-3 py-1.5 text-xs font-semibold">📱 bKash</span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-orange-50 text-orange-700 px-3 py-1.5 text-xs font-semibold">📱 Nagad</span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-purple-50 text-purple-700 px-3 py-1.5 text-xs font-semibold">📱 Rocket</span>
-              <span className="inline-flex items-center gap-1.5 rounded-xl bg-blue-50 text-blue-700 px-3 py-1.5 text-xs font-semibold">💳 Upay</span>
+              <span className="inline-flex items-center gap-2 rounded-xl border border-pink-200 bg-pink-50 text-pink-700 px-3 py-1.5 text-xs font-semibold">
+                <img src={bkashLogo} alt="bKash" className="h-5 w-5 rounded-md object-contain" /> bKash
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50 text-orange-700 px-3 py-1.5 text-xs font-semibold">
+                <img src={nagadLogo} alt="Nagad" className="h-5 w-5 rounded-md object-contain" /> Nagad
+              </span>
             </div>
           </div>
           <div>
