@@ -281,7 +281,7 @@ function Kpi({ icon: Icon, label, value, tone }: { icon: any; label: string; val
         <span className={`grid place-items-center h-9 w-9 rounded-xl ${tones[tone]}`}><Icon className="h-4 w-4" /></span>
         <p className="text-[10px] uppercase tracking-wider text-slate-400">{label}</p>
       </div>
-      <p className="mt-3 font-display text-2xl font-bold tabular-nums">{value}</p>
+      <p className="mt-3 font-display text-2xl font-bold tabular-nums text-white">{value}</p>
     </div>
   );
 }
