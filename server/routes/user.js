@@ -135,7 +135,7 @@ r.post('/packages/:id/buy', authUser, async (req, res) => {
     const pkg = pkgs[0];
     const price = Number(pkg.price);
 
-    const balRows = await q('SELECT balance, referred_by FROM users WHERE id=? LIMIT 1', [req.user.id]);
+    const balRows = await q('SELECT balance, refer_by FROM users WHERE id=? LIMIT 1', [req.user.id]);
     const bal = Number(balRows[0]?.balance || 0);
     if (bal < price) return res.status(400).json({ error: `Balance যথেষ্ট না — দরকার ৳${price}, আছে ৳${bal}` });
 
@@ -155,7 +155,7 @@ r.post('/packages/:id/buy', authUser, async (req, res) => {
     );
 
     // Pay referral commission to referrer (if any)
-    const referrerId = balRows[0]?.referred_by;
+    const referrerId = balRows[0]?.refer_by;
     if (referrerId) {
       const s = await q('SELECT referral_percent FROM payment_settings WHERE id=1 LIMIT 1');
       const pct = Number(s[0]?.referral_percent || 10);
