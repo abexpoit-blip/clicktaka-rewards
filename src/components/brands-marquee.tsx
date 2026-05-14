@@ -1,5 +1,8 @@
 // Sponsor / partner brands marquee — social proof at end of landing
 import { Handshake } from "lucide-react";
+import bkashLogo from "@/assets/bkash-logo.png";
+import nagadLogo from "@/assets/nagad-logo.png";
+import rocketLogo from "@/assets/rocket-logo.png";
 
 const BRANDS = [
   // Foreign Ad networks & sponsors
@@ -54,12 +57,11 @@ export function BrandsMarquee() {
   );
 }
 
-// Real brand marks for local payment partners (official colors + wordmark)
-const BRAND_MARKS: Record<string, { bg: string; fg: string; mark: string; word: string }> = {
-  bKash:   { bg: "#E2136E", fg: "#ffffff", mark: "b", word: "bKash" },
-  Nagad:   { bg: "#EC1C24", fg: "#ffffff", mark: "ন", word: "Nagad" },
-  Rocket:  { bg: "#8C3494", fg: "#ffffff", mark: "R", word: "Rocket" },
-  Upay:    { bg: "#E91D63", fg: "#ffffff", mark: "U", word: "Upay" },
+// Real brand marks for local payment partners (official logo image + wordmark)
+const BRAND_MARKS: Record<string, { logo: string; word: string; color: string }> = {
+  bKash:  { logo: bkashLogo,  word: "bKash",  color: "#E2136E" },
+  Nagad:  { logo: nagadLogo,  word: "Nagad",  color: "#EC1C24" },
+  Rocket: { logo: rocketLogo, word: "Rocket", color: "#8C3494" },
 };
 
 function BrandChip({ name, variant }: { name: string; variant?: boolean }) {
@@ -67,18 +69,19 @@ function BrandChip({ name, variant }: { name: string; variant?: boolean }) {
   if (real) {
     return (
       <div
-        className={`shrink-0 inline-flex items-center gap-2 rounded-2xl border border-border/70 ${variant ? "bg-card" : "bg-background"} px-5 py-3 shadow-card`}
+        className={`shrink-0 inline-flex items-center gap-2.5 rounded-2xl border border-border/70 ${variant ? "bg-card" : "bg-background"} px-5 py-3 shadow-card`}
       >
-        <span
-          aria-hidden
-          className="grid place-items-center h-7 w-7 rounded-lg text-[13px] font-extrabold shadow"
-          style={{ background: real.bg, color: real.fg, fontFamily: "system-ui, sans-serif" }}
-        >
-          {real.mark}
-        </span>
+        <img
+          src={real.logo}
+          alt={`${real.word} logo`}
+          loading="lazy"
+          width={28}
+          height={28}
+          className="h-7 w-7 rounded-lg object-contain shrink-0"
+        />
         <span
           className="font-display font-bold text-sm tracking-tight"
-          style={{ color: real.bg }}
+          style={{ color: real.color }}
         >
           {real.word}
         </span>
