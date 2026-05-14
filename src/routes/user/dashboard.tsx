@@ -421,6 +421,36 @@ function QuickCard({ icon: Icon, tone, label, value, sub, linkLabel, to }: {
   );
 }
 
+function WalletSummary({ balance, today, total }: { balance: number; today: number; total: number }) {
+  return (
+    <section className="relative overflow-hidden rounded-3xl border border-border/70 bg-card shadow-card">
+      <div aria-hidden className="absolute -top-16 -right-12 h-48 w-48 rounded-full bg-gradient-brand-soft blur-2xl opacity-70" />
+      <div className="relative grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/60">
+        <WalletStat icon={Wallet} label="বর্তমান Balance" value={balance} grad="from-violet-500 to-fuchsia-600" highlight />
+        <WalletStat icon={TrendingUp} label="আজকের Earning" value={today} grad="from-emerald-500 to-teal-600" />
+        <WalletStat icon={Trophy} label="মোট Earning" value={total} grad="from-amber-500 to-orange-600" />
+      </div>
+    </section>
+  );
+}
+
+function WalletStat({ icon: Icon, label, value, grad, highlight }: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string; value: number; grad: string; highlight?: boolean;
+}) {
+  return (
+    <div className={`p-5 sm:p-6 flex items-center gap-4 ${highlight ? "bg-gradient-brand-soft/40" : ""}`}>
+      <div className={`grid place-items-center h-12 w-12 rounded-2xl bg-gradient-to-br ${grad} text-white shadow-lg shrink-0`}>
+        <Icon className="h-6 w-6" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground font-bold">{label}</p>
+        <p className="font-display text-xl sm:text-2xl font-bold tabular-nums mt-0.5 truncate">৳{Number(value).toLocaleString()}</p>
+      </div>
+    </div>
+  );
+}
+
 function SectionTitle({ icon: Icon, title }: { icon: React.ComponentType<{className?: string}>; title: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
