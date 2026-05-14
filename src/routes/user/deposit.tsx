@@ -6,6 +6,8 @@ import {
   Wallet, Smartphone, Copy, CheckCircle2, Clock, XCircle, Send,
   ShieldCheck, ArrowDownToLine, Sparkles, Info, History,
 } from "lucide-react";
+import bkashLogo from "@/assets/bkash-logo.png";
+import nagadLogo from "@/assets/nagad-logo.png";
 
 export const Route = createFileRoute("/user/deposit")({ component: DepositPage });
 
