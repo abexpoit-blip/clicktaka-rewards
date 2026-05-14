@@ -43,8 +43,17 @@ function UserLayout() {
       if (!detail) return;
       setUser((u) => (u ? { ...u, balance: Number(u.balance) + Number(detail.delta) } : u));
     }
+    function onSet(e: Event) {
+      const detail = (e as CustomEvent).detail as { value: number } | undefined;
+      if (!detail) return;
+      setUser((u) => (u ? { ...u, balance: Number(detail.value) } : u));
+    }
     window.addEventListener(BALANCE_EVENT, onDelta);
-    return () => window.removeEventListener(BALANCE_EVENT, onDelta);
+    window.addEventListener(BALANCE_SET_EVENT, onSet);
+    return () => {
+      window.removeEventListener(BALANCE_EVENT, onDelta);
+      window.removeEventListener(BALANCE_SET_EVENT, onSet);
+    };
   }, []);
 
   async function logout() {
