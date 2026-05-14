@@ -18,7 +18,8 @@ const METHODS = [
   { name: "bKash", cls: "bg-pink-50 text-pink-700 border-pink-200" },
   { name: "Nagad", cls: "bg-orange-50 text-orange-700 border-orange-200" },
 ] as const;
-const AMOUNTS = [200, 300, 500, 750, 1000, 1500, 2000, 3000, 5000];
+// Minimum withdraw = ৳500 (site policy)
+const AMOUNTS = [500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 7500];
 
 function rand<T>(arr: readonly T[]): T { return arr[Math.floor(Math.random() * arr.length)]; }
 function maskPhone() {

@@ -41,7 +41,16 @@ function PackagesPage() {
       .then((d) => setBalance(Number(d.user.balance)))
       .catch(() => {});
   }
-  useEffect(load, []);
+  useEffect(() => {
+    load();
+    // Auto-refresh balance every 10s so users see updates without reloading
+    const t = setInterval(() => {
+      api<{ user: { balance: number } }>("/user/me")
+        .then((d) => setBalance(Number(d.user.balance)))
+        .catch(() => {});
+    }, 10000);
+    return () => clearInterval(t);
+  }, []);
 
   function openUpgrade(p: Package) {
     setModalPkg(p);
