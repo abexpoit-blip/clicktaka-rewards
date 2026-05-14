@@ -7,6 +7,8 @@ import {
   Wallet, Smartphone, Send, Sparkles, Info, History, ArrowUpFromLine,
 } from "lucide-react";
 import { Field, RequestRow } from "./deposit";
+import bkashLogo from "@/assets/bkash-logo.png";
+import nagadLogo from "@/assets/nagad-logo.png";
 
 export const Route = createFileRoute("/user/withdraw")({ component: WithdrawPage });
 
@@ -18,8 +20,8 @@ type Withdrawal = {
 type Me = { user: { balance: number } };
 
 const METHODS = [
-  { id: "bkash",  label: "Bkash",  color: "from-pink-500 to-rose-500",     emoji: "📱" },
-  { id: "nagad",  label: "Nagad",  color: "from-orange-500 to-amber-500",  emoji: "🟧" },
+  { id: "bkash",  label: "Bkash",  logo: bkashLogo },
+  { id: "nagad",  label: "Nagad",  logo: nagadLogo },
 ] as const;
 
 function WithdrawPage() {
@@ -85,7 +87,9 @@ function WithdrawPage() {
                   className={`relative rounded-2xl border p-3 text-center transition ${
                     active ? "border-primary ring-2 ring-primary/20 bg-gradient-brand-soft" : "border-border/70 hover:border-primary/40 bg-card"
                   }`}>
-                  <div className={`mx-auto grid place-items-center h-10 w-10 rounded-xl bg-gradient-to-br ${mm.color} text-white text-lg shadow-md`}>{mm.emoji}</div>
+                  <div className="mx-auto grid place-items-center h-12 w-12 rounded-xl bg-white border border-border/60 shadow-md overflow-hidden">
+                    <img src={mm.logo} alt={mm.label} className="h-9 w-9 object-contain" />
+                  </div>
                   <p className="mt-2 text-xs font-bold">{mm.label}</p>
                 </button>
               );
