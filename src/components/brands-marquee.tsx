@@ -69,7 +69,7 @@ function BrandChip({ name, variant }: { name: string; variant?: boolean }) {
   if (real) {
     return (
       <div
-        className={`shrink-0 inline-flex items-center gap-2.5 rounded-2xl border border-border/70 ${variant ? "bg-card" : "bg-background"} px-5 py-3 shadow-card`}
+        className={`shrink-0 inline-flex items-center gap-2 sm:gap-2.5 rounded-xl sm:rounded-2xl border border-border/70 ${variant ? "bg-card" : "bg-background"} px-3 sm:px-5 py-2 sm:py-3 shadow-card`}
       >
         <img
           src={real.logo}
@@ -77,10 +77,10 @@ function BrandChip({ name, variant }: { name: string; variant?: boolean }) {
           loading="lazy"
           width={28}
           height={28}
-          className="h-7 w-7 rounded-lg object-contain shrink-0"
+          className="h-6 w-6 sm:h-7 sm:w-7 rounded-lg object-contain shrink-0"
         />
         <span
-          className="font-display font-bold text-sm tracking-tight"
+          className="font-display font-bold text-xs sm:text-sm tracking-tight"
           style={{ color: real.color }}
         >
           {real.word}
@@ -93,19 +93,19 @@ function BrandChip({ name, variant }: { name: string; variant?: boolean }) {
   const hue = (name.charCodeAt(0) * 17 + name.length * 23) % 360;
   return (
     <div
-      className={`shrink-0 inline-flex items-center gap-2 rounded-2xl border border-border/70 ${variant ? "bg-card" : "bg-background"} px-5 py-3 shadow-card`}
+      className={`shrink-0 inline-flex items-center gap-2 rounded-xl sm:rounded-2xl border border-border/70 ${variant ? "bg-card" : "bg-background"} px-3 sm:px-5 py-2 sm:py-3 shadow-card`}
       style={{
         backgroundImage: `linear-gradient(135deg, oklch(0.98 0.02 ${hue}), oklch(0.96 0.04 ${(hue + 40) % 360}))`,
       }}
     >
       <span
         aria-hidden
-        className="grid place-items-center h-7 w-7 rounded-lg text-white text-[11px] font-bold shadow"
+        className="grid place-items-center h-6 w-6 sm:h-7 sm:w-7 rounded-lg text-white text-[10px] sm:text-[11px] font-bold shadow"
         style={{ background: `linear-gradient(135deg, oklch(0.55 0.18 ${hue}), oklch(0.6 0.18 ${(hue + 40) % 360}))` }}
       >
         {name[0]}
       </span>
-      <span className="font-display font-semibold text-sm text-foreground/85 tracking-tight">{name}</span>
+      <span className="font-display font-semibold text-xs sm:text-sm text-foreground/85 tracking-tight">{name}</span>
     </div>
   );
 }
