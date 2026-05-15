@@ -416,6 +416,29 @@ const withdrawSchema = z.object({
   payment_number: z.string().regex(/^01[3-9]\d{8}$/, 'সঠিক 11-digit number দিন'),
 });
 
+// Effective minimum for the *current* user — frontend uses this to render Min hint dynamically
+r.get('/withdraw-info', authUser, async (req, res) => {
+  try {
+    const prior = await q(
+      'SELECT COUNT(*) AS c FROM withdrawals WHERE user_id=? AND status<>"rejected"',
+      [req.user.id]
+    );
+    const isSecondOrLater = Number(prior[0]?.c || 0) >= 1;
+    const min_withdraw = isSecondOrLater ? 2000 : 100;
+    res.json({
+      min_withdraw,
+      is_second_or_later: isSecondOrLater,
+      prior_count: Number(prior[0]?.c || 0),
+      note: isSecondOrLater
+        ? `২য় withdraw থেকে minimum ৳${min_withdraw} লাগবে`
+        : `প্রথম withdraw — minimum ৳${min_withdraw}`,
+    });
+  } catch (e) {
+    console.error('withdraw-info error:', e);
+    res.status(500).json({ error: 'Load failed' });
+  }
+});
+
 r.post('/withdraw', authUser, async (req, res) => {
   try {
     const data = withdrawSchema.parse(req.body);
