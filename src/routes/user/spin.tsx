@@ -6,9 +6,9 @@ import { Lock, Crown, Sparkles, Gift } from "lucide-react";
 
 export const Route = createFileRoute("/user/spin")({ component: SpinPage });
 
-// Wheel slices: ৳50 – ৳1000 (must match SPIN_REWARDS on server/routes/user.js)
-const SLICES = [50, 100, 150, 200, 300, 400, 500, 600, 800, 1000];
-const COLORS = ["#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626", "#0891b2", "#9333ea", "#16a34a", "#ea580c", "#be185d"];
+// Wheel slices DB থেকে আসে (admin-এ configurable)। নিচেরটা শুধু fallback।
+const DEFAULT_SLICES = [50, 100, 150, 200, 300, 400, 500, 600, 800, 1000];
+const PALETTE = ["#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626", "#0891b2", "#9333ea", "#16a34a", "#ea580c", "#be185d"];
 
 type SpinStatus = {
   has_package: boolean;
@@ -17,6 +17,7 @@ type SpinStatus = {
   spins_used: number;
   spins_left: number;
   last: { reward: number } | null;
+  slices?: number[];
 };
 
 const SPIN_TIERS: { price: number; spins: number; label: string }[] = [
@@ -45,6 +46,9 @@ function SpinPage() {
   }
   useEffect(loadStatus, []);
 
+  const slices = status?.slices && status.slices.length >= 2 ? status.slices : DEFAULT_SLICES;
+  const colors = slices.map((_, i) => PALETTE[i % PALETTE.length]);
+
   async function spin() {
     if (spinning || !status || status.spins_left <= 0 || !status.has_package) return;
     setSpinning(true);
@@ -52,8 +56,8 @@ function SpinPage() {
       const res = await api<{ ok: boolean; reward: number; balance: number; spins_left: number; spins_limit: number }>(
         "/user/spin", { method: "POST" }
       );
-      const idx = SLICES.indexOf(res.reward);
-      const sliceAngle = 360 / SLICES.length;
+      const idx = slices.indexOf(res.reward);
+      const sliceAngle = 360 / slices.length;
       const rewardIndex = idx >= 0 ? idx : 0;
       const target = 360 - (rewardIndex * sliceAngle + sliceAngle / 2);
       setAngle((current) => current + 360 * 5 + ((target - (current % 360) + 360) % 360));
@@ -74,8 +78,8 @@ function SpinPage() {
     }
   }
 
-  const sliceAngle = 360 / SLICES.length;
-  const gradient = SLICES.map((_, i) => `${COLORS[i]} ${i * sliceAngle}deg ${(i + 1) * sliceAngle}deg`).join(", ");
+  const sliceAngle = 360 / slices.length;
+  const gradient = slices.map((_, i) => `${colors[i]} ${i * sliceAngle}deg ${(i + 1) * sliceAngle}deg`).join(", ");
 
   // No active package — show upgrade gate
   if (status && !status.has_package) {
@@ -157,7 +161,7 @@ function SpinPage() {
             transition: spinning ? "transform 4s cubic-bezier(0.17, 0.67, 0.21, 1)" : "none",
           }}
         >
-          {SLICES.map((n, i) => {
+          {slices.map((n: number, i: number) => {
             const a = i * sliceAngle + sliceAngle / 2;
             return (
               <div
