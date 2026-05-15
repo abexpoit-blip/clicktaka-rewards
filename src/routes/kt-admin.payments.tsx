@@ -30,7 +30,7 @@ type Withdrawal = {
   created_at: string;
 };
 
-type Tab = "settings" | "deposits" | "withdrawals";
+type Tab = "settings" | "spin" | "deposits" | "withdrawals";
 
 function AdminPayments() {
   const [tab, setTab] = useState<Tab>("settings");
