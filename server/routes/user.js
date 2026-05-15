@@ -310,9 +310,13 @@ async function getSpinContext(userId) {
 
 r.get('/spin/status', authUser, async (req, res) => {
   try {
-    const ctx = await getSpinContext(req.user.id);
+    const [ctx, slices] = await Promise.all([
+      getSpinContext(req.user.id),
+      getSpinSlices(),
+    ]);
     res.json({
       ...ctx,
+      slices,
       spun_today: ctx.spins_left <= 0,   // backwards-compat for old client
     });
   } catch (e) {
