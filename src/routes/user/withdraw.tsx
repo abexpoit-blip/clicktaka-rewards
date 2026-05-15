@@ -116,22 +116,36 @@ function WithdrawPage() {
           </div>
 
           <form onSubmit={submit} className="mt-5 space-y-3">
-            <Field label="Amount (৳)" hint={`Min ৳${s?.min_withdraw ?? "—"} · Max ৳${balance.toLocaleString()}`}>
-              <input type="number" min={s?.min_withdraw || 0} max={balance} value={amount} onChange={(e) => setAmount(e.target.value)} required
-                className="w-full rounded-xl border border-border bg-background px-3.5 py-3 text-base tabular-nums font-semibold focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" placeholder={`${s?.min_withdraw ?? 500}`} />
+            <Field label="Amount (৳)" hint={`Min ৳${effectiveMin || "—"} · Max ৳${balance.toLocaleString()}`}>
+              <input type="number" min={effectiveMin || 0} max={balance} value={amount} onChange={(e) => { setAmount(e.target.value); if (formErr) setFormErr(""); }} required
+                className="w-full rounded-xl border border-border bg-background px-3.5 py-3 text-base tabular-nums font-semibold focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" placeholder={`${effectiveMin || 100}`} />
             </Field>
             <Field label="আপনার Payment Number" hint="যেখানে টাকা যাবে — 01XXXXXXXXX">
               <input value={num} onChange={(e) => setNum(e.target.value)} required pattern="01[0-9]{9}" maxLength={11}
                 className="w-full rounded-xl border border-border bg-background px-3.5 py-3 text-sm font-mono tabular-nums focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition" placeholder="01XXXXXXXXX" />
             </Field>
             <div className="flex gap-2">
-              {[s?.min_withdraw || 500, 1000, 2000].map((v) => (
+              {[effectiveMin || 100, 1000, 2000].map((v) => (
                 <button key={v} type="button" onClick={() => setAmount(String(v))}
                   className="flex-1 rounded-lg border border-border/70 bg-muted/30 hover:bg-muted px-3 py-2 text-xs font-bold text-foreground transition tabular-nums">
                   ৳{v.toLocaleString()}
                 </button>
               ))}
             </div>
+
+            {formErr && (
+              <div className="rounded-xl border border-rose-300 bg-rose-50 text-rose-800 px-3.5 py-2.5 text-sm font-semibold flex items-start gap-2">
+                <span className="text-base leading-none">⚠️</span>
+                <span>{formErr}</span>
+              </div>
+            )}
+
+            {info?.is_second_or_later && (
+              <div className="rounded-xl border border-amber-300 bg-amber-50 text-amber-900 px-3.5 py-2.5 text-xs flex items-start gap-2">
+                <Info className="h-4 w-4 mt-0.5 shrink-0" />
+                <span><b>নোট:</b> আপনার ১ম withdraw হয়ে গেছে — এখন থেকে প্রতি withdraw-এ <b>minimum ৳{effectiveMin}</b> লাগবে।</span>
+              </div>
+            )}
             <button disabled={busy} type="submit"
               className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-orange-500 text-white px-4 py-3.5 text-sm font-bold shadow-2xl hover:scale-[1.01] transition disabled:opacity-60">
               <Send className="h-4 w-4" /> {busy ? "পাঠানো হচ্ছে…" : "Submit Withdraw Request"}
