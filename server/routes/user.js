@@ -294,7 +294,7 @@ r.post('/spin', authUser, async (req, res) => {
     }
 
     // Reward: random multiple of 10 between ৳10 and ৳100 (matches wheel slices)
-    const reward = (Math.floor(Math.random() * 10) + 1) * 10; // 10,20,...,100 BDT
+    const reward = (Math.floor(Math.random() * 10) + 1) * 50; // 50,100,...,500 BDT
     await q('INSERT INTO daily_spins (user_id, spin_date, reward) VALUES (?, CURDATE(), ?)', [req.user.id, reward]);
     await q('UPDATE users SET balance = balance + ? WHERE id=?', [reward, req.user.id]);
     const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
