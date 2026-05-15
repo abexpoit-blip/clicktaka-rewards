@@ -11,8 +11,10 @@ import {
 } from "lucide-react";
 
 const TYPE_META: Record<string, { icon: any; grad: string; label: string }> = {
+  signup: { icon: Sparkles,    grad: "from-indigo-500 to-blue-600",      label: "Signup Bonus" },
   ad:     { icon: ExternalLink, grad: "from-violet-500 to-fuchsia-500",  label: "Sponsored Ad" },
   video:  { icon: Video,        grad: "from-rose-500 to-orange-500",     label: "Video Watch" },
+  survey: { icon: Target,       grad: "from-cyan-500 to-blue-500",       label: "Survey" },
   app:    { icon: AppWindow,    grad: "from-sky-500 to-cyan-500",        label: "App Install" },
   social: { icon: Share2,       grad: "from-emerald-500 to-teal-500",    label: "Social Action" },
   game:   { icon: Gamepad2,     grad: "from-amber-500 to-orange-600",    label: "Mini Game" },
@@ -21,7 +23,7 @@ function typeMeta(t: string) { return TYPE_META[t] || { icon: Target, grad: "fro
 
 export const Route = createFileRoute("/user/tasks")({ component: TasksPage });
 
-type Task = { id: number; title: string; type: string; url: string | null; reward: number };
+type Task = { id: number; title: string; description?: string | null; type: string; url: string | null; reward: number };
 type Pkg = { id: number; name: string; tasks_done_today: number; daily_task_limit: number; daily_earning: number; expires_at: string };
 type Data = {
   tasks: Task[];
