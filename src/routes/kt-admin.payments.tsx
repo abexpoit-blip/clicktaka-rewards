@@ -47,6 +47,7 @@ function AdminPayments() {
       <nav className="flex gap-1.5 rounded-2xl border border-white/10 bg-slate-900/60 p-1.5 w-fit">
         {[
           { id: "settings",    label: "Method Settings", icon: Settings2 },
+          { id: "spin",        label: "Spin Wheel",      icon: Sparkles },
           { id: "deposits",    label: "Deposits",        icon: ArrowDownToLine },
           { id: "withdrawals", label: "Withdrawals",     icon: ArrowUpFromLine },
         ].map((t) => {
@@ -65,6 +66,7 @@ function AdminPayments() {
       </nav>
 
       {tab === "settings"    && <SettingsPanel />}
+      {tab === "spin"        && <SpinSettingsPanel />}
       {tab === "deposits"    && <DepositsPanel />}
       {tab === "withdrawals" && <WithdrawalsPanel />}
     </div>
