@@ -375,8 +375,13 @@ function TasksPage() {
                           <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{m.label}</p>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold inline-flex items-center gap-1">
+                            <Icon className="h-2.5 w-2.5" /> {m.label}
+                          </p>
                           <h3 className="font-display font-bold text-sm sm:text-base mt-0.5 line-clamp-2">{t.title}</h3>
+                          {t.description && (
+                            <p className="text-[11px] sm:text-xs text-muted-foreground/90 mt-1 line-clamp-2 leading-snug">{t.description}</p>
+                          )}
                         </div>
                       </div>
 
