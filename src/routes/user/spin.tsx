@@ -6,9 +6,9 @@ import { Lock, Crown, Sparkles, Gift } from "lucide-react";
 
 export const Route = createFileRoute("/user/spin")({ component: SpinPage });
 
-// Wheel slices: ৳50 – ৳1000 (must match SPIN_REWARDS on server/routes/user.js)
-const SLICES = [50, 100, 150, 200, 300, 400, 500, 600, 800, 1000];
-const COLORS = ["#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626", "#0891b2", "#9333ea", "#16a34a", "#ea580c", "#be185d"];
+// Wheel slices DB থেকে আসে (admin-এ configurable)। নিচেরটা শুধু fallback।
+const DEFAULT_SLICES = [50, 100, 150, 200, 300, 400, 500, 600, 800, 1000];
+const PALETTE = ["#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626", "#0891b2", "#9333ea", "#16a34a", "#ea580c", "#be185d"];
 
 type SpinStatus = {
   has_package: boolean;
@@ -17,6 +17,7 @@ type SpinStatus = {
   spins_used: number;
   spins_left: number;
   last: { reward: number } | null;
+  slices?: number[];
 };
 
 const SPIN_TIERS: { price: number; spins: number; label: string }[] = [
