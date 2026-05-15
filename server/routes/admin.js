@@ -94,6 +94,18 @@ r.post('/users/:id/block', authAdmin, async (req, res) => {
   res.json({ ok: true, status: next });
 });
 
+// Login as user (impersonate) — replaces admin session with that user's session
+r.post('/users/:id/impersonate', authAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const rows = await q('SELECT id, status, is_admin FROM users WHERE id=? LIMIT 1', [id]);
+  if (!rows.length) return res.status(404).json({ error: 'User not found' });
+  if (rows[0].is_admin) return res.status(400).json({ error: 'অন্য admin-কে impersonate করা যাবে না' });
+  if (rows[0].status === 'blocked') return res.status(400).json({ error: 'Blocked user' });
+  const token = signToken({ uid: id, imp: true });
+  setAuthCookie(res, token);
+  res.json({ ok: true });
+});
+
 // Lightweight package list (used in task editor multi-select)
 r.get('/packages', authAdmin, async (_req, res) => {
   const rows = await q('SELECT id, name, price FROM packages WHERE active=1 ORDER BY price ASC');
