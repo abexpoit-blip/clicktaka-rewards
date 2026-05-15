@@ -154,6 +154,94 @@ function AmountField({ label, value, onChange, suffix }: { label: string; value:
   );
 }
 
+// ── Spin Wheel Settings ───────────────────────────────────────────────────
+function SpinSettingsPanel() {
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  function load() {
+    setLoading(true);
+    api<{ slices: number[] }>("/admin/spin-settings")
+      .then((r) => setText((r.slices || []).join(", ")))
+      .catch((e) => toast.error(e.message))
+      .finally(() => setLoading(false));
+  }
+  useEffect(load, []);
+
+  function parseSlices(): number[] {
+    return text
+      .split(/[,\s]+/)
+      .map((x) => Number(x.trim()))
+      .filter((n) => Number.isFinite(n) && n > 0);
+  }
+
+  async function save() {
+    const slices = parseSlices();
+    if (slices.length < 2) return toast.error("কমপক্ষে ২টি slice দিন");
+    if (slices.length > 20) return toast.error("সর্বোচ্চ ২০টি slice দেওয়া যাবে");
+    setSaving(true);
+    try {
+      await api("/admin/spin-settings", { method: "PUT", json: { slices } });
+      toast.success(`Spin slices সেভ হয়েছে ✓ (${slices.length}টি)`);
+    } catch (e: any) { toast.error(e.message); }
+    finally { setSaving(false); }
+  }
+
+  if (loading) return <PanelSkeleton />;
+
+  const preview = parseSlices();
+
+  return (
+    <div className="grid lg:grid-cols-2 gap-4">
+      <section className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+        <h2 className="font-display text-lg font-bold flex items-center gap-2 mb-4">
+          <Sparkles className="h-4 w-4 text-fuchsia-300" /> Wheel Slices (Reward Pool)
+        </h2>
+        <label className="block">
+          <span className="text-[11px] uppercase tracking-wider text-slate-400 font-bold">
+            Reward values (comma-separated, ৳)
+          </span>
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            rows={4}
+            placeholder="50, 100, 150, 200, 300, 400, 500, 600, 800, 1000"
+            className="mt-1 w-full rounded-xl border border-white/10 bg-slate-950/60 px-3.5 py-2.5 text-sm text-white tabular-nums focus:border-fuchsia-400/50 focus:outline-none focus:ring-2 focus:ring-fuchsia-400/20 transition"
+          />
+        </label>
+        <p className="text-[11px] text-slate-400 mt-2">
+          📌 প্রতিটি spin-এ user random একটি পাবে। 6–12 টি value ভাল দেখায়। Min 2, Max 20।
+        </p>
+        <button onClick={save} disabled={saving}
+          className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 px-4 py-3 text-sm font-bold text-white shadow-[0_8px_24px_-6px_rgba(168,85,247,0.55)] hover:scale-[1.01] transition disabled:opacity-60">
+          <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save Slices"}
+        </button>
+      </section>
+
+      <section className="rounded-2xl border border-white/10 bg-slate-900/60 p-5">
+        <h2 className="font-display text-lg font-bold flex items-center gap-2 mb-4">
+          <Sparkles className="h-4 w-4 text-amber-300" /> Preview
+        </h2>
+        {preview.length < 2 ? (
+          <p className="text-sm text-slate-400">কমপক্ষে ২টি valid value দিন।</p>
+        ) : (
+          <>
+            <p className="text-xs text-slate-400 mb-3">{preview.length} টি slice — Min ৳{Math.min(...preview)} · Max ৳{Math.max(...preview)} · Avg ৳{Math.round(preview.reduce((a,b)=>a+b,0)/preview.length)}</p>
+            <div className="flex flex-wrap gap-2">
+              {preview.map((n, i) => (
+                <span key={i} className="rounded-lg bg-gradient-to-br from-fuchsia-500/20 to-indigo-500/20 border border-fuchsia-400/30 px-2.5 py-1.5 text-xs font-bold text-white tabular-nums">
+                  ৳{n}
+                </span>
+              ))}
+            </div>
+          </>
+        )}
+      </section>
+    </div>
+  );
+}
+
 // ── Deposits ──────────────────────────────────────────────────────────────
 function DepositsPanel() {
   const [rows, setRows] = useState<Deposit[]>([]);
