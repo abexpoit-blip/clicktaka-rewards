@@ -161,7 +161,7 @@ function SpinPage() {
             transition: spinning ? "transform 4s cubic-bezier(0.17, 0.67, 0.21, 1)" : "none",
           }}
         >
-          {SLICES.map((n, i) => {
+          {slices.map((n: number, i: number) => {
             const a = i * sliceAngle + sliceAngle / 2;
             return (
               <div
