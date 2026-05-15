@@ -4,7 +4,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
   Wallet, Send, Settings2, Save, CheckCircle2, XCircle, Clock,
-  Smartphone, ShieldCheck, RefreshCw, ArrowDownToLine, ArrowUpFromLine,
+  Smartphone, ShieldCheck, RefreshCw, ArrowDownToLine, ArrowUpFromLine, Sparkles,
 } from "lucide-react";
 
 export const Route = createFileRoute("/kt-admin/payments")({ component: AdminPayments });
