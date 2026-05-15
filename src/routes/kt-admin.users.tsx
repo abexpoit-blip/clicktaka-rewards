@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import {
   Search, Users as UsersIcon, ShieldCheck, ShieldOff, Crown, Filter,
-  RefreshCw, ChevronDown, MoreVertical, UserCheck, UserX,
+  RefreshCw, UserCheck, UserX, LogIn,
 } from "lucide-react";
 import { toast } from "sonner";
 
