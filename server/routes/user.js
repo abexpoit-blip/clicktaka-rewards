@@ -192,6 +192,46 @@ r.get('/transactions', authUser, async (req, res) => {
 // Daily Spin Wheel — package অনুযায়ী দৈনিক spin limit
 // 500=1, 1000=2, 2000=3, 5000=5, 10000=8, 20000=12 ; package না থাকলে 0
 let dailySpinsTableReady;
+let spinSettingsTableReady;
+
+const DEFAULT_SPIN_SLICES = [50, 100, 150, 200, 300, 400, 500, 600, 800, 1000];
+
+async function ensureSpinSettingsTable() {
+  if (!spinSettingsTableReady) {
+    spinSettingsTableReady = (async () => {
+      await q(`
+        CREATE TABLE IF NOT EXISTS spin_settings (
+          id INT PRIMARY KEY DEFAULT 1,
+          slices TEXT NOT NULL DEFAULT '50,100,150,200,300,400,500,600,800,1000',
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB
+      `);
+      await q(
+        "INSERT IGNORE INTO spin_settings (id, slices) VALUES (1, '50,100,150,200,300,400,500,600,800,1000')"
+      );
+    })().catch((error) => {
+      spinSettingsTableReady = undefined;
+      throw error;
+    });
+  }
+  await spinSettingsTableReady;
+}
+
+async function getSpinSlices() {
+  try {
+    await ensureSpinSettingsTable();
+    const rows = await q('SELECT slices FROM spin_settings WHERE id=1 LIMIT 1');
+    const raw = rows[0]?.slices || '';
+    const parsed = String(raw)
+      .split(',')
+      .map((x) => Number(String(x).trim()))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    if (parsed.length >= 2) return parsed;
+  } catch (e) {
+    console.error('spin slices load error:', e);
+  }
+  return DEFAULT_SPIN_SLICES;
+}
 
 async function ensureDailySpinsTable() {
   if (!dailySpinsTableReady) {
