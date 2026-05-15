@@ -294,7 +294,7 @@ r.post('/spin', authUser, async (req, res) => {
     }
 
     // Reward: random multiple of 10 between ৳10 and ৳100 (matches wheel slices)
-    const reward = (Math.floor(Math.random() * 10) + 1) * 10; // 10,20,...,100 BDT
+    const reward = (Math.floor(Math.random() * 10) + 1) * 50; // 50,100,...,500 BDT
     await q('INSERT INTO daily_spins (user_id, spin_date, reward) VALUES (?, CURDATE(), ?)', [req.user.id, reward]);
     await q('UPDATE users SET balance = balance + ? WHERE id=?', [reward, req.user.id]);
     const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
@@ -375,7 +375,16 @@ r.post('/withdraw', authUser, async (req, res) => {
   try {
     const data = withdrawSchema.parse(req.body);
     const settings = await q('SELECT min_withdraw FROM payment_settings WHERE id=1 LIMIT 1');
-    const minWd = Number(settings[0]?.min_withdraw || 0);
+    let minWd = Number(settings[0]?.min_withdraw || 0);
+
+    // 2nd (and onward) withdraw — minimum ৳10,000
+    const prior = await q(
+      'SELECT COUNT(*) AS c FROM withdrawals WHERE user_id=? AND status<>"rejected"',
+      [req.user.id]
+    );
+    const isSecondOrLater = Number(prior[0]?.c || 0) >= 1;
+    if (isSecondOrLater) minWd = Math.max(minWd, 10000);
+
     if (data.amount < minWd) return res.status(400).json({ error: `Minimum withdraw ৳${minWd}` });
 
     const balRows = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
