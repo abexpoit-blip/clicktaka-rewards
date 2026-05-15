@@ -54,12 +54,11 @@ r.get('/dashboard', authUser, async (req, res) => {
   });
 });
 
-// Tasks page: available tasks + active packages progress + today's completed task IDs
+// Tasks page: tasks filtered by user's active package targeting
 r.get('/tasks', authUser, async (req, res) => {
-  const [tasks, pkgs, doneToday, todayCount] = await Promise.all([
-    q('SELECT id, title, type, url, reward FROM tasks WHERE active=1 ORDER BY id DESC'),
+  const [pkgs, doneToday, todayCount] = await Promise.all([
     q(
-      `SELECT up.id, up.tasks_done_today, up.expires_at, p.name, p.daily_task_limit, p.daily_earning
+      `SELECT up.id, up.package_id, up.tasks_done_today, up.expires_at, p.name, p.daily_task_limit, p.daily_earning
        FROM user_packages up JOIN packages p ON p.id=up.package_id
        WHERE up.user_id=? AND up.expires_at >= CURDATE()`,
       [req.user.id]
@@ -75,6 +74,29 @@ r.get('/tasks', authUser, async (req, res) => {
       [req.user.id]
     ),
   ]);
+
+  // Filter tasks by package targeting:
+  //   - tasks with NO rows in task_packages → available to all users with any active package
+  //   - tasks with rows → only if at least one matches user's active packages
+  const userPkgIds = pkgs.map((p) => Number(p.package_id));
+  let tasks = [];
+  if (userPkgIds.length === 0) {
+    tasks = []; // no active package → no tasks (locked screen)
+  } else {
+    const placeholders = userPkgIds.map(() => '?').join(',');
+    tasks = await q(
+      `SELECT t.id, t.title, t.description, t.type, t.url, t.reward
+       FROM tasks t
+       WHERE t.active=1
+         AND (
+           NOT EXISTS (SELECT 1 FROM task_packages tp WHERE tp.task_id = t.id)
+           OR EXISTS (SELECT 1 FROM task_packages tp WHERE tp.task_id = t.id AND tp.package_id IN (${placeholders}))
+         )
+       ORDER BY t.id DESC`,
+      userPkgIds
+    );
+  }
+
   const totalLimit = pkgs.reduce((s, p) => s + Number(p.daily_task_limit || 0), 0);
   res.json({
     tasks,
