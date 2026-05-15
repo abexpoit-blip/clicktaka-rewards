@@ -13,6 +13,7 @@ import nagadLogo from "@/assets/nagad-logo.png";
 export const Route = createFileRoute("/user/withdraw")({ component: WithdrawPage });
 
 type Settings = { min_withdraw: number };
+type WithdrawInfo = { min_withdraw: number; is_second_or_later: boolean; prior_count: number; note: string };
 type Withdrawal = {
   id: number; method: string; amount: number; payment_number: string;
   status: "pending" | "approved" | "rejected"; created_at: string; admin_note: string | null;
@@ -26,34 +27,52 @@ const METHODS = [
 
 function WithdrawPage() {
   const [s, setS] = useState<Settings | null>(null);
+  const [info, setInfo] = useState<WithdrawInfo | null>(null);
   const [history, setHistory] = useState<Withdrawal[]>([]);
   const [balance, setBalance] = useState(0);
   const [method, setMethod] = useState<typeof METHODS[number]["id"]>("bkash");
   const [amount, setAmount] = useState<string>("");
   const [num, setNum] = useState("");
   const [busy, setBusy] = useState(false);
+  const [formErr, setFormErr] = useState<string>("");
 
   function load() {
     api<{ settings: Settings }>("/payment-settings").then((r) => setS(r.settings)).catch(() => {});
+    api<WithdrawInfo>("/user/withdraw-info").then(setInfo).catch(() => {});
     api<{ withdrawals: Withdrawal[] }>("/user/withdrawals").then((r) => setHistory(r.withdrawals || [])).catch(() => {});
     api<Me>("/user/me").then((r) => setBalance(Number(r.user.balance))).catch(() => {});
   }
   useEffect(load, []);
 
+  // Effective minimum: server-told (per-user) > global setting > 0
+  const effectiveMin = info?.min_withdraw ?? s?.min_withdraw ?? 0;
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    setFormErr("");
     const amt = Number(amount);
-    if (!amt || amt < (s?.min_withdraw || 0)) return toast.error(`Minimum withdraw ৳${s?.min_withdraw || 0}`);
-    if (amt > balance) return toast.error("Balance যথেষ্ট না");
-    if (!/^01\d{9}$/.test(num.trim())) return toast.error("সঠিক 11-digit number দিন (01XXXXXXXXX)");
+    if (!amt || amt < effectiveMin) {
+      const msg = info?.is_second_or_later
+        ? `২য় withdraw থেকে minimum ৳${effectiveMin} লাগবে`
+        : `Minimum withdraw ৳${effectiveMin}`;
+      setFormErr(msg);
+      return toast.error(msg);
+    }
+    if (amt > balance) { setFormErr("Balance যথেষ্ট না"); return toast.error("Balance যথেষ্ট না"); }
+    if (!/^01\d{9}$/.test(num.trim())) { setFormErr("সঠিক 11-digit number দিন (01XXXXXXXXX)"); return toast.error("সঠিক 11-digit number দিন"); }
     setBusy(true);
     try {
       await api("/user/withdraw", { method: "POST", json: { method, amount: amt, payment_number: num.trim() } });
-      // Optimistic balance deduction in header — admin will verify
       bumpBalance(-amt);
       toast.success("Withdraw request পাঠানো হয়েছে");
-      setAmount(""); setNum(""); load();
-    } catch (e: any) { toast.error(e.message); } finally { setBusy(false); }
+      setAmount(""); setNum(""); setFormErr(""); load();
+    } catch (e: any) {
+      // Server may return a stricter min (e.g. 2nd-withdraw rule) — show it inline + toast
+      setFormErr(e.message || "Withdraw failed");
+      toast.error(e.message || "Withdraw failed");
+      // Refresh withdraw-info so the displayed Min updates immediately
+      api<WithdrawInfo>("/user/withdraw-info").then(setInfo).catch(() => {});
+    } finally { setBusy(false); }
   }
 
   return (
