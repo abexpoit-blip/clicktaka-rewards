@@ -219,7 +219,49 @@ r.put('/payment-settings', authAdmin, async (req, res) => {
   }
 });
 
-// ─── Deposits queue ───────────────────────────────────────────────────
+// ─── Spin Settings (wheel slices) ─────────────────────────────────────
+async function ensureSpinSettingsTable() {
+  await q(`
+    CREATE TABLE IF NOT EXISTS spin_settings (
+      id INT PRIMARY KEY DEFAULT 1,
+      slices TEXT NOT NULL DEFAULT '50,100,150,200,300,400,500,600,800,1000',
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB
+  `);
+  await q(
+    "INSERT IGNORE INTO spin_settings (id, slices) VALUES (1, '50,100,150,200,300,400,500,600,800,1000')"
+  );
+}
+
+r.get('/spin-settings', authAdmin, async (_req, res) => {
+  try {
+    await ensureSpinSettingsTable();
+    const rows = await q('SELECT slices FROM spin_settings WHERE id=1 LIMIT 1');
+    const raw = rows[0]?.slices || '';
+    const slices = String(raw)
+      .split(',')
+      .map((x) => Number(String(x).trim()))
+      .filter((n) => Number.isFinite(n) && n > 0);
+    res.json({ slices });
+  } catch (e) {
+    console.error('spin-settings GET error:', e);
+    res.status(500).json({ error: 'Load failed' });
+  }
+});
+
+r.put('/spin-settings', authAdmin, async (req, res) => {
+  try {
+    const data = z.object({
+      slices: z.array(z.number().positive().max(1_000_000)).min(2).max(20),
+    }).parse(req.body);
+    await ensureSpinSettingsTable();
+    const csv = data.slices.map((n) => Math.round(n)).join(',');
+    await q('UPDATE spin_settings SET slices=? WHERE id=1', [csv]);
+    res.json({ ok: true, slices: data.slices });
+  } catch (e) {
+    res.status(400).json({ error: e?.errors?.[0]?.message || 'Invalid input' });
+  }
+});
 r.get('/deposits', authAdmin, async (req, res) => {
   const status = (req.query.status || 'pending').toString();
   const where = status === 'all' ? '' : 'WHERE d.status=?';
