@@ -122,7 +122,7 @@ function SpinPage() {
     <div className="space-y-6 animate-fade-in max-w-xl mx-auto px-1">
       <div className="text-center">
         <h1 className="text-2xl font-bold">🎡 Daily Spin Wheel</h1>
-        <p className="text-sm text-gray-600 mt-1">প্রতি spin-এ ৳১০ থেকে ৳১০০ পর্যন্ত জিতুন!</p>
+        <p className="text-sm text-gray-600 mt-1">প্রতি spin-এ ৳৫০ থেকে ৳৫০০ পর্যন্ত জিতুন!</p>
       </div>
 
       {status && (
