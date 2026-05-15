@@ -46,6 +46,9 @@ function SpinPage() {
   }
   useEffect(loadStatus, []);
 
+  const slices = status?.slices && status.slices.length >= 2 ? status.slices : DEFAULT_SLICES;
+  const colors = slices.map((_, i) => PALETTE[i % PALETTE.length]);
+
   async function spin() {
     if (spinning || !status || status.spins_left <= 0 || !status.has_package) return;
     setSpinning(true);
@@ -53,8 +56,8 @@ function SpinPage() {
       const res = await api<{ ok: boolean; reward: number; balance: number; spins_left: number; spins_limit: number }>(
         "/user/spin", { method: "POST" }
       );
-      const idx = SLICES.indexOf(res.reward);
-      const sliceAngle = 360 / SLICES.length;
+      const idx = slices.indexOf(res.reward);
+      const sliceAngle = 360 / slices.length;
       const rewardIndex = idx >= 0 ? idx : 0;
       const target = 360 - (rewardIndex * sliceAngle + sliceAngle / 2);
       setAngle((current) => current + 360 * 5 + ((target - (current % 360) + 360) % 360));
@@ -75,8 +78,8 @@ function SpinPage() {
     }
   }
 
-  const sliceAngle = 360 / SLICES.length;
-  const gradient = SLICES.map((_, i) => `${COLORS[i]} ${i * sliceAngle}deg ${(i + 1) * sliceAngle}deg`).join(", ");
+  const sliceAngle = 360 / slices.length;
+  const gradient = slices.map((_, i) => `${colors[i]} ${i * sliceAngle}deg ${(i + 1) * sliceAngle}deg`).join(", ");
 
   // No active package — show upgrade gate
   if (status && !status.has_package) {
