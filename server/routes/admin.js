@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { q } from '../db.js';
 import { authAdmin } from '../middleware.js';
+import { signToken, setAuthCookie } from '../auth.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
@@ -93,31 +94,91 @@ r.post('/users/:id/block', authAdmin, async (req, res) => {
   res.json({ ok: true, status: next });
 });
 
-// Tasks list
-r.get('/tasks', authAdmin, async (req, res) => {
+// Login as user (impersonate) — replaces admin session with that user's session
+r.post('/users/:id/impersonate', authAdmin, async (req, res) => {
+  const id = Number(req.params.id);
+  const rows = await q('SELECT id, status, is_admin FROM users WHERE id=? LIMIT 1', [id]);
+  if (!rows.length) return res.status(404).json({ error: 'User not found' });
+  if (rows[0].is_admin) return res.status(400).json({ error: 'অন্য admin-কে impersonate করা যাবে না' });
+  if (rows[0].status === 'blocked') return res.status(400).json({ error: 'Blocked user' });
+  const token = signToken({ uid: id, imp: true });
+  setAuthCookie(res, token);
+  res.json({ ok: true });
+});
+
+// Lightweight package list (used in task editor multi-select)
+r.get('/packages', authAdmin, async (_req, res) => {
+  const rows = await q('SELECT id, name, price FROM packages WHERE active=1 ORDER BY price ASC');
+  res.json({ packages: rows });
+});
+
+// Tasks list (with description + package_ids)
+r.get('/tasks', authAdmin, async (_req, res) => {
   const rows = await q(
-    `SELECT t.id, t.title, t.type, t.url, t.reward, t.active, t.created_at,
+    `SELECT t.id, t.title, t.description, t.type, t.url, t.reward, t.active, t.created_at,
             (SELECT COUNT(*) FROM task_completions tc WHERE tc.task_id=t.id) AS completions
      FROM tasks t ORDER BY t.id DESC LIMIT 200`
   );
-  res.json({ tasks: rows });
+  const links = await q('SELECT task_id, package_id FROM task_packages').catch(() => []);
+  const map = new Map();
+  for (const l of links) {
+    if (!map.has(l.task_id)) map.set(l.task_id, []);
+    map.get(l.task_id).push(l.package_id);
+  }
+  res.json({
+    tasks: rows.map((t) => ({ ...t, package_ids: map.get(t.id) || [] })),
+  });
 });
+
+const taskInputSchema = z.object({
+  title: z.string().min(1).max(255),
+  description: z.string().max(2000).optional().nullable(),
+  type: z.enum(['signup', 'ad', 'video', 'survey', 'app', 'social', 'game']).default('ad'),
+  url: z.string().url().optional().or(z.literal('')),
+  reward: z.number().min(0).max(10000),
+  active: z.boolean().default(true),
+  package_ids: z.array(z.number().int().positive()).max(50).optional().default([]),
+});
+
+async function setTaskPackages(taskId, ids) {
+  await q('DELETE FROM task_packages WHERE task_id=?', [taskId]).catch(() => {});
+  if (!ids || !ids.length) return;
+  // dedupe
+  const uniq = [...new Set(ids.map(Number))].filter(Boolean);
+  if (!uniq.length) return;
+  const values = uniq.map(() => '(?,?)').join(',');
+  const params = uniq.flatMap((pid) => [taskId, pid]);
+  await q(`INSERT IGNORE INTO task_packages (task_id, package_id) VALUES ${values}`, params);
+}
 
 // Create task
 r.post('/tasks', authAdmin, async (req, res) => {
   try {
-    const data = z.object({
-      title: z.string().min(1).max(255),
-      type: z.enum(['signup', 'ad', 'video', 'survey', 'app', 'social', 'game']).default('ad'),
-      url: z.string().url().optional().or(z.literal('')),
-      reward: z.number().min(0).max(10000),
-      active: z.boolean().default(true),
-    }).parse(req.body);
+    const data = taskInputSchema.parse(req.body);
     const r2 = await q(
-      'INSERT INTO tasks (title, type, url, reward, active) VALUES (?,?,?,?,?)',
-      [data.title, data.type, data.url || null, data.reward, data.active ? 1 : 0]
+      'INSERT INTO tasks (title, description, type, url, reward, active) VALUES (?,?,?,?,?,?)',
+      [data.title, data.description || null, data.type, data.url || null, data.reward, data.active ? 1 : 0]
     );
+    await setTaskPackages(r2.insertId, data.package_ids);
     res.json({ ok: true, id: r2.insertId });
+  } catch (e) {
+    res.status(400).json({ error: e?.errors?.[0]?.message || 'Invalid input' });
+  }
+});
+
+// Update task
+r.put('/tasks/:id', authAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const data = taskInputSchema.parse(req.body);
+    const exists = await q('SELECT id FROM tasks WHERE id=?', [id]);
+    if (!exists.length) return res.status(404).json({ error: 'Not found' });
+    await q(
+      'UPDATE tasks SET title=?, description=?, type=?, url=?, reward=?, active=? WHERE id=?',
+      [data.title, data.description || null, data.type, data.url || null, data.reward, data.active ? 1 : 0, id]
+    );
+    await setTaskPackages(id, data.package_ids);
+    res.json({ ok: true });
   } catch (e) {
     res.status(400).json({ error: e?.errors?.[0]?.message || 'Invalid input' });
   }

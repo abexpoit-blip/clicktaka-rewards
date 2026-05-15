@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import {
   Search, Users as UsersIcon, ShieldCheck, ShieldOff, Crown, Filter,
-  RefreshCw, ChevronDown, MoreVertical, UserCheck, UserX,
+  RefreshCw, UserCheck, UserX, LogIn,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -35,6 +35,19 @@ function AdminUsers() {
     } catch (e: any) {
       toast.error(e.message);
     } finally {
+      setBusy(null);
+    }
+  }
+
+  async function loginAs(u: U) {
+    if (!confirm(`${u.name || u.phone} (#${u.id}) — এই user হিসেবে login করবেন?\n\nAdmin session শেষ হয়ে যাবে। আবার /kt-admin দিয়ে login করতে হবে।`)) return;
+    setBusy(u.id);
+    try {
+      await api(`/admin/users/${u.id}/impersonate`, { method: "POST" });
+      toast.success(`Logged in as ${u.name || u.phone}`);
+      window.location.href = "/user/dashboard";
+    } catch (e: any) {
+      toast.error(e.message);
       setBusy(null);
     }
   }
@@ -174,20 +187,32 @@ function AdminUsers() {
                       {new Date(u.created_at).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      {!u.is_admin && (
-                        <button
-                          onClick={() => toggleBlock(u.id, u.status)}
-                          disabled={busy === u.id}
-                          className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg font-medium transition disabled:opacity-50 ${
-                            u.status === "blocked"
-                              ? "bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30"
-                              : "bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30"
-                          }`}
-                        >
-                          {u.status === "blocked" ? <ShieldCheck className="h-3.5 w-3.5" /> : <ShieldOff className="h-3.5 w-3.5" />}
-                          {u.status === "blocked" ? "Unblock" : "Block"}
-                        </button>
-                      )}
+                      <div className="inline-flex items-center gap-1.5">
+                        {!u.is_admin && u.status !== "blocked" && (
+                          <button
+                            onClick={() => loginAs(u)}
+                            disabled={busy === u.id}
+                            title="Login as this user"
+                            className="inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg font-medium transition disabled:opacity-50 bg-violet-600/20 hover:bg-violet-600/30 text-violet-200 border border-violet-500/30"
+                          >
+                            <LogIn className="h-3.5 w-3.5" /> Login
+                          </button>
+                        )}
+                        {!u.is_admin && (
+                          <button
+                            onClick={() => toggleBlock(u.id, u.status)}
+                            disabled={busy === u.id}
+                            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg font-medium transition disabled:opacity-50 ${
+                              u.status === "blocked"
+                                ? "bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30"
+                                : "bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30"
+                            }`}
+                          >
+                            {u.status === "blocked" ? <ShieldCheck className="h-3.5 w-3.5" /> : <ShieldOff className="h-3.5 w-3.5" />}
+                            {u.status === "blocked" ? "Unblock" : "Block"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
