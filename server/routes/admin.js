@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { q } from '../db.js';
 import { authAdmin } from '../middleware.js';
+import { signToken, setAuthCookie } from '../auth.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import zlib from 'node:zlib';
