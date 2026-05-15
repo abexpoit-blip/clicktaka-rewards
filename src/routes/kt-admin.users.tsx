@@ -39,6 +39,19 @@ function AdminUsers() {
     }
   }
 
+  async function loginAs(u: U) {
+    if (!confirm(`${u.name || u.phone} (#${u.id}) — এই user হিসেবে login করবেন?\n\nAdmin session শেষ হয়ে যাবে। আবার /kt-admin দিয়ে login করতে হবে।`)) return;
+    setBusy(u.id);
+    try {
+      await api(`/admin/users/${u.id}/impersonate`, { method: "POST" });
+      toast.success(`Logged in as ${u.name || u.phone}`);
+      window.location.href = "/user/dashboard";
+    } catch (e: any) {
+      toast.error(e.message);
+      setBusy(null);
+    }
+  }
+
   const filtered = useMemo(() => {
     return users.filter((u) => {
       if (filter === "active") return u.status === "active" && !u.is_admin;
