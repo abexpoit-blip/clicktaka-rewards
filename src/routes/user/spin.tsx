@@ -6,8 +6,8 @@ import { Lock, Crown, Sparkles, Gift } from "lucide-react";
 
 export const Route = createFileRoute("/user/spin")({ component: SpinPage });
 
-// Wheel slices: ৳10, ৳20, ... ৳100 (must match server reward range)
-const SLICES = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+// Wheel slices: ৳50, ৳100, ... ৳500 (must match server reward range)
+const SLICES = [50, 100, 150, 200, 250, 300, 350, 400, 450, 500];
 const COLORS = ["#7c3aed", "#2563eb", "#059669", "#d97706", "#dc2626", "#0891b2", "#9333ea", "#16a34a", "#ea580c", "#be185d"];
 
 type SpinStatus = {
