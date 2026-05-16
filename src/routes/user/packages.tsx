@@ -244,7 +244,7 @@ function PackagesPage() {
                       <Icon className="h-6 w-6" />
                     </div>
                     <div>
-                      <span className={`inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${t.chip}`}>{t.name} Tier</span>
+                      <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${t.chip}`}><Icon className="h-3 w-3" /> {t.badge}</span>
                       <h3 className="font-display text-xl font-bold mt-1 tracking-tight">{p.name}</h3>
                     </div>
                   </div>
