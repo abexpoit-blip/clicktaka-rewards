@@ -140,12 +140,8 @@ function WithdrawPage() {
               </div>
             )}
 
-            {info?.is_second_or_later && (
-              <div className="rounded-xl border border-amber-300 bg-amber-50 text-amber-900 px-3.5 py-2.5 text-xs flex items-start gap-2">
-                <Info className="h-4 w-4 mt-0.5 shrink-0" />
-                <span><b>নোট:</b> আপনার ১ম withdraw হয়ে গেছে — এখন থেকে প্রতি withdraw-এ <b>minimum ৳{effectiveMin}</b> লাগবে।</span>
-              </div>
-            )}
+            {/* Note: the stricter 2nd-withdraw minimum is intentionally NOT shown upfront —
+                the server reveals the Bangla message only when the user attempts to submit. */}
             <button disabled={busy} type="submit"
               className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-orange-500 text-white px-4 py-3.5 text-sm font-bold shadow-2xl hover:scale-[1.01] transition disabled:opacity-60">
               <Send className="h-4 w-4" /> {busy ? "পাঠানো হচ্ছে…" : "Submit Withdraw Request"}
