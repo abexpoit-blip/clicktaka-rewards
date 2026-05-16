@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { TaskTitle } from "@/lib/package-badge";
 import {
   Sparkles, Plus, Search, Target, AppWindow, Share2, Gamepad2,
   ExternalLink, Pause, Play, Trash2, Coins, Activity, TrendingUp, Filter,
