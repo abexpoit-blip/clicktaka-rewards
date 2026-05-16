@@ -56,6 +56,16 @@ r.get('/dashboard', authUser, async (req, res) => {
 
 // Tasks page: tasks filtered by user's active package targeting
 r.get('/tasks', authUser, async (req, res) => {
+  // 🌙 Daily auto-reset: if a new day started, zero out tasks_done_today for this user
+  await q(
+    `UPDATE user_packages
+       SET tasks_done_today = 0,
+           last_reset_date = CURDATE()
+     WHERE user_id = ?
+       AND (last_reset_date IS NULL OR last_reset_date < CURDATE())`,
+    [req.user.id]
+  );
+
   const [pkgs, doneToday, todayCount] = await Promise.all([
     q(
       `SELECT up.id, up.package_id, up.tasks_done_today, up.expires_at, p.name, p.daily_task_limit, p.daily_earning
