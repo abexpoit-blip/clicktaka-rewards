@@ -51,10 +51,13 @@ const AVATAR_GRAD = [
 ];
 
 export function LiveTicker() {
-  const [items, setItems] = useState<Item[]>(() => Array.from({ length: 5 }, (_, i) => genItem(i + 1)));
+  const [items, setItems] = useState<Item[]>([]);
   const [tick, setTick] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+    setItems(Array.from({ length: 5 }, (_, i) => genItem(i + 1)));
     const t = setInterval(() => {
       setItems((prev) => [genItem(), ...prev.slice(0, 4)]);
       setTick((k) => k + 1);
@@ -62,8 +65,6 @@ export function LiveTicker() {
     return () => clearInterval(t);
   }, []);
 
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
   const stats = useMemo(() => {
     if (!mounted) return { today: 1247, paid: "8.4" };
     const minutes = Math.floor(Date.now() / 60000) % 1000;
