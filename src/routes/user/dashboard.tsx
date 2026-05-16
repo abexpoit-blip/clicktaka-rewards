@@ -334,7 +334,7 @@ function QuickTaskCard({ task, done }: { task: Task; done: boolean }) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{m.label}</p>
-            <h3 className="font-semibold text-sm truncate">{task.title}</h3>
+            <TaskTitle title={task.title} className="font-semibold text-sm" badgeSize="xs" />
             <p className="text-[11px] tabular-nums">
               <span className="text-success font-bold">+৳{Number(task.reward).toFixed(2)}</span>
               <span className="text-muted-foreground"> · {isMine && !ready ? `${remaining}s বাকি` : "~30s"}</span>
