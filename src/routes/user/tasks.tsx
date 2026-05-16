@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import { bumpBalance, setBalance } from "@/lib/active-task";
 import { toast } from "sonner";
 import { TaskSuccessModal } from "@/components/task-success-modal";
+import { TaskTitle } from "@/lib/package-badge";
 import {
   Target, Trophy, Zap, Lock, CheckCircle2, Play, Clock, X, RotateCcw,
   TrendingUp, Crown, Flame, Coins, Package as PackageIcon, ExternalLink,
