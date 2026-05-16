@@ -162,15 +162,6 @@ r.post('/tasks/:id/complete', authUser, async (req, res) => {
     TASK_STARTS.delete(key);
   }
 
-  // Find an active package with remaining quota
-  const pkgs = await q(
-    `SELECT up.id, up.tasks_done_today, p.daily_task_limit
-     FROM user_packages up JOIN packages p ON p.id=up.package_id
-     WHERE up.user_id=? AND up.expires_at >= CURDATE()
-     ORDER BY up.id ASC`,
-    [req.user.id]
-  );
-  if (!pkgs.length) return res.status(403).json({ error: 'Active package নেই — package কিনুন' });
   // 🌙 Daily auto-reset before quota check (covers midnight rollover)
   await q(
     `UPDATE user_packages
