@@ -357,7 +357,7 @@ function AdminTasks() {
                           {t.active ? "Active" : "Paused"}
                         </span>
                       </div>
-                      <h3 className="font-display font-bold text-base mt-1.5 line-clamp-2 text-white">{t.title}</h3>
+                      <h3 className="font-display font-bold text-base mt-1.5 line-clamp-2 text-white"><TaskTitle title={t.title} badgeSize="xs" /></h3>
                       {t.description && (
                         <p className="text-xs text-slate-300/80 mt-1 line-clamp-2">{t.description}</p>
                       )}
