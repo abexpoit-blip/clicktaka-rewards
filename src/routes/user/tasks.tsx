@@ -40,17 +40,8 @@ function TasksPage() {
   const [justClaimed, setJustClaimed] = useState<{ id: number; reward: number } | null>(null);
   const [successModal, setSuccessModal] = useState<{ reward: number; title: string; balance: number | null } | null>(null);
   const REQUIRED_SECONDS = 30;
-  const [active, setActive] = useState<{ task: Task; viewed: number; awayOnce: boolean; awayMs: number; needsAway: boolean } | null>(() => {
-    // Resume from localStorage if user navigated here from dashboard / refreshed
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = localStorage.getItem("ct_active_task_v1");
-      if (!raw) return null;
-      const v = JSON.parse(raw) as { id: number; startedAt: number; awayMs: number; needsAway: boolean };
-      // We can't restore the full Task here without server data; defer until tasks load
-      return null;
-    } catch { return null; }
-  });
+  const adWinRef = useRef<Window | null>(null);
+  const [active, setActive] = useState<{ task: Task; viewed: number; awayOnce: boolean; awayMs: number; needsAway: boolean } | null>(null);
 
   function load(): Promise<Data | null> {
     return api<Data>("/user/tasks")
