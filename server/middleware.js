@@ -10,6 +10,7 @@ export async function authUser(req, res, next) {
   if (!rows.length) return res.status(401).json({ error: 'User not found' });
   if (rows[0].status === 'blocked') return res.status(403).json({ error: 'Account blocked' });
   req.user = rows[0];
+  req.session = { imp: !!payload.imp, aid: payload.aid || null };
   next();
 }
 

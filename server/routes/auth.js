@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { q } from '../db.js';
-import { hashPassword, verifyPassword, signToken, genReferCode, setAuthCookie, clearAuthCookie } from '../auth.js';
+import { hashPassword, verifyPassword, signToken, genReferCode, setAuthCookie, clearAuthCookie, verifyToken } from '../auth.js';
 
 const r = Router();
 
@@ -124,6 +124,21 @@ r.post('/admin-login', async (req, res) => {
 
 r.post('/logout', (req, res) => {
   clearAuthCookie(res);
+  res.json({ ok: true });
+});
+
+// Exit user impersonation — restores the original admin session
+r.post('/exit-impersonation', async (req, res) => {
+  const token = req.cookies?.ct_token;
+  if (!token) return res.status(401).json({ error: 'No active session' });
+  const payload = verifyToken(token);
+  if (!payload?.imp || !payload?.aid) {
+    return res.status(400).json({ error: 'Active impersonation নেই' });
+  }
+  const rows = await q('SELECT id, is_admin FROM users WHERE id=? LIMIT 1', [payload.aid]);
+  if (!rows.length || !rows[0].is_admin) return res.status(403).json({ error: 'Admin user পাওয়া যায়নি' });
+  const newToken = signToken({ uid: rows[0].id, admin: true });
+  setAuthCookie(res, newToken);
   res.json({ ok: true });
 });
 

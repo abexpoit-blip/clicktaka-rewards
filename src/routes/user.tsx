@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 type User = { id: number; phone: string; name: string | null; balance: number; refer_code: string };
+type MeResponse = { user: User; impersonating?: boolean; admin_id?: number | null };
 
 export const Route = createFileRoute("/user")({ component: UserLayout });
 
@@ -27,14 +28,30 @@ const NAV = [
 function UserLayout() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [impersonating, setImpersonating] = useState(false);
+  const [exitBusy, setExitBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    api<{ user: User }>("/user/me")
-      .then((d) => { setUser(d.user); setLoading(false); })
+    api<MeResponse>("/user/me")
+      .then((d) => {
+        setUser(d.user);
+        setImpersonating(!!d.impersonating);
+        setLoading(false);
+      })
       .catch(() => navigate({ to: "/login" }));
   }, [navigate]);
+
+  async function exitImpersonation() {
+    setExitBusy(true);
+    try {
+      await api("/auth/exit-impersonation", { method: "POST" });
+      window.location.href = "/kt-admin/users";
+    } catch {
+      setExitBusy(false);
+    }
+  }
 
   // Optimistic balance updates from Claim / Withdraw / Deposit success
   useEffect(() => {
@@ -73,6 +90,20 @@ function UserLayout() {
 
   return (
     <div className="min-h-screen grid-noise text-foreground">
+      {impersonating && (
+        <div className="sticky top-0 z-40 bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 text-white shadow-lg">
+          <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between gap-3 flex-wrap">
+            <p className="text-xs sm:text-sm font-bold flex items-center gap-2">
+              <span className="inline-flex h-2 w-2 rounded-full bg-white animate-pulse" />
+              👤 Admin Mode — আপনি <span className="underline">{user.name || user.phone}</span> হিসেবে browse করছেন
+            </p>
+            <button onClick={exitImpersonation} disabled={exitBusy}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-white/95 hover:bg-white text-rose-700 px-3 py-1.5 text-xs font-bold shadow disabled:opacity-60">
+              <LogOut className="h-3.5 w-3.5" /> {exitBusy ? "Exiting..." : "Exit to Admin"}
+            </button>
+          </div>
+        </div>
+      )}
       <header className="sticky top-0 z-30 glass border-b border-border/60">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
           <Link to="/user/dashboard" className="flex items-center gap-2 group">
