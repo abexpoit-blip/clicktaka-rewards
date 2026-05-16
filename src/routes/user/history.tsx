@@ -68,7 +68,7 @@ function HistoryPage() {
               {earns.map((c) => (
                 <li key={c.id} className="px-4 py-3 flex items-center justify-between">
                   <div className="min-w-0">
-                    <p className="font-medium text-sm truncate">{c.title}</p>
+                    <TaskTitle title={c.title} className="font-medium text-sm" badgeSize="xs" />
                     <p className="text-xs text-gray-500 capitalize">{c.type} • {new Date(c.completed_at).toLocaleString("bn-BD")}</p>
                   </div>
                   <span className="text-green-600 font-bold whitespace-nowrap">+৳{Number(c.reward).toFixed(2)}</span>
