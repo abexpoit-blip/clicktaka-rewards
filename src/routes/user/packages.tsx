@@ -15,14 +15,18 @@ type Package = {
   daily_task_limit: number; daily_earning: number; validity_days: number;
 };
 
-// Visual theme per tier (deterministic by index)
-const THEMES = [
-  { name: "Silver",   ring: "ring-slate-300",   grad: "from-slate-400 to-slate-600",       chip: "bg-slate-100 text-slate-700",     icon: ShieldCheck, accent: "text-slate-600", glow: "shadow-slate-300/40" },
-  { name: "Bronze",   ring: "ring-amber-300",   grad: "from-amber-500 to-orange-600",      chip: "bg-amber-100 text-amber-800",     icon: Star,       accent: "text-amber-700", glow: "shadow-amber-300/50" },
-  { name: "Gold",     ring: "ring-yellow-300",  grad: "from-yellow-400 via-amber-500 to-orange-500", chip: "bg-yellow-100 text-yellow-800", icon: Crown,      accent: "text-yellow-700", glow: "shadow-yellow-400/50" },
-  { name: "Platinum", ring: "ring-cyan-300",    grad: "from-cyan-500 via-blue-500 to-indigo-600", chip: "bg-cyan-100 text-cyan-800",    icon: Sparkles,   accent: "text-cyan-700",  glow: "shadow-cyan-400/50" },
-  { name: "Diamond",  ring: "ring-fuchsia-300", grad: "from-fuchsia-500 via-purple-500 to-indigo-600", chip: "bg-fuchsia-100 text-fuchsia-800", icon: Flame,    accent: "text-fuchsia-700", glow: "shadow-fuchsia-400/50" },
-];
+// Visual theme per package — keyed by name with sensible fallback
+type Theme = { ring: string; grad: string; chip: string; icon: any; accent: string; glow: string; badge: string };
+const THEME_MAP: Record<string, Theme> = {
+  "Silver":   { ring: "ring-slate-300",   grad: "from-slate-400 to-slate-600",                  chip: "bg-slate-100 text-slate-700",     icon: ShieldCheck, accent: "text-slate-600",   glow: "shadow-slate-300/40",   badge: "Starter" },
+  "Silver 2": { ring: "ring-zinc-300",    grad: "from-zinc-400 via-slate-500 to-zinc-600",      chip: "bg-zinc-100 text-zinc-800",       icon: Medal,       accent: "text-zinc-600",    glow: "shadow-zinc-300/40",    badge: "Silver II" },
+  "Silver 3": { ring: "ring-blue-300",    grad: "from-blue-400 via-sky-500 to-blue-600",        chip: "bg-blue-100 text-blue-800",       icon: Star,        accent: "text-blue-600",    glow: "shadow-blue-300/40",    badge: "Silver III" },
+  "Gold":     { ring: "ring-yellow-300",  grad: "from-yellow-400 via-amber-500 to-orange-500",  chip: "bg-yellow-100 text-yellow-800",   icon: Crown,       accent: "text-yellow-700",  glow: "shadow-yellow-400/50",  badge: "Popular" },
+  "Diamond":  { ring: "ring-cyan-300",    grad: "from-cyan-400 via-sky-500 to-indigo-600",      chip: "bg-cyan-100 text-cyan-800",       icon: Gem,         accent: "text-cyan-700",    glow: "shadow-cyan-400/50",    badge: "Premium" },
+  "Royal":    { ring: "ring-fuchsia-300", grad: "from-fuchsia-500 via-purple-500 to-indigo-600",chip: "bg-fuchsia-100 text-fuchsia-800", icon: Trophy,      accent: "text-fuchsia-700", glow: "shadow-fuchsia-400/50", badge: "Royal VIP" },
+};
+const FALLBACK_THEME: Theme = { ring: "ring-slate-300", grad: "from-slate-400 to-slate-600", chip: "bg-slate-100 text-slate-700", icon: ShieldCheck, accent: "text-slate-600", glow: "shadow-slate-300/40", badge: "Pkg" };
+function themeFor(name: string): Theme { return THEME_MAP[name] || FALLBACK_THEME; }
 
 type ActivePkg = { id: number; name: string; expires_at: string; daily_earning: number; tasks_done_today: number; daily_task_limit: number };
 
