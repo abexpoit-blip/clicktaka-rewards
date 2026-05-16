@@ -444,6 +444,22 @@ function TasksPage() {
   );
 }
 
+function ResetCountdown() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const next = new Date();
+  next.setHours(24, 0, 0, 0); // midnight local
+  const ms = Math.max(0, next.getTime() - now);
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return <span className="tabular-nums font-bold ml-1">{pad(h)}:{pad(m)}:{pad(s)}</span>;
+}
+
 function LockedTasks() {
   return (
     <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-primary/30 bg-gradient-brand-soft p-8 sm:p-10 text-center">
