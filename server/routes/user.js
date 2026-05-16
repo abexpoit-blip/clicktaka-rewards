@@ -458,7 +458,9 @@ const withdrawSchema = z.object({
   payment_number: z.string().regex(/^01[3-9]\d{8}$/, 'সঠিক 11-digit number দিন'),
 });
 
-// Effective minimum for the *current* user — frontend uses this to render Min hint dynamically
+// Effective minimum for the *current* user.
+// IMPORTANT: We intentionally always advertise ৳100 upfront — the stricter
+// "2nd+ withdraw = ৳5000" rule is revealed ONLY when the user actually tries.
 r.get('/withdraw-info', authUser, async (req, res) => {
   try {
     const prior = await q(
@@ -466,14 +468,11 @@ r.get('/withdraw-info', authUser, async (req, res) => {
       [req.user.id]
     );
     const isSecondOrLater = Number(prior[0]?.c || 0) >= 1;
-    const min_withdraw = isSecondOrLater ? 2000 : 100;
     res.json({
-      min_withdraw,
-      is_second_or_later: isSecondOrLater,
+      min_withdraw: 100,                  // ← always shown publicly
+      is_second_or_later: isSecondOrLater, // (frontend ignores for the upfront UI)
       prior_count: Number(prior[0]?.c || 0),
-      note: isSecondOrLater
-        ? `২য় withdraw থেকে minimum ৳${min_withdraw} লাগবে`
-        : `প্রথম withdraw — minimum ৳${min_withdraw}`,
+      note: `Minimum withdraw ৳100`,
     });
   } catch (e) {
     console.error('withdraw-info error:', e);
@@ -485,18 +484,18 @@ r.post('/withdraw', authUser, async (req, res) => {
   try {
     const data = withdrawSchema.parse(req.body);
 
-    // First withdraw min ৳100, 2nd+ min ৳2000 (not shown upfront)
+    // First withdraw min ৳100, 2nd+ min ৳5000 — only revealed on attempt
     const prior = await q(
       'SELECT COUNT(*) AS c FROM withdrawals WHERE user_id=? AND status<>"rejected"',
       [req.user.id]
     );
     const isSecondOrLater = Number(prior[0]?.c || 0) >= 1;
-    const minWd = isSecondOrLater ? 2000 : 100;
+    const minWd = isSecondOrLater ? 5000 : 100;
 
     if (data.amount < minWd) {
       return res.status(400).json({
         error: isSecondOrLater
-          ? `2nd withdraw থেকে minimum ৳${minWd} লাগবে`
+          ? `আমাদের প্যাকেজ আপডেট হয়েছে — এখন থেকে minimum withdraw ৳${minWd}। আরও advanced package activate করে বেশি earn ও withdraw করুন।`
           : `Minimum withdraw ৳${minWd}`,
       });
     }
