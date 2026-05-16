@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { TaskTitle } from "@/lib/package-badge";
 
 export const Route = createFileRoute("/user/history")({ component: HistoryPage });
 
