@@ -171,6 +171,24 @@ r.post('/tasks/:id/complete', authUser, async (req, res) => {
     [req.user.id]
   );
   if (!pkgs.length) return res.status(403).json({ error: 'Active package নেই — package কিনুন' });
+  // 🌙 Daily auto-reset before quota check (covers midnight rollover)
+  await q(
+    `UPDATE user_packages
+       SET tasks_done_today = 0, last_reset_date = CURDATE()
+     WHERE user_id = ?
+       AND (last_reset_date IS NULL OR last_reset_date < CURDATE())`,
+    [req.user.id]
+  );
+
+  // Find an active package with remaining quota
+  const pkgs = await q(
+    `SELECT up.id, up.tasks_done_today, p.daily_task_limit
+     FROM user_packages up JOIN packages p ON p.id=up.package_id
+     WHERE up.user_id=? AND up.expires_at >= CURDATE()
+     ORDER BY up.id ASC`,
+    [req.user.id]
+  );
+  if (!pkgs.length) return res.status(403).json({ error: 'Active package নেই — package কিনুন' });
   const slot = pkgs.find((p) => Number(p.tasks_done_today) < Number(p.daily_task_limit));
   if (!slot) return res.status(429).json({ error: 'আজকের সব task সম্পন্ন — কাল আবার আসুন' });
 
