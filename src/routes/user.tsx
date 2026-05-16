@@ -28,14 +28,30 @@ const NAV = [
 function UserLayout() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
+  const [impersonating, setImpersonating] = useState(false);
+  const [exitBusy, setExitBusy] = useState(false);
   const [loading, setLoading] = useState(true);
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    api<{ user: User }>("/user/me")
-      .then((d) => { setUser(d.user); setLoading(false); })
+    api<MeResponse>("/user/me")
+      .then((d) => {
+        setUser(d.user);
+        setImpersonating(!!d.impersonating);
+        setLoading(false);
+      })
       .catch(() => navigate({ to: "/login" }));
   }, [navigate]);
+
+  async function exitImpersonation() {
+    setExitBusy(true);
+    try {
+      await api("/auth/exit-impersonation", { method: "POST" });
+      window.location.href = "/kt-admin/users";
+    } catch {
+      setExitBusy(false);
+    }
+  }
 
   // Optimistic balance updates from Claim / Withdraw / Deposit success
   useEffect(() => {
