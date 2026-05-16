@@ -185,7 +185,7 @@ function ProfilePage() {
                   <Activity className="h-4 w-4" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate">{c.title}</p>
+                  <TaskTitle title={c.title} className="text-sm font-semibold" badgeSize="xs" />
                   <p className="text-[11px] text-muted-foreground inline-flex items-center gap-1"><Clock className="h-2.5 w-2.5" /> {new Date(c.completed_at).toLocaleString("bn-BD")}</p>
                 </div>
                 <p className="text-sm font-bold tabular-nums text-success shrink-0">+৳{Number(c.reward).toFixed(2)}</p>
