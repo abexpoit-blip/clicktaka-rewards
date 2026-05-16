@@ -51,11 +51,9 @@ function Landing() {
       {/* Header */}
       <header className="sticky top-0 z-30 glass border-b border-border/60">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 group">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-brand shadow-brand">
-              <Banknote className="h-4 w-4 text-white" strokeWidth={2.5} />
-            </span>
-            <span className="font-display text-xl font-bold text-gradient-brand">ClickTaka</span>
+          <Link to="/" className="flex flex-col leading-tight group">
+            <span className="font-display text-xl font-bold text-gradient-brand tracking-tight">ClickTaka</span>
+            <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground -mt-0.5">দৈনিক ইনকামের সেরা ঠিকানা</span>
           </Link>
           <div className="flex gap-2">
             <Link to="/login" className="px-4 py-2 text-sm font-medium text-foreground hover:bg-accent/40 rounded-xl transition">Login</Link>
