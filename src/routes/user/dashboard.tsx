@@ -228,7 +228,7 @@ function Dashboard() {
                       <Target className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">{c.title}</p>
+                      <TaskTitle title={c.title} className="font-medium text-sm" badgeSize="xs" />
                       <p className="text-[11px] text-muted-foreground capitalize">{c.type} • {new Date(c.completed_at).toLocaleString()}</p>
                     </div>
                   </div>
