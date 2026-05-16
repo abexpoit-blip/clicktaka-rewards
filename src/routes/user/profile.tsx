@@ -8,6 +8,7 @@ import {
   Share2, ChevronRight, Package as PackageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
+import { TaskTitle } from "@/lib/package-badge";
 
 export const Route = createFileRoute("/user/profile")({ component: ProfilePage });
 
