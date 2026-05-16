@@ -432,9 +432,15 @@ r.post('/spin', authUser, async (req, res) => {
       });
     }
 
-    // Reward: DB-configured slices থেকে random pick (admin panel-এ edit-able)
+    // Weighted reward: 95% → ৳10, 5% → spread across the higher slices
     const SPIN_REWARDS = await getSpinSlices();
-    const reward = SPIN_REWARDS[Math.floor(Math.random() * SPIN_REWARDS.length)];
+    const highRewards = SPIN_REWARDS.filter((n) => n !== LOW_REWARD);
+    let reward;
+    if (Math.random() < LOW_REWARD_PROBABILITY || highRewards.length === 0) {
+      reward = SPIN_REWARDS.includes(LOW_REWARD) ? LOW_REWARD : SPIN_REWARDS[0];
+    } else {
+      reward = highRewards[Math.floor(Math.random() * highRewards.length)];
+    }
     await q('INSERT INTO daily_spins (user_id, spin_date, reward) VALUES (?, CURDATE(), ?)', [req.user.id, reward]);
     await q('UPDATE users SET balance = balance + ? WHERE id=?', [reward, req.user.id]);
     const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
