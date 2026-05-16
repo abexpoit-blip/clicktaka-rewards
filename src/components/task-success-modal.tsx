@@ -2,6 +2,7 @@
 // Includes confetti burst, scale-in animation, and auto-dismiss.
 import { useEffect } from "react";
 import { CheckCircle2, Sparkles, Coins, X } from "lucide-react";
+import { TaskTitle } from "@/lib/package-badge";
 
 type Props = {
   open: boolean;
