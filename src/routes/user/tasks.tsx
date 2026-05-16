@@ -100,13 +100,36 @@ function TasksPage() {
     return () => clearInterval(t);
   }, [active]);
 
+  // Watch the opened ad window — if user closes it before reaching REQUIRED_SECONDS,
+  // auto-reset the active task so they can retry.
+  useEffect(() => {
+    if (!active || !active.needsAway) return;
+    const iv = setInterval(() => {
+      const w = adWinRef.current;
+      if (!w) return;
+      if (w.closed) {
+        adWinRef.current = null;
+        setActive((a) => {
+          if (!a) return a;
+          if (a.viewed >= REQUIRED_SECONDS) return a; // already completed dwell
+          toast.error("Ad tab বন্ধ হয়েছে — task incomplete, আবার Start করুন");
+          return null;
+        });
+      }
+    }, 700);
+    return () => clearInterval(iv);
+  }, [active]);
+
   async function startTask(task: Task) {
     const needsAway = !!task.url;
     setActive({ task, viewed: 0, awayOnce: false, awayMs: 0, needsAway });
     // Tell the server we started — required for ad-dwell validation on /complete
     api(`/user/tasks/${task.id}/start`, { method: "POST" }).catch(() => {});
     if (task.url) {
-      setTimeout(() => window.open(task.url!, "_blank", "noopener,noreferrer"), 50);
+      setTimeout(() => {
+        const w = window.open(task.url!, "_blank", "noopener,noreferrer");
+        adWinRef.current = w || null;
+      }, 50);
       toast.message("Ad খুলছে — কমপক্ষে 30s দেখুন, তারপর Claim চালু হবে", { duration: 3500 });
     }
   }
