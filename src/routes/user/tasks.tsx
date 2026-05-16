@@ -406,7 +406,7 @@ function TasksPage() {
                         disabled={disabled}
                         className={`mt-2.5 sm:mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition ${
                           isDone
-                            ? "bg-success/10 text-success cursor-default"
+                            ? "bg-success/15 text-success cursor-default border border-success/30"
                             : limitReached
                             ? "bg-muted text-muted-foreground cursor-not-allowed"
                             : disabled
@@ -414,8 +414,8 @@ function TasksPage() {
                             : `bg-gradient-to-r ${m.grad} text-white shadow-brand hover:scale-[1.02]`
                         }`}
                       >
-                        {isDone ? <><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Done</>
-                          : limitReached ? <>Limit শেষ</>
+                        {isDone ? <><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Completed — কাল আবার আসুন</>
+                          : limitReached ? <>Limit শেষ — কাল আবার আসুন</>
                           : <><Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white" /> Start <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" /></>}
                       </button>
                     </div>
