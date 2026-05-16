@@ -25,7 +25,12 @@ r.get('/me', authUser, async (req, res) => {
      WHERE up.user_id=? AND up.expires_at >= CURDATE()`,
     [req.user.id]
   );
-  res.json({ user: req.user, packages: pkgs });
+  res.json({
+    user: req.user,
+    packages: pkgs,
+    impersonating: !!req.session?.imp,
+    admin_id: req.session?.aid || null,
+  });
 });
 
 // Aggregated dashboard payload (balance + active tasks count + recent earnings)
