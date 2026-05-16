@@ -106,12 +106,9 @@ function UserLayout() {
       )}
       <header className="sticky top-0 z-30 glass border-b border-border/60">
         <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-          <Link to="/user/dashboard" className="flex items-center gap-2 group">
-            <span className="relative grid place-items-center h-9 w-9 rounded-xl bg-gradient-brand shadow-brand">
-              <Banknote className="h-4 w-4 text-white" strokeWidth={2.5} />
-              <span className="absolute inset-0 rounded-xl animate-pulse-glow" />
-            </span>
+          <Link to="/user/dashboard" className="flex flex-col leading-tight group">
             <span className="font-display text-xl font-bold text-gradient-brand tracking-tight">ClickTaka</span>
+            <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground -mt-0.5">দৈনিক ইনকামের সেরা ঠিকানা</span>
           </Link>
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="hidden sm:flex items-center gap-2 rounded-full border border-border/70 bg-card/70 px-3 py-1.5">
