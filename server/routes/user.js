@@ -176,6 +176,26 @@ r.post('/packages/:id/buy', authUser, async (req, res) => {
       [req.user.id, -price, Number(after[0].balance), `Activate ${pkg.name}`]
     );
 
+    // ── First-time activation: credit ৳50 Join Bonus (once per user) ──
+    const priorPkgs = await q(
+      'SELECT COUNT(*) AS c FROM user_packages WHERE user_id=?',
+      [req.user.id]
+    );
+    const alreadyBonus = await q(
+      "SELECT id FROM transactions WHERE user_id=? AND type='bonus' AND note='Join Bonus' LIMIT 1",
+      [req.user.id]
+    );
+    if (Number(priorPkgs[0]?.c || 0) === 1 && !alreadyBonus.length) {
+      const JOIN_BONUS = 50;
+      await q('UPDATE users SET balance = balance + ? WHERE id=?', [JOIN_BONUS, req.user.id]);
+      const afterBonus = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
+      await q(
+        "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'bonus', ?, ?, 'Join Bonus')",
+        [req.user.id, JOIN_BONUS, Number(afterBonus[0].balance)]
+      ).catch(() => {});
+      after[0].balance = afterBonus[0].balance;
+    }
+
     // Pay referral commission to referrer (if any)
     const referrerId = balRows[0]?.refer_by;
     if (referrerId) {
