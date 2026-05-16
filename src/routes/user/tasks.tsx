@@ -367,9 +367,12 @@ function TasksPage() {
                   <article key={t.id} className={`group relative overflow-hidden rounded-2xl border bg-card shadow-card hover:shadow-brand hover:-translate-y-0.5 transition-all ${justOk ? "border-success ring-2 ring-success/30 animate-pulse" : "border-border/70"}`}>
                     <div aria-hidden className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.grad}`} />
                     {(isDone || justOk) && (
-                      <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-success/15 text-success px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
-                        <CheckCircle2 className="h-3 w-3" /> {justOk ? `+৳${justClaimed!.reward}` : "Done"}
+                      <span className="absolute top-2 right-2 inline-flex items-center gap-1 rounded-full bg-success text-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider shadow-lg">
+                        <CheckCircle2 className="h-3 w-3" /> {justOk ? `+৳${justClaimed!.reward}` : "Completed"}
                       </span>
+                    )}
+                    {isDone && !justOk && (
+                      <div aria-hidden className="absolute inset-0 bg-success/5 backdrop-blur-[1px] pointer-events-none" />
                     )}
                     <div className="p-3 sm:p-4">
                       <div className="flex items-start gap-2.5 sm:gap-3">
@@ -403,7 +406,7 @@ function TasksPage() {
                         disabled={disabled}
                         className={`mt-2.5 sm:mt-3 w-full inline-flex items-center justify-center gap-1.5 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-bold transition ${
                           isDone
-                            ? "bg-success/10 text-success cursor-default"
+                            ? "bg-success/15 text-success cursor-default border border-success/30"
                             : limitReached
                             ? "bg-muted text-muted-foreground cursor-not-allowed"
                             : disabled
@@ -411,8 +414,8 @@ function TasksPage() {
                             : `bg-gradient-to-r ${m.grad} text-white shadow-brand hover:scale-[1.02]`
                         }`}
                       >
-                        {isDone ? <><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Done</>
-                          : limitReached ? <>Limit শেষ</>
+                        {isDone ? <><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Completed — কাল আবার আসুন</>
+                          : limitReached ? <>Limit শেষ — কাল আবার আসুন</>
                           : <><Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white" /> Start <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" /></>}
                       </button>
                     </div>
