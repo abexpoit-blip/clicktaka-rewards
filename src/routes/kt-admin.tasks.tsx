@@ -50,6 +50,7 @@ function AdminTasks() {
   const [busy, setBusy] = useState(false);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<"all" | "active" | "paused">("all");
+  const [pkgFilter, setPkgFilter] = useState<number | "all" | "none">("all");
 
   function load() {
     setLoading(true);
