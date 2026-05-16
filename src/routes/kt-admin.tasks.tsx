@@ -128,10 +128,12 @@ function AdminTasks() {
     return tasks.filter((t) => {
       if (filter === "active" && !t.active) return false;
       if (filter === "paused" && t.active) return false;
+      if (pkgFilter === "none" && t.package_ids.length !== 0) return false;
+      if (typeof pkgFilter === "number" && !t.package_ids.includes(pkgFilter)) return false;
       if (q && !(`${t.title} ${t.description || ""} ${t.type} ${t.url ?? ""}`.toLowerCase().includes(q.toLowerCase()))) return false;
       return true;
     });
-  }, [tasks, q, filter]);
+  }, [tasks, q, filter, pkgFilter]);
 
   const pkgName = (id: number) => packages.find((p) => p.id === id)?.name || `#${id}`;
 
