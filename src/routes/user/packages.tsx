@@ -251,10 +251,18 @@ function PackagesPage() {
                     <span className="text-sm text-muted-foreground">one-time</span>
                   </div>
 
-                  {/* ROI badge */}
-                  <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-success/10 text-success px-2.5 py-1 text-[11px] font-bold">
-                    <TrendingUp className="h-3 w-3" /> {roi}% ROI in {p.validity_days} days
+                  {/* ROI + Total income suggestion */}
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-success/10 text-success px-2.5 py-1 text-[11px] font-bold">
+                      <TrendingUp className="h-3 w-3" /> {roi}% ROI · {p.validity_days} দিনে
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-[11px] font-bold">
+                      <Coins className="h-3 w-3" /> মোট আয় ৳{(Number(p.daily_earning) * p.validity_days).toLocaleString()}
+                    </span>
                   </div>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">
+                    💡 {p.validity_days} দিন পর্যন্ত প্রতিদিন ৳{Number(p.daily_earning).toLocaleString()} করে ইনকাম — লাভ <b className="text-success">৳{(Number(p.daily_earning) * p.validity_days - Number(p.price)).toLocaleString()}</b>
+                  </p>
 
                   {/* Active status detail */}
                   {active && (
