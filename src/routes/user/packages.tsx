@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import {
   Crown, Sparkles, CheckCircle2, Calendar, Coins, Target, Gift,
   ShieldCheck, Zap, TrendingUp, ArrowRight, Star, Wallet, Flame,
-  X, CreditCard, Smartphone, Lock, Loader2,
+  X, CreditCard, Smartphone, Lock, Loader2, Gem, Medal, Trophy,
 } from "lucide-react";
 
 export const Route = createFileRoute("/user/packages")({ component: PackagesPage });
