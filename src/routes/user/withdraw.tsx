@@ -51,10 +51,10 @@ function WithdrawPage() {
     e.preventDefault();
     setFormErr("");
     const amt = Number(amount);
+    // Only the public ৳100 minimum is checked client-side. The stricter
+    // "2nd+ withdraw" rule is enforced by the server and surfaced via formErr.
     if (!amt || amt < effectiveMin) {
-      const msg = info?.is_second_or_later
-        ? `২য় withdraw থেকে minimum ৳${effectiveMin} লাগবে`
-        : `Minimum withdraw ৳${effectiveMin}`;
+      const msg = `Minimum withdraw ৳${effectiveMin}`;
       setFormErr(msg);
       return toast.error(msg);
     }
