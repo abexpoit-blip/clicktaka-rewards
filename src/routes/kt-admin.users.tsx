@@ -40,7 +40,7 @@ function AdminUsers() {
   }
 
   async function loginAs(u: U) {
-    if (!confirm(`${u.name || u.phone} (#${u.id}) — এই user হিসেবে login করবেন?\n\nAdmin session শেষ হয়ে যাবে। আবার /kt-admin দিয়ে login করতে হবে।`)) return;
+    if (!confirm(`${u.name || u.phone} (#${u.id}) — এই user হিসেবে login করবেন?\n\nUser dashboard-এর উপরে "Exit to Admin" বাটন থাকবে — যেকোনো সময় ফিরে আসতে পারবেন।`)) return;
     setBusy(u.id);
     try {
       await api(`/admin/users/${u.id}/impersonate`, { method: "POST" });
