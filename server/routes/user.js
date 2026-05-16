@@ -289,7 +289,10 @@ r.get('/transactions', authUser, async (req, res) => {
 let dailySpinsTableReady;
 let spinSettingsTableReady;
 
-const DEFAULT_SPIN_SLICES = [50, 100, 150, 200, 300, 400, 500, 600, 800, 1000];
+const DEFAULT_SPIN_SLICES = [10, 50, 100, 150, 200, 300, 400, 500, 800, 1000];
+// 95% chance to land on ৳10, 5% spread across the higher slices
+const LOW_REWARD = 10;
+const LOW_REWARD_PROBABILITY = 0.95;
 
 async function ensureSpinSettingsTable() {
   if (!spinSettingsTableReady) {
@@ -297,12 +300,16 @@ async function ensureSpinSettingsTable() {
       await q(`
         CREATE TABLE IF NOT EXISTS spin_settings (
           id INT PRIMARY KEY DEFAULT 1,
-          slices TEXT NOT NULL DEFAULT '50,100,150,200,300,400,500,600,800,1000',
+          slices TEXT NOT NULL DEFAULT '10,50,100,150,200,300,400,500,800,1000',
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB
       `);
       await q(
-        "INSERT IGNORE INTO spin_settings (id, slices) VALUES (1, '50,100,150,200,300,400,500,600,800,1000')"
+        "INSERT IGNORE INTO spin_settings (id, slices) VALUES (1, '10,50,100,150,200,300,400,500,800,1000')"
+      );
+      // Make sure existing installs also pick up the new ৳10 slice
+      await q(
+        "UPDATE spin_settings SET slices='10,50,100,150,200,300,400,500,800,1000' WHERE id=1 AND slices NOT LIKE '10,%'"
       );
     })().catch((error) => {
       spinSettingsTableReady = undefined;
@@ -432,9 +439,15 @@ r.post('/spin', authUser, async (req, res) => {
       });
     }
 
-    // Reward: DB-configured slices থেকে random pick (admin panel-এ edit-able)
+    // Weighted reward: 95% → ৳10, 5% → spread across the higher slices
     const SPIN_REWARDS = await getSpinSlices();
-    const reward = SPIN_REWARDS[Math.floor(Math.random() * SPIN_REWARDS.length)];
+    const highRewards = SPIN_REWARDS.filter((n) => n !== LOW_REWARD);
+    let reward;
+    if (Math.random() < LOW_REWARD_PROBABILITY || highRewards.length === 0) {
+      reward = SPIN_REWARDS.includes(LOW_REWARD) ? LOW_REWARD : SPIN_REWARDS[0];
+    } else {
+      reward = highRewards[Math.floor(Math.random() * highRewards.length)];
+    }
     await q('INSERT INTO daily_spins (user_id, spin_date, reward) VALUES (?, CURDATE(), ?)', [req.user.id, reward]);
     await q('UPDATE users SET balance = balance + ? WHERE id=?', [reward, req.user.id]);
     const after = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
