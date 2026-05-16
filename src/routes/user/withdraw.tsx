@@ -90,7 +90,7 @@ function WithdrawPage() {
           <div className="rounded-2xl bg-white/15 backdrop-blur border border-white/20 px-4 py-3 text-right">
             <p className="text-[10px] uppercase tracking-wider text-white/80 font-bold">Available Balance</p>
             <p className="font-display text-2xl font-bold tabular-nums">৳{balance.toLocaleString()}</p>
-            <p className="text-[10px] text-white/70 mt-0.5">Min ৳{effectiveMin || "—"}{info?.is_second_or_later ? " (2nd+)" : ""}</p>
+            <p className="text-[10px] text-white/70 mt-0.5">Min ৳{effectiveMin || "—"}</p>
           </div>
         </div>
       </header>
