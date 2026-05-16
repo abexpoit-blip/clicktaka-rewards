@@ -201,7 +201,7 @@ function PackagesPage() {
       <section>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {packages.map((p, i) => {
-            const t = THEMES[i % THEMES.length];
+            const t = themeFor(p.name);
             const Icon = t.icon;
             const active = activeByName.get(p.name);
             const isUpgrade = nextUpgrade?.id === p.id;
