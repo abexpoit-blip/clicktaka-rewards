@@ -112,6 +112,8 @@ function TasksPage() {
   async function startTask(task: Task) {
     const needsAway = !!task.url;
     setActive({ task, viewed: 0, awayOnce: false, awayMs: 0, needsAway });
+    // Tell the server we started — required for ad-dwell validation on /complete
+    api(`/user/tasks/${task.id}/start`, { method: "POST" }).catch(() => {});
     if (task.url) {
       setTimeout(() => window.open(task.url!, "_blank", "noopener,noreferrer"), 50);
       toast.message("Ad খুলছে — কমপক্ষে 30s দেখুন, তারপর Claim চালু হবে", { duration: 3500 });

@@ -51,10 +51,10 @@ function WithdrawPage() {
     e.preventDefault();
     setFormErr("");
     const amt = Number(amount);
+    // Only the public ৳100 minimum is checked client-side. The stricter
+    // "2nd+ withdraw" rule is enforced by the server and surfaced via formErr.
     if (!amt || amt < effectiveMin) {
-      const msg = info?.is_second_or_later
-        ? `২য় withdraw থেকে minimum ৳${effectiveMin} লাগবে`
-        : `Minimum withdraw ৳${effectiveMin}`;
+      const msg = `Minimum withdraw ৳${effectiveMin}`;
       setFormErr(msg);
       return toast.error(msg);
     }
@@ -90,7 +90,7 @@ function WithdrawPage() {
           <div className="rounded-2xl bg-white/15 backdrop-blur border border-white/20 px-4 py-3 text-right">
             <p className="text-[10px] uppercase tracking-wider text-white/80 font-bold">Available Balance</p>
             <p className="font-display text-2xl font-bold tabular-nums">৳{balance.toLocaleString()}</p>
-            <p className="text-[10px] text-white/70 mt-0.5">Min ৳{effectiveMin || "—"}{info?.is_second_or_later ? " (2nd+)" : ""}</p>
+            <p className="text-[10px] text-white/70 mt-0.5">Min ৳{effectiveMin || "—"}</p>
           </div>
         </div>
       </header>
@@ -140,12 +140,8 @@ function WithdrawPage() {
               </div>
             )}
 
-            {info?.is_second_or_later && (
-              <div className="rounded-xl border border-amber-300 bg-amber-50 text-amber-900 px-3.5 py-2.5 text-xs flex items-start gap-2">
-                <Info className="h-4 w-4 mt-0.5 shrink-0" />
-                <span><b>নোট:</b> আপনার ১ম withdraw হয়ে গেছে — এখন থেকে প্রতি withdraw-এ <b>minimum ৳{effectiveMin}</b> লাগবে।</span>
-              </div>
-            )}
+            {/* Note: the stricter 2nd-withdraw minimum is intentionally NOT shown upfront —
+                the server reveals the Bangla message only when the user attempts to submit. */}
             <button disabled={busy} type="submit"
               className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-orange-500 text-white px-4 py-3.5 text-sm font-bold shadow-2xl hover:scale-[1.01] transition disabled:opacity-60">
               <Send className="h-4 w-4" /> {busy ? "পাঠানো হচ্ছে…" : "Submit Withdraw Request"}

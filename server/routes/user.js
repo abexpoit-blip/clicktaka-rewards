@@ -107,11 +107,25 @@ r.get('/tasks', authUser, async (req, res) => {
   });
 });
 
-// Complete a task: validate package limits, insert completion + transaction, increment counter
+// ── Ad-click / task dwell tracker (in-memory; per server process) ──
+// User must POST /tasks/:id/start, wait ≥25s, then POST /tasks/:id/complete.
+// This is the server-side guarantee that a user actually engaged with the ad,
+// in addition to the client-side "tab away 30s" check.
+const TASK_STARTS = new Map(); // key: `${userId}:${taskId}` → startedAt(ms)
+const MIN_DWELL_MS = 25_000;
+
+r.post('/tasks/:id/start', authUser, async (req, res) => {
+  const taskId = Number(req.params.id);
+  if (!taskId) return res.status(400).json({ error: 'Invalid task id' });
+  TASK_STARTS.set(`${req.user.id}:${taskId}`, Date.now());
+  res.json({ ok: true, required_seconds: Math.ceil(MIN_DWELL_MS / 1000) });
+});
+
+// Complete a task: validate dwell + package limits, insert completion + transaction
 r.post('/tasks/:id/complete', authUser, async (req, res) => {
   const taskId = Number(req.params.id);
   if (!taskId) return res.status(400).json({ error: 'Invalid task id' });
-  const tasks = await q('SELECT id, reward, active FROM tasks WHERE id=? LIMIT 1', [taskId]);
+  const tasks = await q('SELECT id, reward, active, url FROM tasks WHERE id=? LIMIT 1', [taskId]);
   if (!tasks.length || !tasks[0].active) return res.status(404).json({ error: 'Task পাওয়া যায়নি' });
   const task = tasks[0];
 
@@ -122,6 +136,21 @@ r.post('/tasks/:id/complete', authUser, async (req, res) => {
     [req.user.id, taskId]
   );
   if (dup.length) return res.status(409).json({ error: 'এই task আজ ইতিমধ্যে সম্পন্ন' });
+
+  // Server-side dwell validation — only for URL-bearing tasks (ads/videos)
+  if (task.url) {
+    const key = `${req.user.id}:${taskId}`;
+    const startedAt = TASK_STARTS.get(key);
+    if (!startedAt) {
+      return res.status(400).json({ error: 'প্রথমে Start চাপুন ও Ad দেখুন' });
+    }
+    const elapsed = Date.now() - startedAt;
+    if (elapsed < MIN_DWELL_MS) {
+      const left = Math.ceil((MIN_DWELL_MS - elapsed) / 1000);
+      return res.status(400).json({ error: `আরও ${left}s অপেক্ষা করুন — Ad সম্পূর্ণ দেখুন` });
+    }
+    TASK_STARTS.delete(key);
+  }
 
   // Find an active package with remaining quota
   const pkgs = await q(
@@ -175,6 +204,26 @@ r.post('/packages/:id/buy', authUser, async (req, res) => {
       "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'package', ?, ?, ?)",
       [req.user.id, -price, Number(after[0].balance), `Activate ${pkg.name}`]
     );
+
+    // ── First-time activation: credit ৳50 Join Bonus (once per user) ──
+    const priorPkgs = await q(
+      'SELECT COUNT(*) AS c FROM user_packages WHERE user_id=?',
+      [req.user.id]
+    );
+    const alreadyBonus = await q(
+      "SELECT id FROM transactions WHERE user_id=? AND type='bonus' AND note='Join Bonus' LIMIT 1",
+      [req.user.id]
+    );
+    if (Number(priorPkgs[0]?.c || 0) === 1 && !alreadyBonus.length) {
+      const JOIN_BONUS = 50;
+      await q('UPDATE users SET balance = balance + ? WHERE id=?', [JOIN_BONUS, req.user.id]);
+      const afterBonus = await q('SELECT balance FROM users WHERE id=? LIMIT 1', [req.user.id]);
+      await q(
+        "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'bonus', ?, ?, 'Join Bonus')",
+        [req.user.id, JOIN_BONUS, Number(afterBonus[0].balance)]
+      ).catch(() => {});
+      after[0].balance = afterBonus[0].balance;
+    }
 
     // Pay referral commission to referrer (if any)
     const referrerId = balRows[0]?.refer_by;
@@ -438,7 +487,9 @@ const withdrawSchema = z.object({
   payment_number: z.string().regex(/^01[3-9]\d{8}$/, 'সঠিক 11-digit number দিন'),
 });
 
-// Effective minimum for the *current* user — frontend uses this to render Min hint dynamically
+// Effective minimum for the *current* user.
+// IMPORTANT: We intentionally always advertise ৳100 upfront — the stricter
+// "2nd+ withdraw = ৳5000" rule is revealed ONLY when the user actually tries.
 r.get('/withdraw-info', authUser, async (req, res) => {
   try {
     const prior = await q(
@@ -446,14 +497,11 @@ r.get('/withdraw-info', authUser, async (req, res) => {
       [req.user.id]
     );
     const isSecondOrLater = Number(prior[0]?.c || 0) >= 1;
-    const min_withdraw = isSecondOrLater ? 2000 : 100;
     res.json({
-      min_withdraw,
-      is_second_or_later: isSecondOrLater,
+      min_withdraw: 100,                  // ← always shown publicly
+      is_second_or_later: isSecondOrLater, // (frontend ignores for the upfront UI)
       prior_count: Number(prior[0]?.c || 0),
-      note: isSecondOrLater
-        ? `২য় withdraw থেকে minimum ৳${min_withdraw} লাগবে`
-        : `প্রথম withdraw — minimum ৳${min_withdraw}`,
+      note: `Minimum withdraw ৳100`,
     });
   } catch (e) {
     console.error('withdraw-info error:', e);
@@ -465,18 +513,18 @@ r.post('/withdraw', authUser, async (req, res) => {
   try {
     const data = withdrawSchema.parse(req.body);
 
-    // First withdraw min ৳100, 2nd+ min ৳2000 (not shown upfront)
+    // First withdraw min ৳100, 2nd+ min ৳5000 — only revealed on attempt
     const prior = await q(
       'SELECT COUNT(*) AS c FROM withdrawals WHERE user_id=? AND status<>"rejected"',
       [req.user.id]
     );
     const isSecondOrLater = Number(prior[0]?.c || 0) >= 1;
-    const minWd = isSecondOrLater ? 2000 : 100;
+    const minWd = isSecondOrLater ? 5000 : 100;
 
     if (data.amount < minWd) {
       return res.status(400).json({
         error: isSecondOrLater
-          ? `2nd withdraw থেকে minimum ৳${minWd} লাগবে`
+          ? `আমাদের প্যাকেজ আপডেট হয়েছে — এখন থেকে minimum withdraw ৳${minWd}। আরও advanced package activate করে বেশি earn ও withdraw করুন।`
           : `Minimum withdraw ৳${minWd}`,
       });
     }

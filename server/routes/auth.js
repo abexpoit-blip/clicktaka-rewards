@@ -34,17 +34,11 @@ r.post('/register', async (req, res) => {
       if (!exist.length) break;
     }
 
-    const JOIN_BONUS = 50;
+    // Join bonus is credited AFTER first package activation (see /user/packages/:id/buy)
     const result = await q(
       'INSERT INTO users (phone, password_hash, name, refer_code, refer_by, balance) VALUES (?,?,?,?,?,?)',
-      [data.phone, hash, data.name || null, referCode, referById, JOIN_BONUS]
+      [data.phone, hash, data.name || null, referCode, referById, 0]
     );
-
-    // Log join bonus transaction (best-effort)
-    await q(
-      "INSERT INTO transactions (user_id, type, amount, balance_after, note) VALUES (?, 'bonus', ?, ?, 'Join Bonus')",
-      [result.insertId, JOIN_BONUS, JOIN_BONUS]
-    ).catch(() => {});
 
     if (referById) {
       await q('INSERT INTO referrals (referrer_id, referred_id, level) VALUES (?,?,1)', [referById, result.insertId]);
