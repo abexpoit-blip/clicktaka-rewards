@@ -289,7 +289,10 @@ r.get('/transactions', authUser, async (req, res) => {
 let dailySpinsTableReady;
 let spinSettingsTableReady;
 
-const DEFAULT_SPIN_SLICES = [50, 100, 150, 200, 300, 400, 500, 600, 800, 1000];
+const DEFAULT_SPIN_SLICES = [10, 50, 100, 150, 200, 300, 400, 500, 800, 1000];
+// 95% chance to land on ৳10, 5% spread across the higher slices
+const LOW_REWARD = 10;
+const LOW_REWARD_PROBABILITY = 0.95;
 
 async function ensureSpinSettingsTable() {
   if (!spinSettingsTableReady) {
@@ -297,12 +300,16 @@ async function ensureSpinSettingsTable() {
       await q(`
         CREATE TABLE IF NOT EXISTS spin_settings (
           id INT PRIMARY KEY DEFAULT 1,
-          slices TEXT NOT NULL DEFAULT '50,100,150,200,300,400,500,600,800,1000',
+          slices TEXT NOT NULL DEFAULT '10,50,100,150,200,300,400,500,800,1000',
           updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         ) ENGINE=InnoDB
       `);
       await q(
-        "INSERT IGNORE INTO spin_settings (id, slices) VALUES (1, '50,100,150,200,300,400,500,600,800,1000')"
+        "INSERT IGNORE INTO spin_settings (id, slices) VALUES (1, '10,50,100,150,200,300,400,500,800,1000')"
+      );
+      // Make sure existing installs also pick up the new ৳10 slice
+      await q(
+        "UPDATE spin_settings SET slices='10,50,100,150,200,300,400,500,800,1000' WHERE id=1 AND slices NOT LIKE '10,%'"
       );
     })().catch((error) => {
       spinSettingsTableReady = undefined;
