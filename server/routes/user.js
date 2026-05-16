@@ -107,11 +107,25 @@ r.get('/tasks', authUser, async (req, res) => {
   });
 });
 
-// Complete a task: validate package limits, insert completion + transaction, increment counter
+// ── Ad-click / task dwell tracker (in-memory; per server process) ──
+// User must POST /tasks/:id/start, wait ≥25s, then POST /tasks/:id/complete.
+// This is the server-side guarantee that a user actually engaged with the ad,
+// in addition to the client-side "tab away 30s" check.
+const TASK_STARTS = new Map(); // key: `${userId}:${taskId}` → startedAt(ms)
+const MIN_DWELL_MS = 25_000;
+
+r.post('/tasks/:id/start', authUser, async (req, res) => {
+  const taskId = Number(req.params.id);
+  if (!taskId) return res.status(400).json({ error: 'Invalid task id' });
+  TASK_STARTS.set(`${req.user.id}:${taskId}`, Date.now());
+  res.json({ ok: true, required_seconds: Math.ceil(MIN_DWELL_MS / 1000) });
+});
+
+// Complete a task: validate dwell + package limits, insert completion + transaction
 r.post('/tasks/:id/complete', authUser, async (req, res) => {
   const taskId = Number(req.params.id);
   if (!taskId) return res.status(400).json({ error: 'Invalid task id' });
-  const tasks = await q('SELECT id, reward, active FROM tasks WHERE id=? LIMIT 1', [taskId]);
+  const tasks = await q('SELECT id, reward, active, url FROM tasks WHERE id=? LIMIT 1', [taskId]);
   if (!tasks.length || !tasks[0].active) return res.status(404).json({ error: 'Task পাওয়া যায়নি' });
   const task = tasks[0];
 
@@ -122,6 +136,21 @@ r.post('/tasks/:id/complete', authUser, async (req, res) => {
     [req.user.id, taskId]
   );
   if (dup.length) return res.status(409).json({ error: 'এই task আজ ইতিমধ্যে সম্পন্ন' });
+
+  // Server-side dwell validation — only for URL-bearing tasks (ads/videos)
+  if (task.url) {
+    const key = `${req.user.id}:${taskId}`;
+    const startedAt = TASK_STARTS.get(key);
+    if (!startedAt) {
+      return res.status(400).json({ error: 'প্রথমে Start চাপুন ও Ad দেখুন' });
+    }
+    const elapsed = Date.now() - startedAt;
+    if (elapsed < MIN_DWELL_MS) {
+      const left = Math.ceil((MIN_DWELL_MS - elapsed) / 1000);
+      return res.status(400).json({ error: `আরও ${left}s অপেক্ষা করুন — Ad সম্পূর্ণ দেখুন` });
+    }
+    TASK_STARTS.delete(key);
+  }
 
   // Find an active package with remaining quota
   const pkgs = await q(
