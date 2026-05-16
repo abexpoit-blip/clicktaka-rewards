@@ -292,7 +292,7 @@ function TasksPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] uppercase tracking-wider font-bold text-white/80">▶ Verifying View</p>
-                <h3 className="font-display text-lg font-bold mt-0.5 truncate">{active.task.title}</h3>
+                <h3 className="font-display text-lg font-bold mt-0.5 truncate"><TaskTitle title={active.task.title} badgeSize="sm" /></h3>
                 <p className="text-sm text-white/90">
                   Reward: <b>৳{active.task.reward}</b>
                   {needsAway && !active.awayOnce && (
