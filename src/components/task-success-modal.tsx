@@ -2,6 +2,7 @@
 // Includes confetti burst, scale-in animation, and auto-dismiss.
 import { useEffect } from "react";
 import { CheckCircle2, Sparkles, Coins, X } from "lucide-react";
+import { TaskTitle } from "@/lib/package-badge";
 
 type Props = {
   open: boolean;
@@ -89,7 +90,7 @@ export function TaskSuccessModal({ open, reward, taskTitle, newBalance, onClose 
         {/* Reward body */}
         <div className="px-5 sm:px-6 py-5 sm:py-6 text-center space-y-3 sm:space-y-4">
           {taskTitle && (
-            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">{taskTitle}</p>
+            <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2"><TaskTitle title={taskTitle} badgeSize="xs" /></p>
           )}
 
           <div className="rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-green-50 px-4 sm:px-5 py-3 sm:py-4">

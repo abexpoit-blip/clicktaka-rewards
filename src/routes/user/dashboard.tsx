@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import { readActive, viewedSeconds, clearActive, REQUIRED_SECONDS, type ActiveTask } from "@/lib/active-task";
 import { CheckCircle2, RotateCcw } from "lucide-react";
 import { DashboardSkeleton, ErrorState, EmptyState } from "@/components/ui-states";
+import { TaskTitle } from "@/lib/package-badge";
 import { LiveTicker } from "@/components/live-ticker";
 import { Leaderboard } from "@/components/leaderboard";
 import {
@@ -227,7 +228,7 @@ function Dashboard() {
                       <Target className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-sm truncate">{c.title}</p>
+                      <TaskTitle title={c.title} className="font-medium text-sm" badgeSize="xs" />
                       <p className="text-[11px] text-muted-foreground capitalize">{c.type} • {new Date(c.completed_at).toLocaleString()}</p>
                     </div>
                   </div>
@@ -333,7 +334,7 @@ function QuickTaskCard({ task, done }: { task: Task; done: boolean }) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{m.label}</p>
-            <h3 className="font-semibold text-sm truncate">{task.title}</h3>
+            <TaskTitle title={task.title} className="font-semibold text-sm" badgeSize="xs" />
             <p className="text-[11px] tabular-nums">
               <span className="text-success font-bold">+৳{Number(task.reward).toFixed(2)}</span>
               <span className="text-muted-foreground"> · {isMine && !ready ? `${remaining}s বাকি` : "~30s"}</span>

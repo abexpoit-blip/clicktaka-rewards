@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { TaskTitle } from "@/lib/package-badge";
 import {
   Sparkles, Plus, Search, Target, AppWindow, Share2, Gamepad2,
   ExternalLink, Pause, Play, Trash2, Coins, Activity, TrendingUp, Filter,
@@ -356,7 +357,7 @@ function AdminTasks() {
                           {t.active ? "Active" : "Paused"}
                         </span>
                       </div>
-                      <h3 className="font-display font-bold text-base mt-1.5 line-clamp-2 text-white">{t.title}</h3>
+                      <h3 className="font-display font-bold text-base mt-1.5 line-clamp-2 text-white"><TaskTitle title={t.title} badgeSize="xs" /></h3>
                       {t.description && (
                         <p className="text-xs text-slate-300/80 mt-1 line-clamp-2">{t.description}</p>
                       )}

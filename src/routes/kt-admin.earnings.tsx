@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import { TaskTitle } from "@/lib/package-badge";
 
 export const Route = createFileRoute("/kt-admin/earnings")({ component: AdminEarnings });
 
@@ -43,7 +44,7 @@ function AdminEarnings() {
                   <tr key={e.id}>
                     <td className="px-3 py-2 text-xs text-slate-400">{new Date(e.completed_at).toLocaleString()}</td>
                     <td className="px-3 py-2">{e.name || e.phone} <span className="text-xs text-slate-500">#{e.user_id}</span></td>
-                    <td className="px-3 py-2">{e.task_title}</td>
+                    <td className="px-3 py-2"><TaskTitle title={e.task_title} badgeSize="xs" /></td>
                     <td className="px-3 py-2"><span className="px-2 py-0.5 rounded bg-slate-700 text-xs">{e.task_type}</span></td>
                     <td className="px-3 py-2 text-right text-green-400 font-semibold">৳{Number(e.reward).toFixed(2)}</td>
                   </tr>

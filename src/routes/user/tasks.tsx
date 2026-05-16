@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import { bumpBalance, setBalance } from "@/lib/active-task";
 import { toast } from "sonner";
 import { TaskSuccessModal } from "@/components/task-success-modal";
+import { TaskTitle } from "@/lib/package-badge";
 import {
   Target, Trophy, Zap, Lock, CheckCircle2, Play, Clock, X, RotateCcw,
   TrendingUp, Crown, Flame, Coins, Package as PackageIcon, ExternalLink,
@@ -291,7 +292,7 @@ function TasksPage() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[11px] uppercase tracking-wider font-bold text-white/80">▶ Verifying View</p>
-                <h3 className="font-display text-lg font-bold mt-0.5 truncate">{active.task.title}</h3>
+                <h3 className="font-display text-lg font-bold mt-0.5 truncate"><TaskTitle title={active.task.title} badgeSize="sm" /></h3>
                 <p className="text-sm text-white/90">
                   Reward: <b>৳{active.task.reward}</b>
                   {needsAway && !active.awayOnce && (
@@ -397,31 +398,8 @@ function TasksPage() {
                           <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold inline-flex items-center gap-1">
                             <Icon className="h-2.5 w-2.5" /> {m.label}
                           </p>
-                          <h3 className="font-display font-bold text-sm sm:text-base mt-0.5 line-clamp-2 inline-flex items-center gap-1.5">
-                            {(() => {
-                              const m2 = t.title.match(/^\[pkg:([^\]]+)\]\s*(.*)$/);
-                              if (!m2) return t.title;
-                              const pkgKey = m2[1];
-                              const clean = m2[2];
-                              const pkgMeta: Record<string, { label: string; cls: string; Icon: any }> = {
-                                "silver":   { label: "Silver",   cls: "bg-slate-200 text-slate-800",        Icon: Sparkles },
-                                "silver-2": { label: "Silver 2", cls: "bg-zinc-200 text-zinc-800",          Icon: Sparkles },
-                                "silver-3": { label: "Silver 3", cls: "bg-blue-200 text-blue-800",          Icon: Sparkles },
-                                "gold":     { label: "Gold",     cls: "bg-yellow-200 text-yellow-900",      Icon: Crown },
-                                "diamond":  { label: "Diamond",  cls: "bg-cyan-200 text-cyan-900",          Icon: Sparkles },
-                                "royal":    { label: "Royal",    cls: "bg-fuchsia-200 text-fuchsia-900",    Icon: Crown },
-                              };
-                              const pm = pkgMeta[pkgKey] || { label: pkgKey, cls: "bg-muted text-foreground", Icon: PackageIcon };
-                              const PIcon = pm.Icon;
-                              return (
-                                <>
-                                  <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider shrink-0 ${pm.cls}`}>
-                                    <PIcon className="h-2.5 w-2.5" /> {pm.label}
-                                  </span>
-                                  <span className="truncate">{clean}</span>
-                                </>
-                              );
-                            })()}
+                          <h3 className="font-display font-bold text-sm sm:text-base mt-0.5 line-clamp-2">
+                            <TaskTitle title={t.title} badgeSize="xs" />
                           </h3>
                           {t.description && (
                             <p className="text-[11px] sm:text-xs text-muted-foreground/90 mt-1 line-clamp-2 leading-snug">{t.description}</p>

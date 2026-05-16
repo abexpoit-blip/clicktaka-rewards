@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { ErrorState, Skeleton } from "@/components/ui-states";
+import { TaskTitle } from "@/lib/package-badge";
 import {
   Users, UserCheck, UserX, Target, CheckCircle2, Wallet, ArrowDownCircle,
   ArrowUpCircle, TrendingUp, Activity, GitBranch, Clock, RefreshCw, Server,
@@ -127,7 +128,7 @@ function AdminDashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-white truncate">{e.name || e.phone} <span className="text-xs text-slate-500">#{e.user_id}</span></p>
-                      <p className="text-xs text-slate-400 truncate">{e.task_title} · <span className="capitalize">{e.task_type}</span></p>
+                      <p className="text-xs text-slate-400 truncate"><TaskTitle title={e.task_title} badgeSize="xs" /> · <span className="capitalize">{e.task_type}</span></p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-bold text-emerald-400 tabular-nums">+৳{Number(e.reward).toFixed(2)}</p>
