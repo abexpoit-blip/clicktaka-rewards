@@ -428,8 +428,8 @@ function TasksPage() {
                             : `bg-gradient-to-r ${m.grad} text-white shadow-brand hover:scale-[1.02]`
                         }`}
                       >
-                        {isDone ? <><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Completed — কাল আবার আসুন</>
-                          : limitReached ? <>Limit শেষ — কাল আবার আসুন</>
+                        {isDone ? <><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Task Complete — Reset in <ResetCountdown /></>
+                          : limitReached ? <>Limit শেষ — Reset in <ResetCountdown /></>
                           : <><Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white" /> Start <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" /></>}
                       </button>
                     </div>
