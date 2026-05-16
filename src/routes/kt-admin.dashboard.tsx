@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { ErrorState, Skeleton } from "@/components/ui-states";
+import { TaskTitle } from "@/lib/package-badge";
 import {
   Users, UserCheck, UserX, Target, CheckCircle2, Wallet, ArrowDownCircle,
   ArrowUpCircle, TrendingUp, Activity, GitBranch, Clock, RefreshCw, Server,
