@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { bumpBalance, setBalance } from "@/lib/active-task";
 import { toast } from "sonner";
@@ -40,17 +40,8 @@ function TasksPage() {
   const [justClaimed, setJustClaimed] = useState<{ id: number; reward: number } | null>(null);
   const [successModal, setSuccessModal] = useState<{ reward: number; title: string; balance: number | null } | null>(null);
   const REQUIRED_SECONDS = 30;
-  const [active, setActive] = useState<{ task: Task; viewed: number; awayOnce: boolean; awayMs: number; needsAway: boolean } | null>(() => {
-    // Resume from localStorage if user navigated here from dashboard / refreshed
-    if (typeof window === "undefined") return null;
-    try {
-      const raw = localStorage.getItem("ct_active_task_v1");
-      if (!raw) return null;
-      const v = JSON.parse(raw) as { id: number; startedAt: number; awayMs: number; needsAway: boolean };
-      // We can't restore the full Task here without server data; defer until tasks load
-      return null;
-    } catch { return null; }
-  });
+  const adWinRef = useRef<Window | null>(null);
+  const [active, setActive] = useState<{ task: Task; viewed: number; awayOnce: boolean; awayMs: number; needsAway: boolean } | null>(null);
 
   function load(): Promise<Data | null> {
     return api<Data>("/user/tasks")
@@ -109,13 +100,36 @@ function TasksPage() {
     return () => clearInterval(t);
   }, [active]);
 
+  // Watch the opened ad window — if user closes it before reaching REQUIRED_SECONDS,
+  // auto-reset the active task so they can retry.
+  useEffect(() => {
+    if (!active || !active.needsAway) return;
+    const iv = setInterval(() => {
+      const w = adWinRef.current;
+      if (!w) return;
+      if (w.closed) {
+        adWinRef.current = null;
+        setActive((a) => {
+          if (!a) return a;
+          if (a.viewed >= REQUIRED_SECONDS) return a; // already completed dwell
+          toast.error("Ad tab বন্ধ হয়েছে — task incomplete, আবার Start করুন");
+          return null;
+        });
+      }
+    }, 700);
+    return () => clearInterval(iv);
+  }, [active]);
+
   async function startTask(task: Task) {
     const needsAway = !!task.url;
     setActive({ task, viewed: 0, awayOnce: false, awayMs: 0, needsAway });
     // Tell the server we started — required for ad-dwell validation on /complete
     api(`/user/tasks/${task.id}/start`, { method: "POST" }).catch(() => {});
     if (task.url) {
-      setTimeout(() => window.open(task.url!, "_blank", "noopener,noreferrer"), 50);
+      setTimeout(() => {
+        const w = window.open(task.url!, "_blank", "noopener,noreferrer");
+        adWinRef.current = w || null;
+      }, 50);
       toast.message("Ad খুলছে — কমপক্ষে 30s দেখুন, তারপর Claim চালু হবে", { duration: 3500 });
     }
   }
@@ -414,8 +428,8 @@ function TasksPage() {
                             : `bg-gradient-to-r ${m.grad} text-white shadow-brand hover:scale-[1.02]`
                         }`}
                       >
-                        {isDone ? <><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Completed — কাল আবার আসুন</>
-                          : limitReached ? <>Limit শেষ — কাল আবার আসুন</>
+                        {isDone ? <><CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Task Complete — Reset in <ResetCountdown /></>
+                          : limitReached ? <>Limit শেষ — Reset in <ResetCountdown /></>
                           : <><Play className="h-3.5 w-3.5 sm:h-4 sm:w-4 fill-white" /> Start <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" /></>}
                       </button>
                     </div>
@@ -428,6 +442,22 @@ function TasksPage() {
       </section>
     </div>
   );
+}
+
+function ResetCountdown() {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const next = new Date();
+  next.setHours(24, 0, 0, 0); // midnight local
+  const ms = Math.max(0, next.getTime() - now);
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  const s = Math.floor((ms % 60000) / 1000);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return <span className="tabular-nums font-bold ml-1">{pad(h)}:{pad(m)}:{pad(s)}</span>;
 }
 
 function LockedTasks() {
