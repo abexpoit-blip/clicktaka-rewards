@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 type User = { id: number; phone: string; name: string | null; balance: number; refer_code: string };
+type MeResponse = { user: User; impersonating?: boolean; admin_id?: number | null };
 
 export const Route = createFileRoute("/user")({ component: UserLayout });
 
