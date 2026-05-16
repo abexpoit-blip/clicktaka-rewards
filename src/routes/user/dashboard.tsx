@@ -4,6 +4,7 @@ import { api } from "@/lib/api";
 import { readActive, viewedSeconds, clearActive, REQUIRED_SECONDS, type ActiveTask } from "@/lib/active-task";
 import { CheckCircle2, RotateCcw } from "lucide-react";
 import { DashboardSkeleton, ErrorState, EmptyState } from "@/components/ui-states";
+import { TaskTitle } from "@/lib/package-badge";
 import { LiveTicker } from "@/components/live-ticker";
 import { Leaderboard } from "@/components/leaderboard";
 import {
