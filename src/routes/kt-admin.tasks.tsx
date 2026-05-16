@@ -289,6 +289,37 @@ function AdminTasks() {
         </div>
       </div>
 
+      {/* Package filter chips — package-base separation */}
+      <div className="rounded-2xl border border-white/10 bg-slate-900/60 backdrop-blur p-3 shadow-xl">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-slate-300 pl-2 pr-1">
+            <PackageCheck className="h-3.5 w-3.5 text-fuchsia-300" /> Package
+          </span>
+          <button onClick={() => setPkgFilter("all")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${pkgFilter === "all" ? "bg-gradient-brand text-white shadow-brand" : "bg-slate-950/40 text-slate-300 hover:text-white border border-white/10"}`}>
+            All ({tasks.length})
+          </button>
+          <button onClick={() => setPkgFilter("none")}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition ${pkgFilter === "none" ? "bg-emerald-500 text-white shadow-brand" : "bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 border border-emerald-500/20"}`}>
+            Common ({tasks.filter(t => t.package_ids.length === 0).length})
+          </button>
+          {packages.map((p) => {
+            const cnt = tasks.filter((t) => t.package_ids.includes(p.id)).length;
+            const sel = pkgFilter === p.id;
+            return (
+              <button key={p.id} onClick={() => setPkgFilter(p.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${sel ? "bg-gradient-brand text-white shadow-brand" : "bg-slate-950/40 text-slate-300 hover:text-white border border-white/10"}`}>
+                <span>{p.name}</span>
+                <span className={`tabular-nums text-[10px] px-1.5 rounded ${sel ? "bg-white/20" : "bg-fuchsia-500/15 text-fuchsia-200"}`}>{cnt}</span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-2 px-2 text-[10px] text-slate-400">
+          💡 প্রতিটা package-এর tasks আলাদা করে দেখতে এখান থেকে select করুন। <span className="text-emerald-300 font-bold">Common</span> = সব package-এর user এর জন্য available।
+        </p>
+      </div>
+
       {/* Tasks grid */}
       {loading ? (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 animate-pulse">
